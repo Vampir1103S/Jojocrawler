@@ -9,6 +9,7 @@ import java.awt.*;
 
 public class UI extends GraphicalObject {
 
+
     public UI() {
 
     }
@@ -20,6 +21,10 @@ public class UI extends GraphicalObject {
         drawTool.setCurrentColor(Color.BLACK);
         drawTool.drawFilledRectangle(0,0, 1920, 1080);
         drawTool.setCurrentColor(Color.WHITE);
-        drawTool.drawText(Config.WINDOW_WIDTH/2, Config.WINDOW_HEIGHT/2, "START");
+        drawTool.formatText("Algerian", 1, 300);
+        drawTool.drawText(Config.WINDOW_WIDTH/2-450, Config.WINDOW_HEIGHT/2-150, "START");
     }
+
+
+
 }
