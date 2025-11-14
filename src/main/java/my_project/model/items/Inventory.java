@@ -1,4 +1,4 @@
-package my_project.model.Items;
+package my_project.model.items;
 
 public class Inventory {
     private int sizeX;

@@ -1,4 +1,4 @@
-package my_project.model.Umgebung;
+package my_project.model.map;
 
 public class TutorialDungeon extends Dungeon {
 }
