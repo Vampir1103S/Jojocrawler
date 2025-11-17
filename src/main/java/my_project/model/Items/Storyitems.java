@@ -1,4 +1,6 @@
 package my_project.model.Items;
 
-abstract class Storyitems extends Item {
+import my_project.model.items.Item;
+
+public abstract class Storyitems extends Item{
 }
