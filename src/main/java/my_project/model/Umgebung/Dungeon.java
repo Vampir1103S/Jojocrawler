@@ -1,6 +1,6 @@
 package my_project.model.Umgebung;
 
-import my_project.model.Umgebung.Enviroment;
+import my_project.model.map.Environment;
 
-abstract class Dungeon extends Enviroment {
+public abstract class Dungeon extends Environment {
 }
