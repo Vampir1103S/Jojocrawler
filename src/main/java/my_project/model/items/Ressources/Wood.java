@@ -1,4 +1,0 @@
-package my_project.model.items.Ressources;
-
-public class Wood extends Ressource {
-}
