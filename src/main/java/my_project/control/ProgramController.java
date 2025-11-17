@@ -24,7 +24,7 @@ public class ProgramController {
     // Referenzen
     private final ViewController viewController;  // diese Referenz soll auf ein Objekt der Klasse viewController zeigen. Über dieses Objekt wird das Fenster gesteuert.
     private House firstHouse;
-    private UI controller;// deklariert eine Referenz für ein Objekt der Klasse House
+    private Controller firstController;// deklariert eine Referenz für ein Objekt der Klasse House
 
     /**
      * Konstruktor
@@ -43,12 +43,13 @@ public class ProgramController {
      */
     public void startProgram() {
         // Erstelle ein Objekt der Klasse House und initialisiere damit die Referenz house1
-        firstHouse = new House();
+        //firstHouse = new House();
+        firstController = new Controller();
         // Teile dem ViewController-Objekt mit, dass das House-Objekt gezeichnet werden soll
         viewController.draw(firstHouse);
 
-        controller = new UI();
-        viewController.draw((Drawable) controller);
+
+        viewController.draw(firstController);
 
     }
 
