@@ -16,6 +16,7 @@ abstract class Entity {
 
     }
 
+
     public double getHP(){
         return hp;
     }
