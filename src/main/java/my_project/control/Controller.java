@@ -7,11 +7,11 @@ import my_project.view.UI;
 import java.awt.*;
 
 public class Controller extends GraphicalObject {
-    private int szene = 0;
+    private static int scene = 0;
     public Controller() {}
 
     public void draw(DrawTool drawTool) {
-        switch (szene){
+        switch (scene){
             case 0:
                 new UI().draw(drawTool);
             break;
@@ -31,7 +31,7 @@ public class Controller extends GraphicalObject {
 
     @Override
     public void update(double dt){
-        switch (szene){
+        switch (scene){
             case 0:
                 new UI().update(dt);
                 break;
@@ -47,8 +47,8 @@ public class Controller extends GraphicalObject {
                 break;
         }
     }
-    public void switchSzene(int newSzene){
-        szene = newSzene;
+    public static void switchScene(int newSzene){
+        scene = newSzene;
     }
 
 }
