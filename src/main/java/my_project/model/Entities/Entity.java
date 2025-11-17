@@ -1,13 +1,17 @@
 package my_project.model.Entities;
 
 abstract class Entity {
+    protected int xpos;
+    protected int ypos;
     protected double hp;
     protected int speed;
     protected double stamina;
     protected int defense;
     protected String Name;
 
-    public Entity(double hp, int speed, double stamina, int defense, String Name) {
+    public Entity(int xpos ,int ypos,double hp, int speed, double stamina, int defense, String Name) {
+        this.xpos = xpos;
+        this.ypos = ypos;
         this.hp = hp;
         this.speed = speed;
         this.stamina = stamina;
@@ -16,6 +20,13 @@ abstract class Entity {
 
     }
 
+    public double getXpos() {return xpos;}
+
+    public void setXpos(int xpos) {this.xpos = xpos;}
+
+    public double getYpos() {return ypos;}
+
+    public void setYpos(int ypos) {this.ypos = ypos;}
 
     public double getHP(){
         return hp;
