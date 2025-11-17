@@ -2,6 +2,8 @@ package my_project.view;
 
 import KAGO_framework.model.InteractiveGraphicalObject;
 import my_project.control.ProgramController;
+
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 
 /**
@@ -24,6 +26,13 @@ public class InputManager extends InteractiveGraphicalObject {
     @Override
     public void mouseReleased(MouseEvent e) {
 
+    }
+
+    @Override
+    public void keyPressed(int key){
+        if(key == KeyEvent.VK_LEFT){
+
+        }
     }
 
 }
