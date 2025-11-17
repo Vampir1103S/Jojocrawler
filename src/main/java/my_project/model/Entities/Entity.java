@@ -1,15 +1,15 @@
 package my_project.model.Entities;
 
 abstract class Entity {
-    protected int xpos;
-    protected int ypos;
+    protected double xpos;
+    protected double ypos;
     protected double hp;
     protected int speed;
     protected double stamina;
     protected int defense;
     protected String Name;
 
-    public Entity(int xpos ,int ypos,double hp, int speed, double stamina, int defense, String Name) {
+    public Entity(double xpos , double ypos,double hp, int speed, double stamina, int defense, String Name) {
         this.xpos = xpos;
         this.ypos = ypos;
         this.hp = hp;

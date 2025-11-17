@@ -6,6 +6,7 @@ import KAGO_framework.view.DrawTool;
 import my_project.view.UI;
 
 import java.awt.*;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 
 public class Controller extends InteractiveGraphicalObject {
@@ -58,6 +59,9 @@ public class Controller extends InteractiveGraphicalObject {
     @Override
     public void mouseClicked(MouseEvent e){
         ui.mouseClicked(e);
+    }
+    public void keyPressed(KeyEvent e){
+
     }
 
 }
