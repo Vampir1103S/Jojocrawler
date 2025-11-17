@@ -1,11 +1,8 @@
 package my_project.control;
 
-import KAGO_framework.control.Drawable;
+import KAGO_framework.control.MainController;
 import KAGO_framework.control.ViewController;
-import my_project.model.*;
-import my_project.view.*;
-
-import java.awt.event.KeyEvent;
+import my_project.model.House;
 
 /**
  * Ein Objekt der Klasse ProgramController dient dazu das Programm zu steuern.
@@ -18,12 +15,11 @@ import java.awt.event.KeyEvent;
 public class ProgramController {
 
     //Attribute
-    private boolean startscreen = true;
+
 
     // Referenzen
     private final ViewController viewController;  // diese Referenz soll auf ein Objekt der Klasse viewController zeigen. Über dieses Objekt wird das Fenster gesteuert.
-    private House firstHouse;
-    private UI controller;// deklariert eine Referenz für ein Objekt der Klasse House
+    //private House firstHouse; // deklariert eine Referenz für ein Objekt der Klasse House
 
     /**
      * Konstruktor
@@ -42,14 +38,9 @@ public class ProgramController {
      */
     public void startProgram() {
         // Erstelle ein Objekt der Klasse House und initialisiere damit die Referenz house1
-        firstHouse = new House();
+        //firstHouse = new House();
         // Teile dem ViewController-Objekt mit, dass das House-Objekt gezeichnet werden soll
-        viewController.draw(firstHouse);
-        if (startscreen) {
-            controller = new UI();
-            viewController.draw((Drawable) controller);
-        }
-
+        //viewController.draw(firstHouse);
     }
 
     /**
@@ -59,11 +50,4 @@ public class ProgramController {
     public void updateProgram(double dt){
 
     }
-
-    public void keyPressed(KeyEvent e) {
-        if (e.getKeyCode() == KeyEvent.VK_SPACE) {
-            startscreen = false;
-        }
-    }
-
 }

@@ -7,9 +7,15 @@ abstract class Entity {
     protected int defense;
     protected String Name;
 
-    public Entity(){
+    public Entity(double hp, int speed, double stamina, int defense, String Name) {
+        this.hp = hp;
+        this.speed = speed;
+        this.stamina = stamina;
+        this.defense = defense;
+        this.Name = Name;
 
     }
+
 
     public double getHP(){
         return hp;
