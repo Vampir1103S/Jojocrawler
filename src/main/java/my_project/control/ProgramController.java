@@ -47,6 +47,7 @@ public class ProgramController {
         firstController = new Controller();
         // Teile dem ViewController-Objekt mit, dass das House-Objekt gezeichnet werden soll
         viewController.draw(firstHouse);
+        viewController.register(firstController);
 
 
         viewController.draw(firstController);
