@@ -2,6 +2,7 @@ package KAGO_framework.model;
 
 import KAGO_framework.control.Interactable;
 
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 
 public abstract class InteractiveGraphicalObject extends GraphicalObject implements Interactable {
@@ -41,4 +42,7 @@ public abstract class InteractiveGraphicalObject extends GraphicalObject impleme
 
     }
 
-}
+
+    }
+
+

@@ -4,6 +4,7 @@ import KAGO_framework.model.GraphicalObject;
 import KAGO_framework.model.InteractiveGraphicalObject;
 import KAGO_framework.view.DrawTool;
 import my_project.view.UI;
+import my_project.model.Entities.Player;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
@@ -12,17 +13,22 @@ import java.awt.event.MouseEvent;
 public class Controller extends InteractiveGraphicalObject {
     private static int scene = 0;
     private UI ui;
+    private Player player;
     public Controller() {
+
         ui = new UI();
+        player = new Player();
     }
+
 
     public void draw(DrawTool drawTool) {
         switch (scene){
             case 0:
                 ui.draw(drawTool);
+
             break;
             case 1:
-
+                player.draw(drawTool);
             break;
             case 2:
 
@@ -42,7 +48,7 @@ public class Controller extends InteractiveGraphicalObject {
                 ui.update(dt);
                 break;
             case 1:
-
+                player.update(dt);
                 break;
             case 2:
 
@@ -60,8 +66,11 @@ public class Controller extends InteractiveGraphicalObject {
     public void mouseClicked(MouseEvent e){
         ui.mouseClicked(e);
     }
-    public void keyPressed(KeyEvent e){
-
+    @Override
+    public void keyPressed(int key){
+        if (KeyEvent.VK_W == key){
+            player.setDirection(1);
+        }
     }
 
 }

@@ -126,6 +126,9 @@ public class ViewController implements ActionListener, KeyListener, MouseListene
         showScene(0);
         // Übergibt den weiteren Programmfluss an das neue Objekt der Klasse ViewController
         if ( Config.INFO_MESSAGES) System.out.println("  > ViewController: Fenster eingerichtet. Startszene (Index: 0) angelegt.");
+
+
+
     }
 
     /**
