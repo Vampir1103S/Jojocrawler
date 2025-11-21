@@ -12,7 +12,8 @@ import java.awt.event.MouseEvent;
 
 public class UI extends InteractiveGraphicalObject {
 
-    boolean startscreen = true;
+
+    private boolean startscreen = true;
     private double alpha = 255;
     private double alphaTimer = 0;
     private double alphaAnimation = 255;
@@ -32,13 +33,13 @@ public class UI extends InteractiveGraphicalObject {
 
         drawTool.setCurrentColor(0, 0, 0, (int) alphaAnimation);
         drawTool.drawFilledRectangle(0,0, 1920, 1080);
-        drawTool.setCurrentColor(255,192,203, (int) alpha);
+        drawTool.setCurrentColor(255,192,203, (int) 255);
         drawTool.formatText("Algerian", 2, 200);
         drawTool.drawText(xPos-300, yPos-150, "JOJO'S");
-        drawTool.setCurrentColor(255, 255, 130, (int) alpha);
+        drawTool.setCurrentColor(255, 255, 130, 255);
         drawTool.drawText(xPos-450, yPos+30, "CRAWLER");
         drawTool.formatText("Algerian", 4, 50);
-        drawTool.setCurrentColor(Color.WHITE);
+        drawTool.setCurrentColor(255,255,255,(int) alpha);
         drawTool.drawText(xPos-200, yPos+350, "Click to Start");
     }
 
@@ -46,14 +47,15 @@ public class UI extends InteractiveGraphicalObject {
     public void update(double dt){
         alphaTimer += dt;
 
-        if (alphaTimer < 5) {
-            alpha -= 21*dt;
+        if (alphaTimer < 2) {
+            alpha -= 95*dt;
         }
-        if (alphaTimer >= 5) {
-           alpha += 20*dt;
+        if (alphaTimer >= 2) {
+           alpha += 90*dt;
         }
-        if (alphaTimer >= 10) {
+        if (alphaTimer >= 4) {
             alphaTimer = 0;
+            alpha = 255;
         }
 
         if (startscreen == false) {
@@ -75,6 +77,10 @@ public class UI extends InteractiveGraphicalObject {
             Controller.switchScene(1);
             alphaAnimation = 0;
         }
+    }
+
+    public boolean getStartscreen() {
+        return startscreen;
     }
 }
 

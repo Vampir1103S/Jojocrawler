@@ -2,7 +2,6 @@ package my_project.control;
 
 import KAGO_framework.model.GraphicalObject;
 import KAGO_framework.model.InteractiveGraphicalObject;
-
 import KAGO_framework.view.DrawTool;
 import my_project.view.UI;
 import my_project.model.Entities.Player;
@@ -15,39 +14,36 @@ public class Controller extends InteractiveGraphicalObject {
     private static int scene = 0;
     private UI ui;
     private Player player;
-
-
     public Controller() {
 
         ui = new UI();
         player = new Player();
-
     }
 
 
     public void draw(DrawTool drawTool) {
-        switch (scene) {
+        switch (scene){
             case 0:
                 ui.draw(drawTool);
 
-                break;
+            break;
             case 1:
                 player.draw(drawTool);
-                break;
+            break;
             case 2:
 
-                break;
+            break;
 
             default:
 
-                break;
+             break;
         }
     }
 
 
     @Override
-    public void update(double dt) {
-        switch (scene) {
+    public void update(double dt){
+        switch (scene){
             case 0:
                 ui.update(dt);
                 break;
@@ -63,50 +59,19 @@ public class Controller extends InteractiveGraphicalObject {
                 break;
         }
     }
-
-    public static void switchScene(int newSzene) {
+    public static void switchScene(int newSzene){
         scene = newSzene;
     }
-
     @Override
-    public void mouseClicked(MouseEvent e) {
+    public void mouseClicked(MouseEvent e){
         ui.mouseClicked(e);
     }
-
     @Override
-
-    public void keyPressed(int key) {
-
-        if (KeyEvent.VK_W == key) {
-            player.setIsDownWTrue();
-        }
-        if (KeyEvent.VK_S == key) {
-            player.setIsDownSTrue();
-        }
-        if (KeyEvent.VK_A == key) {
-            player.setIsDownATrue();
-        }
-        if (KeyEvent.VK_D == key) {
-            player.setIsDownDTrue();
+    public void keyPressed(int key){
+        if (KeyEvent.VK_W == key){
+            player.setDirection(1);
         }
     }
-
-    @Override
-    public void keyReleased(int key) {
-        if (KeyEvent.VK_W == key) {
-            player.setIsDownWFalse();
-        }
-        if (KeyEvent.VK_A == key) {
-            player.setIsDownAFalse();
-        }
-        if (KeyEvent.VK_D == key) {
-            player.setIsDownDFalse();
-        }
-        if (KeyEvent.VK_S == key) {
-            player.setIsDownSFalse();
-        }
-    }
-
 
 }
 
