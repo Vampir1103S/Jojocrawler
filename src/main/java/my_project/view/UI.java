@@ -51,10 +51,11 @@ public class UI extends InteractiveGraphicalObject {
             alpha -= 95*dt;
         }
         if (alphaTimer >= 2) {
-           alpha += 80*dt;
+           alpha += 90*dt;
         }
         if (alphaTimer >= 4) {
             alphaTimer = 0;
+            alpha = 255;
         }
 
         if (startscreen == false) {
