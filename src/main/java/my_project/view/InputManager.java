@@ -31,8 +31,10 @@ public class InputManager extends InteractiveGraphicalObject {
     @Override
     public void keyPressed(int key){
         if(key == KeyEvent.VK_LEFT){
-            System.out.println("LEFT");
+
         }
     }
+    @Override
+    public void keyReleased(int key){}
 
 }

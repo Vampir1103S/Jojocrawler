@@ -7,40 +7,96 @@ import java.awt.event.KeyListener;
 import KAGO_framework.view.DrawTool;
 
 public class Player extends Entity{
-    private int direction ;
+    private int directionx ;
+    private int directiony ;
+    private boolean isDownW ;
+    private boolean isDownA ;
+    private boolean isDownS ;
+    private boolean isDownD ;
 
     public Player() {
         super(1,1,1,1,1,1,"hehe");
-
-
+    this.directionx = 1;
+    this.directiony = 1;
+    xpos = 200;
+    ypos = 200;
     }
 
+
     public void draw(DrawTool drawTool){
-        drawTool.drawTool.setCurrentColor(100, 100, 100, 255);
+
         drawTool.drawFilledRectangle(xpos,ypos, 50, 100);
     }
 
 
 
+
     public void update(double dt){
 
-
-        switch(direction) {
-            case 0:
-                xpos += 100 * dt;
-                break;
-            case 1:
-                break;
-            case 2:
-                break;
-            case 3:
-                break;
+        if(isDownW){
+            ypos -= dt*50;
+        }else
+        if(isDownA){
+            xpos -= dt*50;
+        }else
+        if(isDownS){
+            ypos += dt*50;
+        }else
+        if(isDownD){
+            xpos += dt*50;
         }
+        System.out.println(isDownW+" "+isDownA+" "+isDownS+" "+isDownD);
+
+
+
     }
-    public int setDirection(int d){
-        direction = d;
+    public int addDirectionx(int d){
+        directionx = directionx + d;
         return d;
     }
-
+    public int addDirectiony(int d){
+        directiony = directiony + d;
+        return d;
+    }
+    public int setDirectionx(int d){
+        directionx = d;
+        return d;
+    }
+    public int setDirectiony(int d){
+        directiony = d;
+        return d;
+    }
+    public boolean setIsDownWTrue() {
+            isDownW = true;
+        return isDownW;
+    }
+    public boolean setIsDownWFalse() {
+        isDownW = false;
+        return isDownW;
+    }
+    public boolean setIsDownATrue() {
+        isDownA = true;
+        return isDownA;
+    }
+    public boolean setIsDownAFalse() {
+        isDownA = false;
+        return isDownA;
+    }
+    public boolean setIsDownSTrue() {
+        isDownS = true;
+        return isDownS;
+    }
+    public boolean setIsDownSFalse() {
+        isDownS = false;
+        return isDownS;
+    }
+    public boolean setIsDownDTrue() {
+        isDownD = true;
+        return isDownD;
+    }
+    public boolean setIsDownDFalse() {
+        isDownD = false;
+        return isDownD;
+    }
 
 }
