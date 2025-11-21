@@ -4,6 +4,7 @@ import KAGO_framework.model.GraphicalObject;
 import KAGO_framework.model.InteractiveGraphicalObject;
 import KAGO_framework.view.DrawTool;
 import my_project.model.Entities.Player;
+import my_project.model.Entities.StoryTeller;
 import my_project.view.Deathscreen;
 import my_project.view.UI;
 
@@ -16,10 +17,12 @@ public class Controller extends InteractiveGraphicalObject {
     private UI ui;
     private Deathscreen deathscreen;
     private Player player;
+    private StoryTeller storyTeller;
     public Controller() {
         ui = new UI();
         deathscreen = new Deathscreen();
         player = new Player();
+        storyTeller = new StoryTeller(400, 400, 100, 10, 10, 0, "Justus");
     }
 
     public void draw(DrawTool drawTool) {
@@ -28,12 +31,11 @@ public class Controller extends InteractiveGraphicalObject {
                 ui.draw(drawTool);
             break;
             case 1:
-                if (ui.getStartscreen() == false) {
-                    deathscreen.draw(drawTool);
-                }
+                deathscreen.draw(drawTool);
             break;
             case 2:
                 player.draw(drawTool);
+                storyTeller.draw(drawTool);
             break;
 
             default:
@@ -54,6 +56,7 @@ public class Controller extends InteractiveGraphicalObject {
                 break;
             case 2:
                 player.update(dt);
+                storyTeller.update(dt);
                 break;
 
             default:
@@ -66,8 +69,18 @@ public class Controller extends InteractiveGraphicalObject {
     }
     @Override
     public void mouseClicked(MouseEvent e){
-        ui.mouseClicked(e);
-        deathscreen.mouseClicked(e);
+        switch (scene){
+            case 0:
+                ui.mouseClicked(e);
+            break;
+            case 1:
+                deathscreen.mouseClicked(e);
+            break;
+            case 2:
+
+            break;
+
+        }
     }
     public void keyPressed(KeyEvent e){
 

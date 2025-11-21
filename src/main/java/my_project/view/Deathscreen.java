@@ -12,7 +12,7 @@ import java.awt.event.MouseEvent;
 
 public class Deathscreen extends InteractiveGraphicalObject {
 
-    boolean deathscreen = false;
+    boolean deathscreen = true;
     private double alphaAnimation = 255;
     private double xPos = Config.WINDOW_WIDTH/2;
     private double yPos = Config.WINDOW_HEIGHT/2;
