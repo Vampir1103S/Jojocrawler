@@ -68,11 +68,10 @@ public class Controller extends InteractiveGraphicalObject {
     }
     @Override
     public void keyPressed(int key){
-        if (KeyEvent.VK_W == key){
-            player.setDirection(1);
-        }
-    }
 
+        }
 }
+
+
 
 
