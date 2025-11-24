@@ -34,16 +34,16 @@ public class Player extends Entity{
     public void update(double dt){
 
         if(isDownW){
-            ypos -= dt * (100 * speed);
+            ypos -= dt * (200 * speed);
         }
         if(isDownA){
-            xpos -= dt * (100 * speed);
+            xpos -= dt * (200 * speed);
         }
         if(isDownS){
-            ypos += dt * (100 * speed);
+            ypos += dt * (200 * speed);
         }
         if(isDownD){
-            xpos += dt * (100 * speed);
+            xpos += dt * (200 * speed);
         }
         System.out.println(isDownW+" "+isDownA+" "+isDownS+" "+isDownD);
 
