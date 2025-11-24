@@ -12,7 +12,6 @@ public abstract class InteractiveGraphicalObject extends GraphicalObject impleme
 
     }
 
-
     @Override
     public void keyReleased(int key){
 

@@ -68,8 +68,33 @@ public class Controller extends InteractiveGraphicalObject {
     }
     @Override
     public void keyPressed(int key){
-
+        if(key == KeyEvent.VK_W){
+            player.setIsDownWTrue();
         }
+        if(key == KeyEvent.VK_A){
+            player.setIsDownATrue();
+        }
+        if(key == KeyEvent.VK_S){
+            player.setIsDownSTrue();
+        }
+        if(key == KeyEvent.VK_D){
+            player.setIsDownDTrue();
+        }
+    }
+    public void keyReleased(int key){
+        if(key == KeyEvent.VK_W){
+            player.setIsDownWFalse();
+        }
+        if(key == KeyEvent.VK_A){
+            player.setIsDownAFalse();
+        }
+        if(key == KeyEvent.VK_S){
+            player.setIsDownSFalse();
+        }
+        if(key == KeyEvent.VK_D){
+            player.setIsDownDFalse();
+        }
+    }
 }
 
 
