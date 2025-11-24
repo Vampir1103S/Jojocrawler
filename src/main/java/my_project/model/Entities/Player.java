@@ -34,36 +34,21 @@ public class Player extends Entity{
     public void update(double dt){
 
         if(isDownW){
-            ypos -= dt * (100 * speed);
+            ypos -= dt*250;
         }
         if(isDownA){
-            xpos -= dt * (100 * speed);
+            xpos -= dt*250;
         }
         if(isDownS){
-            ypos += dt * (100 * speed);
+            ypos += dt*250;
         }
         if(isDownD){
-            xpos += dt * (100 * speed);
+            xpos += dt*250;
         }
         System.out.println(isDownW+" "+isDownA+" "+isDownS+" "+isDownD);
 
 
-    }
-    public int addDirectionx(int d){
-        directionx = directionx + d;
-        return d;
-    }
-    public int addDirectiony(int d){
-        directiony = directiony + d;
-        return d;
-    }
-    public int setDirectionx(int d){
-        directionx = d;
-        return d;
-    }
-    public int setDirectiony(int d){
-        directiony = d;
-        return d;
+
     }
     public boolean setIsDownWTrue() {
             isDownW = true;

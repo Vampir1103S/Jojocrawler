@@ -37,7 +37,6 @@ public class Deathscreen extends InteractiveGraphicalObject {
 
     @Override
     public void update(double dt){
-
         if (deathscreen == false) {
             startDeathScreenAn(dt);
         }
