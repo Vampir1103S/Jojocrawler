@@ -296,7 +296,7 @@ public class List<ContentType> {
    * aktuelles Objekt mehr.
    */
   public void remove() {
-    // Nichts tun, wenn es kein aktuelle Element gibt oder die Liste leer ist.
+    // Nichts tun, wenn es kein aktuelles Element gibt oder die Liste leer ist.
     if (this.hasAccess() && !this.isEmpty()) { 
 
       if (current == first) {

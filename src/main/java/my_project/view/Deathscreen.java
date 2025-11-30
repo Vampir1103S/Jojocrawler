@@ -33,6 +33,8 @@ public class Deathscreen extends InteractiveGraphicalObject {
         drawTool.setCurrentColor(145,0,1, 255);
         drawTool.formatText("Algerian", 2, 200);
         drawTool.drawText(xPos-300, yPos, "DEATH");
+        drawTool.formatText("Algerian", 4, 50);
+        drawTool.drawText(xPos-200, yPos+450, "Close to Restart");
     }
 
     @Override
