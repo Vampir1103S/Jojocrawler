@@ -1,6 +1,6 @@
 package my_project.model.Entities;
 
-abstract class Entity {
+public abstract class Entity {
     protected double xpos;
     protected double ypos;
     protected double hp;
@@ -19,6 +19,7 @@ abstract class Entity {
         this.Name = Name;
 
     }
+
 
     public double getXpos() {return xpos;}
 

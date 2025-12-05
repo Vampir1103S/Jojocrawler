@@ -3,9 +3,13 @@ package my_project.control;
 import KAGO_framework.model.GraphicalObject;
 import KAGO_framework.model.InteractiveGraphicalObject;
 import KAGO_framework.view.DrawTool;
+import my_project.model.Entities.Dieb;
 import my_project.view.Deathscreen;
 import my_project.view.UI;
 import my_project.model.Entities.Player;
+import my_project.model.Entities.Enemy;
+import my_project.model.Entities.Entity;
+
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
@@ -16,11 +20,24 @@ public class Controller extends InteractiveGraphicalObject {
     private UI ui;
     private Player player;
     private Deathscreen deathscreen;
-    public Controller() {
+    private Entity entity;
 
+
+    //Enemies
+    private Enemy enemy;
+    private Enemy dieb;
+    private Controller controller;
+
+    public Controller() {
+        this.controller = this;
         ui = new UI();
         deathscreen = new Deathscreen();
         player = new Player();
+
+        enemy = new Enemy(0,0,0,0,0,0,"",controller);
+        dieb = new Dieb();
+
+
     }
 
 
@@ -35,6 +52,7 @@ public class Controller extends InteractiveGraphicalObject {
             break;
             case 2:
                 player.draw(drawTool);
+                dieb.draw(drawTool);
             break;
 
             default:
@@ -55,6 +73,8 @@ public class Controller extends InteractiveGraphicalObject {
                 break;
             case 2:
                 player.update(dt);
+                dieb.update(dt);
+
                 break;
 
             default:
@@ -110,6 +130,16 @@ public class Controller extends InteractiveGraphicalObject {
         if(key == KeyEvent.VK_D){
             player.setIsDownDFalse();
         }
+    }
+    public double followplayerX(){
+        double xV = 0;
+       xV = player.getXpos()- entity.getXpos();
+       return xV;
+    }
+    public double followplayerY(){
+        double yV = 0;
+        yV = player.getYpos()- entity.getYpos();
+        return yV;
     }
 }
 

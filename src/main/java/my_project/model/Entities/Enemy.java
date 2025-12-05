@@ -1,26 +1,44 @@
 package my_project.model.Entities;
 import KAGO_framework.view.DrawTool;
 import my_project.model.Entities.Player;
+import my_project.control.Controller;
 
 public class Enemy extends Entity {
+    private int direction ;
+    private Controller controller;
 
     private Player player;
-    public Enemy(int xpos, int ypos, double hp, int speed, double stamina, int defense, String Name) {
+    public Enemy(int xpos, int ypos, double hp, int speed, double stamina, int defense, String Name, Controller controller) {
         super(ypos, xpos, hp, speed, stamina, defense, Name);
-
+        this.controller = controller;
 
     }
-    public void hallo(){
-        System.out.println(player.getXpos());
-    }
+
+
     public void draw(DrawTool drawTool){
-        drawTool.setCurrentColor(200,1,1,255);
-        drawTool.drawFilledRectangle(xpos,ypos, 50, 50);
+
     }
     public void update(double dt){
+        if(controller.followplayerX() > xpos){
+            xpos = xpos + (dt * 100);
+            System.out.println(dt);
+        }
+        if(controller.followplayerX() < xpos){
+            xpos = xpos + (dt * 100);
+            System.out.println(dt);
+        }
+        if(controller.followplayerY() > ypos){
+            xpos = xpos + (dt * 100);
+            System.out.println(dt);
+        }
+        if(controller.followplayerY() < ypos){
+            xpos = xpos + (dt * 100);
+            System.out.println(dt);
+        }
 
     }
 
 
 
 }
+

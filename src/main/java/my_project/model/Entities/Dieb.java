@@ -1,7 +1,24 @@
 package my_project.model.Entities;
 
-public class Dieb extends Enemy{
-    public Dieb(int xpos, int ypos, double hp, int speed, double stamina, int defense, String Name) {
-        super(xpos, ypos, hp, speed, stamina, defense, Name);
+import KAGO_framework.view.DrawTool;
+import my_project.control.Controller;
+
+import java.awt.*;
+
+public class Dieb extends Enemy {
+    private Controller controller;
+    public Dieb() {
+        super(100, 1000, 50, 2, 10, 20, "maron", Controller controller);
+
     }
+
+    public void draw(DrawTool drawTool) {
+        drawTool.setCurrentColor(Color.GREEN);
+        drawTool.drawFilledRectangle(xpos,ypos, 50, 50);
+    }
+
+    public void update(double dt) {
+        super.update(dt);
+    }
+
 }
