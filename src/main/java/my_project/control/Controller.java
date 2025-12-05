@@ -21,6 +21,7 @@ public class Controller extends InteractiveGraphicalObject {
         ui = new UI();
         deathscreen = new Deathscreen();
         player = new Player();
+        this.setNewImage("src/main/resources/graphic/map101.png");
     }
 
 
@@ -34,6 +35,7 @@ public class Controller extends InteractiveGraphicalObject {
                 deathscreen.draw(drawTool);
             break;
             case 2:
+                drawTool.drawImage(getMyImage(), 0, 0);
                 player.draw(drawTool);
             break;
 
