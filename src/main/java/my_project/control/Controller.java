@@ -3,7 +3,7 @@ package my_project.control;
 import KAGO_framework.model.GraphicalObject;
 import KAGO_framework.model.InteractiveGraphicalObject;
 import KAGO_framework.view.DrawTool;
-import my_project.model.Entities.Enemy;
+import my_project.view.Deathscreen;
 import my_project.view.UI;
 import my_project.model.Entities.Player;
 
@@ -15,10 +15,11 @@ public class Controller extends InteractiveGraphicalObject {
     private static int scene = 0;
     private UI ui;
     private Player player;
-    private Enemy enemy;
+    private Deathscreen deathscreen;
     public Controller() {
-        enemy = new Enemy(200,200,200,200,200,200,"Mario");
+
         ui = new UI();
+        deathscreen = new Deathscreen();
         player = new Player();
     }
 
@@ -30,11 +31,10 @@ public class Controller extends InteractiveGraphicalObject {
 
             break;
             case 1:
-                enemy.draw(drawTool);
-                player.draw(drawTool);
+                deathscreen.draw(drawTool);
             break;
             case 2:
-
+                player.draw(drawTool);
             break;
 
             default:
@@ -51,11 +51,10 @@ public class Controller extends InteractiveGraphicalObject {
                 ui.update(dt);
                 break;
             case 1:
-                player.update(dt);
-                enemy.update(dt);
+                deathscreen.update(dt);
                 break;
             case 2:
-
+                player.update(dt);
                 break;
 
             default:
@@ -68,7 +67,20 @@ public class Controller extends InteractiveGraphicalObject {
     }
     @Override
     public void mouseClicked(MouseEvent e){
-        ui.mouseClicked(e);
+        switch (scene){
+            case 0:
+                ui.mouseClicked(e);
+                break;
+            case 1:
+                deathscreen.mouseClicked(e);
+                break;
+            case 2:
+                break;
+
+                default:
+                    break;
+        }
+
     }
     @Override
     public void keyPressed(int key){
