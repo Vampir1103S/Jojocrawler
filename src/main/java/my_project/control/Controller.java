@@ -3,9 +3,13 @@ package my_project.control;
 import KAGO_framework.model.GraphicalObject;
 import KAGO_framework.model.InteractiveGraphicalObject;
 import KAGO_framework.view.DrawTool;
+import my_project.model.Entities.Dieb;
 import my_project.view.Deathscreen;
 import my_project.view.UI;
 import my_project.model.Entities.Player;
+import my_project.model.Entities.Enemy;
+import my_project.model.Entities.Entity;
+
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
@@ -16,12 +20,20 @@ public class Controller extends InteractiveGraphicalObject {
     private UI ui;
     private Player player;
     private Deathscreen deathscreen;
-    public Controller() {
+    private Entity entity;
 
+
+    //Enemies
+    private Enemy enemy;
+    private Enemy dieb;
+
+    public Controller() {
         ui = new UI();
         deathscreen = new Deathscreen();
         player = new Player();
-        this.setNewImage("src/main/resources/graphic/map101.png");
+        dieb = new Dieb();
+        Enemy.setController(this);
+
     }
 
 
@@ -35,8 +47,8 @@ public class Controller extends InteractiveGraphicalObject {
                 deathscreen.draw(drawTool);
             break;
             case 2:
-                drawTool.drawImage(getMyImage(), 0, 0);
                 player.draw(drawTool);
+                dieb.draw(drawTool);
             break;
 
             default:
@@ -57,6 +69,8 @@ public class Controller extends InteractiveGraphicalObject {
                 break;
             case 2:
                 player.update(dt);
+                dieb.update(dt);
+
                 break;
 
             default:
@@ -112,6 +126,21 @@ public class Controller extends InteractiveGraphicalObject {
         if(key == KeyEvent.VK_D){
             player.setIsDownDFalse();
         }
+    }
+    public double followplayerX(Entity e){
+        double xV = 0;
+        if (player != null && e != null) {
+            xV = player.getXpos() - e.getXpos();
+        }
+
+       return xV;
+    }
+    public double followplayerY(Entity e){
+        double yV = 0;
+        if (player != null && e != null) {
+            yV = player.getYpos() - e.getYpos();
+        }
+        return yV;
     }
 }
 

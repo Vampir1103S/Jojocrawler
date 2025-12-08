@@ -3,14 +3,15 @@ import KAGO_framework.view.DrawTool;
 import my_project.model.Entities.Player;
 import my_project.control.Controller;
 
-public class Enemy extends Entity {
+public abstract class Enemy extends Entity {
     private int direction ;
-    private Controller controller;
+    protected static Controller controller;
+
 
     private Player player;
-    public Enemy(int xpos, int ypos, double hp, int speed, double stamina, int defense, String Name, Controller controller) {
+    public Enemy(int xpos, int ypos, double hp, int speed, double stamina, int defense, String Name) {
         super(ypos, xpos, hp, speed, stamina, defense, Name);
-        this.controller = controller;
+
 
     }
 
@@ -19,26 +20,27 @@ public class Enemy extends Entity {
 
     }
     public void update(double dt){
-        if(controller.followplayerX() > xpos){
+        if(controller.followplayerX(this) > 0){
             xpos = xpos + (dt * 100);
+            System.out.println(">" + 0);
+        }
+        if(controller.followplayerX(this) < 0){
+            xpos = xpos - (dt * 100);
+            System.out.println("<" + 0);
+        }
+        if(controller.followplayerY(this) > 0){
+            ypos = ypos + (dt * 100);
             System.out.println(dt);
         }
-        if(controller.followplayerX() < xpos){
-            xpos = xpos + (dt * 100);
-            System.out.println(dt);
-        }
-        if(controller.followplayerY() > ypos){
-            xpos = xpos + (dt * 100);
-            System.out.println(dt);
-        }
-        if(controller.followplayerY() < ypos){
-            xpos = xpos + (dt * 100);
+        if(controller.followplayerY(this) < 0){
+            ypos = ypos - (dt * 100);
             System.out.println(dt);
         }
 
     }
-
-
+    public static void setController(Controller con) {
+        controller = con;
+    }
 
 }
 
