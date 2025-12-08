@@ -33,6 +33,7 @@ public class Controller extends InteractiveGraphicalObject {
         player = new Player();
         dieb = new Dieb();
         Enemy.setController(this);
+        this.setNewImage("src/main/resources/graphic/map101.png");
 
     }
 
@@ -47,6 +48,7 @@ public class Controller extends InteractiveGraphicalObject {
                 deathscreen.draw(drawTool);
             break;
             case 2:
+                drawTool.drawImage(getMyImage(), 0, 0);
                 player.draw(drawTool);
                 dieb.draw(drawTool);
             break;
@@ -142,6 +144,20 @@ public class Controller extends InteractiveGraphicalObject {
         }
         return yV;
     }
+
+    public double followplayerX(){
+        /* double xV = 0;
+        xV = player.getXpos()- entity.getXpos();
+        return xV;*/
+        return 0;
+    }
+    public double followplayerY(){
+     /*   double yV = 0;
+        yV = player.getYpos()- entity.getYpos();
+        return yV; */
+        return 0;
+    }
+
 }
 
 
