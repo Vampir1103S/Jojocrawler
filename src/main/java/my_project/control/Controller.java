@@ -26,17 +26,13 @@ public class Controller extends InteractiveGraphicalObject {
     //Enemies
     private Enemy enemy;
     private Enemy dieb;
-    private Controller controller;
 
     public Controller() {
-        this.controller = this;
         ui = new UI();
         deathscreen = new Deathscreen();
         player = new Player();
-
-        enemy = new Enemy(0,0,0,0,0,0,"",controller);
         dieb = new Dieb();
-
+        Enemy.setController(this);
 
     }
 
@@ -131,14 +127,19 @@ public class Controller extends InteractiveGraphicalObject {
             player.setIsDownDFalse();
         }
     }
-    public double followplayerX(){
+    public double followplayerX(Entity e){
         double xV = 0;
-       xV = player.getXpos()- entity.getXpos();
+        if (player != null && e != null) {
+            xV = player.getXpos() - e.getXpos();
+        }
+
        return xV;
     }
-    public double followplayerY(){
+    public double followplayerY(Entity e){
         double yV = 0;
-        yV = player.getYpos()- entity.getYpos();
+        if (player != null && e != null) {
+            yV = player.getYpos() - e.getYpos();
+        }
         return yV;
     }
 }

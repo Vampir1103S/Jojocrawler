@@ -8,7 +8,7 @@ import java.awt.*;
 public class Dieb extends Enemy {
     private Controller controller;
     public Dieb() {
-        super(100, 1000, 50, 2, 10, 20, "maron", Controller controller);
+        super(100, 1000, 50, 2, 10, 20, "maron");
 
     }
 
