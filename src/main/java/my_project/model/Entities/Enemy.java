@@ -9,7 +9,7 @@ public abstract class Enemy extends Entity {
 
 
     private Player player;
-    public Enemy(int xpos, int ypos, double hp, int speed, double stamina, int defense, String Name) {
+    public Enemy(int xpos, int ypos, double hp, double speed, double stamina, int defense, String Name) {
         super(ypos, xpos, hp, speed, stamina, defense, Name);
 
 
@@ -21,20 +21,20 @@ public abstract class Enemy extends Entity {
     }
     public void update(double dt){
         if(controller.followplayerX(this) > 0){
-            xpos = xpos + (dt * 100);
-            System.out.println(">" + 0);
+            xpos = xpos + (dt * (100 * speed ));
+
         }
         if(controller.followplayerX(this) < 0){
-            xpos = xpos - (dt * 100);
-            System.out.println("<" + 0);
+            xpos = xpos - (dt * (100 * speed ));
+
         }
         if(controller.followplayerY(this) > 0){
-            ypos = ypos + (dt * 100);
-            System.out.println(dt);
+            ypos = ypos + (dt * (100 * speed ));
+
         }
         if(controller.followplayerY(this) < 0){
-            ypos = ypos - (dt * 100);
-            System.out.println(dt);
+            ypos = ypos - (dt * (100 * speed ));
+
         }
 
     }

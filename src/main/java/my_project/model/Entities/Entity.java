@@ -4,12 +4,12 @@ public abstract class Entity {
     protected double xpos;
     protected double ypos;
     protected double hp;
-    protected int speed;
+    protected double speed;
     protected double stamina;
     protected int defense;
     protected String Name;
 
-    public Entity(double xpos , double ypos,double hp, int speed, double stamina, int defense, String Name) {
+    public Entity(double xpos , double ypos,double hp, double speed, double stamina, int defense, String Name) {
         this.xpos = xpos;
         this.ypos = ypos;
         this.hp = hp;
@@ -37,7 +37,7 @@ public abstract class Entity {
         this.hp = hp;
     }
 
-    public int getSpeed(){
+    public double getSpeed(){
         return speed;
     }
 

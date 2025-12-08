@@ -45,13 +45,18 @@ public class Controller extends InteractiveGraphicalObject {
 
             break;
             case 1:
-                deathscreen.draw(drawTool);
-            break;
-            case 2:
                 drawTool.drawImage(getMyImage(), 0, 0);
                 player.draw(drawTool);
                 dieb.draw(drawTool);
+
             break;
+            case 2:
+
+
+            break;
+            case 3:
+                deathscreen.draw(drawTool);
+                break;
 
             default:
 
@@ -67,12 +72,15 @@ public class Controller extends InteractiveGraphicalObject {
                 ui.update(dt);
                 break;
             case 1:
-                deathscreen.update(dt);
-                break;
-            case 2:
                 player.update(dt);
                 dieb.update(dt);
+                break;
+            case 2:
 
+
+                break;
+            case 3:
+                deathscreen.update(dt);
                 break;
 
             default:
@@ -90,7 +98,7 @@ public class Controller extends InteractiveGraphicalObject {
                 ui.mouseClicked(e);
                 break;
             case 1:
-                deathscreen.mouseClicked(e);
+                //deathscreen.mouseClicked(e);
                 break;
             case 2:
                 break;
