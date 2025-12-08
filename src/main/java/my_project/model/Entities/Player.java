@@ -23,7 +23,6 @@ public class Player extends Entity{
     }
 
     public void draw(DrawTool drawTool){
-
         drawTool.drawFilledRectangle(xpos,ypos, 50, 100);
     }
 
@@ -82,5 +81,10 @@ public class Player extends Entity{
         isDownD = false;
         return isDownD;
     }
-
+    public double getXpos(){
+        return xpos;
+    }
+    public double getYpos(){
+        return ypos;
+    }
 }
