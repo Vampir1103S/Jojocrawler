@@ -5,6 +5,7 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import KAGO_framework.view.DrawTool;
+import my_project.Config;
 
 public class Player extends Entity{
     private int directionx ;
@@ -13,6 +14,8 @@ public class Player extends Entity{
     private boolean isDownA ;
     private boolean isDownS ;
     private boolean isDownD ;
+    private int width;
+    private int height;
 
     public Player() {
         super(1,1,1,1,1,1,"hehe");
@@ -20,24 +23,26 @@ public class Player extends Entity{
     this.directiony = 1;
     xpos = 200;
     ypos = 200;
+    width = 50;
+    height = 100;
     }
 
     public void draw(DrawTool drawTool){
-        drawTool.drawFilledRectangle(xpos,ypos, 50, 100);
+        drawTool.drawFilledRectangle(xpos,ypos, width, height);
     }
 
     public void update(double dt){
 
-        if(isDownW){
+        if(isDownW && ypos > 0){
             ypos -= dt*250;
         }
-        if(isDownA){
+        if(isDownA && xpos > 0){
             xpos -= dt*250;
         }
-        if(isDownS){
+        if(isDownS && ypos < Config.WINDOW_HEIGHT - height){
             ypos += dt*250;
         }
-        if(isDownD){
+        if(isDownD &&  xpos < Config.WINDOW_WIDTH -  width){
             xpos += dt*250;
         }
     }
