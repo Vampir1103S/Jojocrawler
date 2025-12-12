@@ -1,6 +1,8 @@
 package my_project.model.Entities;
 
-public abstract class Entity {
+import KAGO_framework.model.GraphicalObject;
+
+public abstract class Entity extends GraphicalObject {
     protected double xpos;
     protected double ypos;
     protected double hp;
@@ -9,7 +11,7 @@ public abstract class Entity {
     protected int defense;
     protected String Name;
 
-    public Entity(double xpos , double ypos,double hp, double speed, double stamina, int defense, String Name) {
+    public Entity(double xpos , double ypos, double hp, double speed, double stamina, int defense, String Name) {
         this.xpos = xpos;
         this.ypos = ypos;
         this.hp = hp;
@@ -17,7 +19,6 @@ public abstract class Entity {
         this.stamina = stamina;
         this.defense = defense;
         this.Name = Name;
-
     }
 
 
@@ -64,7 +65,6 @@ public abstract class Entity {
     public String getName(){
         return Name;
     }
-
 
 }
 

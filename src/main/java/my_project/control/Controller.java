@@ -46,7 +46,9 @@ public class Controller extends InteractiveGraphicalObject {
             break;
             case 1:
                 drawTool.drawImage(getMyImage(), 0, 0);
-                player.draw(drawTool);
+                if (player.getHP() > 0) {
+                    player.draw(drawTool);
+                }
                 dieb.draw(drawTool);
 
             break;
@@ -72,6 +74,10 @@ public class Controller extends InteractiveGraphicalObject {
                 ui.update(dt);
                 break;
             case 1:
+                if (player.collidesWith(dieb)) {
+                    player.setHP(0);
+                    System.out.println("TOT");
+                }
                 player.update(dt);
                 dieb.update(dt);
                 break;
@@ -91,6 +97,7 @@ public class Controller extends InteractiveGraphicalObject {
     public static void switchScene(int newSzene){
         scene = newSzene;
     }
+
     @Override
     public void mouseClicked(MouseEvent e){
         switch (scene){
