@@ -14,13 +14,14 @@ public class Player extends Entity{
     private boolean isDownA ;
     private boolean isDownS ;
     private boolean isDownD ;
-    private int width;
-    private int height;
+
 
     public Player() {
-        super(1,1,1,1,1,1,"hehe");
+        super(1,1,1,1,1,1,"hehe",50,100);
     this.directionx = 1;
     this.directiony = 1;
+
+
     xpos = 200;
     ypos = 200;
     width = 50;

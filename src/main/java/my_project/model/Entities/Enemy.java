@@ -9,8 +9,8 @@ public abstract class Enemy extends Entity {
 
 
     private Player player;
-    public Enemy(int xpos, int ypos, double hp, double speed, double stamina, int defense, String Name) {
-        super(ypos, xpos, hp, speed, stamina, defense, Name);
+    public Enemy(double xpos, double ypos, double hp, double speed, double stamina, int defense, String Name,double width,double height) {
+        super(ypos, xpos, hp, speed, stamina, defense, Name, width, height);
 
 
     }
