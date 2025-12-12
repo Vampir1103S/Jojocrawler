@@ -6,12 +6,12 @@ import my_project.control.Controller;
 public abstract class Enemy extends Entity {
     private int direction ;
     protected static Controller controller;
-
+    protected int damage;
 
     private Player player;
-    public Enemy(int xpos, int ypos, double hp, double speed, double stamina, int defense, String Name) {
+    public Enemy(int xpos, int ypos, double hp, double speed, double stamina, int defense, String Name, int damage) {
         super(ypos, xpos, hp, speed, stamina, defense, Name);
-
+        this.damage = damage;
 
     }
 
@@ -38,6 +38,14 @@ public abstract class Enemy extends Entity {
         }
 
     }
+    public int getDamage() {
+        return damage;
+    }
+
+    public void setDamage(int damage) {
+        this.damage = damage;
+    }
+
     public static void setController(Controller con) {
         controller = con;
     }

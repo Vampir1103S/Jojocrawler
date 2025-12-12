@@ -1,9 +1,5 @@
 package my_project.model.Entities;
 
-import javax.xml.namespace.QName;
-import java.awt.*;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import KAGO_framework.view.DrawTool;
 import my_project.Config;
 
@@ -16,15 +12,17 @@ public class Player extends Entity{
     private boolean isDownD ;
     private int width;
     private int height;
+    private int hp;
 
     public Player() {
-        super(1,1,1,1,1,1,"hehe");
+        super(1,1,100,1,1,1,"hehe");
     this.directionx = 1;
     this.directiony = 1;
     xpos = 200;
     ypos = 200;
     width = 50;
     height = 100;
+    this.hp = 100;
     }
 
     public void draw(DrawTool drawTool){
@@ -91,5 +89,9 @@ public class Player extends Entity{
     }
     public double getYpos(){
         return ypos;
+    }
+
+    public void schlage(int gegnerHp){
+        gegnerHp -= 10;
     }
 }
