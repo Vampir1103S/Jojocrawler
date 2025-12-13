@@ -2,7 +2,7 @@ package my_project.model.Entities;
 
 import KAGO_framework.model.GraphicalObject;
 
-public abstract class Entity extends GraphicalObject {
+public abstract class Entity {
     protected double xpos;
     protected double ypos;
     protected double hp;

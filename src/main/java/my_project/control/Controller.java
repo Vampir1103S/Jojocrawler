@@ -4,6 +4,7 @@ import KAGO_framework.model.GraphicalObject;
 import KAGO_framework.model.InteractiveGraphicalObject;
 import KAGO_framework.view.DrawTool;
 import my_project.model.Entities.Dieb;
+import my_project.model.map.Bürgersteig;
 import my_project.view.Deathscreen;
 import my_project.view.UI;
 import my_project.model.Entities.Player;
@@ -21,6 +22,10 @@ public class Controller extends InteractiveGraphicalObject {
     private Player player;
     private Deathscreen deathscreen;
     private Entity entity;
+    private Bürgersteig[][] bürgersteig;
+
+    private int breite = 20;
+    private int hoehe = 10;
 
 
     //Enemies
@@ -33,8 +38,12 @@ public class Controller extends InteractiveGraphicalObject {
         player = new Player();
         dieb = new Dieb();
         Enemy.setController(this);
-        this.setNewImage("src/main/resources/graphic/map101.png");
-
+        bürgersteig = new Bürgersteig[breite][hoehe];
+        for (int x = 0; x < breite; x++) {
+            for (int y = 0; y < hoehe; y++) {
+                bürgersteig[x][y] = new Bürgersteig(100 + x * 30, 100 + y * 30);
+            }
+        }
     }
 
 
@@ -42,15 +51,17 @@ public class Controller extends InteractiveGraphicalObject {
         switch (scene){
             case 0:
                 ui.draw(drawTool);
-
             break;
             case 1:
-                drawTool.drawImage(getMyImage(), 0, 0);
+                for (int x = 0; x < bürgersteig.length; x++) {
+                    for (int y = 0; y < bürgersteig[x].length; y++) {
+                        bürgersteig[x][y].draw(drawTool);
+                    }
+                }
                 if (player.getHP() > 0) {
                     player.draw(drawTool);
                 }
                 dieb.draw(drawTool);
-
             break;
             case 2:
 
@@ -74,10 +85,6 @@ public class Controller extends InteractiveGraphicalObject {
                 ui.update(dt);
                 break;
             case 1:
-                if (player.collidesWith(dieb)) {
-                    player.setHP(0);
-                    System.out.println("TOT");
-                }
                 player.update(dt);
                 dieb.update(dt);
                 break;
