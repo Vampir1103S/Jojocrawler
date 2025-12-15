@@ -4,12 +4,14 @@ import KAGO_framework.model.GraphicalObject;
 import KAGO_framework.model.InteractiveGraphicalObject;
 import KAGO_framework.view.DrawTool;
 import my_project.model.Entities.Dieb;
+import my_project.model.map.Baum;
 import my_project.model.map.Bürgersteig;
 import my_project.view.Deathscreen;
 import my_project.view.UI;
 import my_project.model.Entities.Player;
 import my_project.model.Entities.Enemy;
 import my_project.model.Entities.Entity;
+import my_project.control.Collisions;
 
 
 import java.awt.*;
@@ -22,9 +24,13 @@ public class Controller extends InteractiveGraphicalObject {
     private Player player;
     private Deathscreen deathscreen;
     private Entity entity;
+    private Collisions collisions;
     private Bürgersteig[][] bürgersteig;
+    private Baum[][] baum;
     private int hoehe = 10;
     private int breite = 10;
+    private int bhoehe = 2;
+    private int bbreite = 10;
 
 
     //Enemies
@@ -36,7 +42,9 @@ public class Controller extends InteractiveGraphicalObject {
         deathscreen = new Deathscreen();
         player = new Player();
         dieb = new Dieb();
+        collisions = new Collisions();
         Enemy.setController(this);
+
         bürgersteig = new Bürgersteig[breite][hoehe];
         for (int x = 0; x < breite; x++) {
             for (int y = 0; y < hoehe; y++) {
@@ -44,6 +52,12 @@ public class Controller extends InteractiveGraphicalObject {
             }
         }
 
+        baum = new Baum[bbreite][bhoehe];
+        for (int x = 0; x < 10; x++) {
+            for (int y = 0; y < 2; y++) {
+                baum[x][y] = new Baum(100 + x * 70, 100 + y * 200);
+            }
+        }
     }
 
 
@@ -59,6 +73,12 @@ public class Controller extends InteractiveGraphicalObject {
                         bürgersteig[x][y].draw(drawTool);
                     }
                 }
+                for (int x = 0; x < baum.length; x++) {
+                    for (int y = 0; y < baum[x].length; y++) {
+                        baum[x][y].draw(drawTool);
+                    }
+                }
+
                 if (player.getHP() > 0) {
                     player.draw(drawTool);
                 }
@@ -90,6 +110,11 @@ public class Controller extends InteractiveGraphicalObject {
 
                 player.update(dt);
                 dieb.update(dt);
+                System.out.println(collisions.calculateColisions(player, dieb));
+                if (collisions.calculateColisions(player, dieb)){
+                    player.setHP(0);
+                    System.out.println(player.getHP());
+                }
                 break;
             case 2:
 

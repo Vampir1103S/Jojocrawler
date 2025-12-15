@@ -24,11 +24,11 @@ public abstract class Entity extends GraphicalObject {
     }
 
 
-    public double getXpos() {return xpos;}
+    public  double getXpos() {return xpos;}
 
     public void setXpos(int xpos) {this.xpos = xpos;}
 
-    public double getYpos() {return ypos;}
+    public  double getYpos() {return ypos;}
 
     public void setYpos(int ypos) {this.ypos = ypos;}
 

@@ -46,6 +46,10 @@ public class Player extends Entity{
         if(isDownD &&  xpos < Config.WINDOW_WIDTH -  width){
             xpos += dt*250;
         }
+
+        if (this.hp == 0){
+            System.out.println("TOT");
+        }
     }
 
     public boolean setIsDownWTrue() {
@@ -93,4 +97,6 @@ public class Player extends Entity{
     public double getYpos(){
         return ypos;
     }
+
+
 }
