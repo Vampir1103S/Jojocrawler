@@ -10,8 +10,10 @@ public abstract class Entity extends GraphicalObject {
     protected double stamina;
     protected int defense;
     protected String Name;
+    protected int Width;
+    protected int Height;
 
-    public Entity(double xpos , double ypos, double hp, double speed, double stamina, int defense, String Name) {
+    public Entity(double xpos , double ypos, double hp, double speed, double stamina, int defense, String Name, double width, double height) {
         this.xpos = xpos;
         this.ypos = ypos;
         this.hp = hp;

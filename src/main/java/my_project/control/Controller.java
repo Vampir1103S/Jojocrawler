@@ -74,10 +74,7 @@ public class Controller extends InteractiveGraphicalObject {
                 ui.update(dt);
                 break;
             case 1:
-                if (player.collidesWith(dieb)) {
-                    player.setHP(0);
-                    System.out.println("TOT");
-                }
+
                 player.update(dt);
                 dieb.update(dt);
                 break;
@@ -160,18 +157,7 @@ public class Controller extends InteractiveGraphicalObject {
         return yV;
     }
 
-    public double followplayerX(){
-        /* double xV = 0;
-        xV = player.getXpos()- entity.getXpos();
-        return xV;*/
-        return 0;
-    }
-    public double followplayerY(){
-     /*   double yV = 0;
-        yV = player.getYpos()- entity.getYpos();
-        return yV; */
-        return 0;
-    }
+
 
 }
 
