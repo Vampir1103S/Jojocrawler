@@ -9,7 +9,7 @@ import my_project.view.UI;
 import my_project.model.Entities.Player;
 import my_project.model.Entities.Enemy;
 import my_project.model.Entities.Entity;
-import my_project.control.Collisions;
+
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
@@ -21,7 +21,6 @@ public class Controller extends InteractiveGraphicalObject {
     private Player player;
     private Deathscreen deathscreen;
     private Entity entity;
-    private Collisions collisions;
 
 
     //Enemies
@@ -33,7 +32,6 @@ public class Controller extends InteractiveGraphicalObject {
         deathscreen = new Deathscreen();
         player = new Player();
         dieb = new Dieb();
-        collisions = new Collisions();
         Enemy.setController(this);
         this.setNewImage("src/main/resources/graphic/map101.png");
 
@@ -173,10 +171,6 @@ public class Controller extends InteractiveGraphicalObject {
         yV = player.getYpos()- entity.getYpos();
         return yV; */
         return 0;
-    }
-    public boolean collidesWith(Entity e){
-
-        return false;
     }
 
 }
