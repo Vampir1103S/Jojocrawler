@@ -14,22 +14,26 @@ public class Player extends Entity{
     private boolean isDownA ;
     private boolean isDownS ;
     private boolean isDownD ;
+    private double xPos;
+    private double yPos;
+    private int width;
+    private int height;
 
 
     public Player() {
-        super(1,1,1,1,1,1,"hehe",50,100);
+        super(100,100,100,1,1,1,"hehe",100,150);
     this.directionx = 1;
     this.directiony = 1;
-
-
-    xpos = 200;
-    ypos = 200;
-    width = 50;
-    height = 100;
+        this.xPos = xpos;
+        this.yPos = ypos;
+        this.width = 100;
+        this.height  = 150;
     }
 
     public void draw(DrawTool drawTool){
-        drawTool.drawFilledRectangle(xpos,ypos, width, height);
+        drawTool.setCurrentColor(Color.BLACK);
+        drawTool.drawFilledRectangle(xpos+20,ypos+20, width-40, height-40);
+        drawTool.drawRectangle(xpos,ypos, width, height); //Hitbox
     }
 
     public void update(double dt){
