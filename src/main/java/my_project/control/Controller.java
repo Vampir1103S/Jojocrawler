@@ -3,14 +3,11 @@ package my_project.control;
 import KAGO_framework.model.GraphicalObject;
 import KAGO_framework.model.InteractiveGraphicalObject;
 import KAGO_framework.view.DrawTool;
-import my_project.model.Entities.Dieb;
+import my_project.model.Entities.*;
 import my_project.model.map.Baum;
 import my_project.model.map.Bürgersteig;
 import my_project.view.Deathscreen;
 import my_project.view.UI;
-import my_project.model.Entities.Player;
-import my_project.model.Entities.Enemy;
-import my_project.model.Entities.Entity;
 import my_project.control.Collisions;
 
 
@@ -36,12 +33,14 @@ public class Controller extends InteractiveGraphicalObject {
     //Enemies
     private Enemy enemy;
     private Enemy dieb;
+    private StoryTeller storytomole;
 
     public Controller() {
         ui = new UI();
         deathscreen = new Deathscreen();
         player = new Player();
         dieb = new Dieb();
+        storytomole = new StoryTeller();
         collisions = new Collisions();
         Enemy.setController(this);
 
@@ -83,6 +82,7 @@ public class Controller extends InteractiveGraphicalObject {
                     player.draw(drawTool);
                 }
                 dieb.draw(drawTool);
+                storytomole.draw(drawTool);
 
             break;
             case 2:
@@ -114,6 +114,10 @@ public class Controller extends InteractiveGraphicalObject {
                 if (collisions.calculateColisions(player, dieb)){
                     player.setHP(0);
                     System.out.println(player.getHP());
+                }
+
+                if (collisions.calculateColisions(player, storytomole) && storytomole.getETrue()){
+                    storytomole.speak();
                 }
                 break;
             case 2:
@@ -152,6 +156,9 @@ public class Controller extends InteractiveGraphicalObject {
     }
     @Override
     public void keyPressed(int key){
+        if(key== KeyEvent.VK_E){
+            storytomole.setETrue(true);
+        }
         if(key == KeyEvent.VK_W){
             player.setIsDownWTrue();
         }
