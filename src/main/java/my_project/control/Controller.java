@@ -110,10 +110,10 @@ public class Controller extends InteractiveGraphicalObject {
 
                 player.update(dt);
                 dieb.update(dt);
-                System.out.println(collisions.calculateColisions(player, dieb));
+
                 if (collisions.calculateColisions(player, dieb)){
-                    player.setHP(0);
-                    System.out.println(player.getHP());
+                    //player.setHP(0);
+
                 }
                 break;
             case 2:
