@@ -28,12 +28,14 @@ public class Player extends Entity{
         this.yPos = ypos;
         this.width = 100;
         this.height  = 150;
+        setWidth(100);
+        setHeight(150);
     }
 
     public void draw(DrawTool drawTool){
         drawTool.setCurrentColor(Color.BLACK);
-        drawTool.drawFilledRectangle(xpos+20,ypos+20, width-40, height-40);
-        drawTool.drawRectangle(xpos,ypos, width, height); //Hitbox
+        drawTool.drawFilledRectangle(xpos+20,ypos+20, 100-40, 150-40);
+        drawTool.drawRectangle(xpos,ypos, 100, 150); //Hitbox
     }
 
     public void update(double dt){
@@ -101,6 +103,4 @@ public class Player extends Entity{
     public double getYpos(){
         return ypos;
     }
-
-
 }

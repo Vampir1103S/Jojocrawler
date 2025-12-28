@@ -7,25 +7,18 @@ import java.awt.*;
 
 public class Dieb extends Enemy {
     private Controller controller;
-    private double height;
-    private double width;
     public Dieb() {
         super(500, 200, 50, 0.7, 10, 20, "maron",50,100);
-        this.width = width;
-        this.height = height;
+        setWidth(50);
+        setHeight(100);
     }
-
-
 
     public void draw(DrawTool drawTool) {
         drawTool.setCurrentColor(Color.GREEN);
         drawTool.drawFilledRectangle(xpos,ypos, 50, 100);
-
     }
 
     public void update(double dt) {
         super.update(dt);
-
     }
-
 }

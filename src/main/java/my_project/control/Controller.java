@@ -110,15 +110,14 @@ public class Controller extends InteractiveGraphicalObject {
 
                 player.update(dt);
                 dieb.update(dt);
-
                 if (collisions.calculateColisions(player, dieb)){
                     //player.setHP(0);
-
+                    System.out.println("collisions calculated");
                 }
 
-                if (collisions.calculateColisions(player, storytomole) && storytomole.getETrue()){
+                /*if (collisions.calculateColisions(player, storytomole) && storytomole.getETrue()){
                     storytomole.speak();
-                }
+                }*/
                 break;
             case 2:
 
