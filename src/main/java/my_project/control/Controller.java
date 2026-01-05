@@ -204,6 +204,9 @@ public class Controller extends InteractiveGraphicalObject {
         if (player == null || e == null) return 0;
         return player.getYpos() - e.getYpos();
     }
+    public Player getPlayer() {
+        return player;
+    }
 
 
 

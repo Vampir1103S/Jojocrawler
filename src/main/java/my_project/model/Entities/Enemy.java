@@ -19,26 +19,40 @@ public abstract class Enemy extends Entity {
 
     }
 
+    @Override
     public void update(double dt) {
         if (controller == null) return;
 
-        double dx = controller.followPlayerX(this);
-        double dy = controller.followPlayerY(this);
+        // Ziel = MITTE des Players
+        double targetX = controller.getPlayer().getCenterX();
+        double targetY = controller.getPlayer().getCenterY();
+
+        // Gegner-Mitte (damit er wirklich "mittig" auf den Player zugeht)
+        double myX = this.getCenterX();
+        double myY = this.getCenterY();
+
+        double dx = targetX - myX;
+        double dy = targetY - myY;
 
         double dist = Math.sqrt(dx * dx + dy * dy);
-
-        double stopDistance = 5.0;
-        if (dist < stopDistance) return;
-
-
-        double dirX = dx / dist;
-        double dirY = dy / dist;
+        if (dist == 0) return;
 
         double move = dt * (100 * speed);
 
+        // Wenn wir in diesem Frame "drüber hinaus" laufen würden: direkt auf Ziel setzen
+        if (dist <= move) {
+            // xpos/ypos sind top-left, also Mitte zurückrechnen
+            xpos = targetX - this.getWidth() / 2.0;
+            ypos = targetY - this.getHeight() / 2.0;
+            return;
+        }
+
+        // Normalisierte Richtung
+        double dirX = dx / dist;
+        double dirY = dy / dist;
+
         xpos += dirX * move;
         ypos += dirY * move;
-
     }
     public static void setController(Controller con) {
         controller = con;

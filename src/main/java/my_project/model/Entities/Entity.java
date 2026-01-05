@@ -68,5 +68,13 @@ public abstract class Entity extends GraphicalObject {
         return Name;
     }
 
+    public double getCenterX() {
+        return getXpos() + getWidth() / 2.0;
+    }
+
+    public double getCenterY() {
+        return getYpos() + getHeight() / 2.0;
+    }
+
 }
 
