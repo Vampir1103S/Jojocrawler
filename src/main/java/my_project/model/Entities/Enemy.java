@@ -4,38 +4,40 @@ import my_project.model.Entities.Player;
 import my_project.control.Controller;
 
 public abstract class Enemy extends Entity {
-    private int direction ;
+    private int direction;
     protected static Controller controller;
 
 
-    private Player player;
-    public Enemy(double xpos, double ypos, double hp, double speed, double stamina, int defense, String Name,double width,double height) {
-        super(ypos, xpos, hp, speed, stamina, defense, Name, width, height);
+    public Enemy(double xpos, double ypos, double hp, double speed, double stamina, int defense, String Name, double width, double height) {
+        super(xpos, ypos, hp, speed, stamina, defense, Name, width, height);
 
 
     }
 
 
-    public void draw(DrawTool drawTool){
+    public void draw(DrawTool drawTool) {
 
     }
-    public void update(double dt){
-        if(controller.followplayerX(this) > 0){
-            xpos = xpos + (dt * (100 * speed ));
 
-        }
-        if(controller.followplayerX(this) < 0){
-            xpos = xpos - (dt * (100 * speed ));
+    public void update(double dt) {
+        if (controller == null) return;
 
-        }
-        if(controller.followplayerY(this) > 0){
-            ypos = ypos + (dt * (100 * speed ));
+        double dx = controller.followPlayerX(this);
+        double dy = controller.followPlayerY(this);
 
-        }
-        if(controller.followplayerY(this) < 0){
-            ypos = ypos - (dt * (100 * speed ));
+        double dist = Math.sqrt(dx * dx + dy * dy);
 
-        }
+        double stopDistance = 5.0;   // damit er nicht jittert
+        if (dist < stopDistance) return;
+
+        // Richtung normalisieren (Länge = 1)
+        double dirX = dx / dist;
+        double dirY = dy / dist;
+
+        double move = dt * (100 * speed);
+
+        xpos += dirX * move;
+        ypos += dirY * move;
 
     }
     public static void setController(Controller con) {

@@ -110,7 +110,7 @@ public class Controller extends InteractiveGraphicalObject {
 
                 player.update(dt);
                 dieb.update(dt);
-                if (collisions.calculateColisions(player, dieb)){
+                if (collisions.rectangleCollisions(player, dieb)){
                     //player.setHP(0);
                     System.out.println("collisions calculated");
                 }
@@ -185,20 +185,14 @@ public class Controller extends InteractiveGraphicalObject {
             player.setIsDownDFalse();
         }
     }
-    public double followplayerX(Entity e){
-        double xV = 0;
-        if (player != null && e != null) {
-            xV = player.getXpos() - e.getXpos();
-        }
-
-       return xV;
+    public double followPlayerX(Entity e){
+        if (player == null || e == null) return 0;
+        return player.getXpos() - e.getXpos();
     }
-    public double followplayerY(Entity e){
-        double yV = 0;
-        if (player != null && e != null) {
-            yV = player.getYpos() - e.getYpos();
-        }
-        return yV;
+
+    public double followPlayerY(Entity e){
+        if (player == null || e == null) return 0;
+        return player.getYpos() - e.getYpos();
     }
 }
 
