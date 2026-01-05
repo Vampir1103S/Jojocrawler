@@ -27,10 +27,10 @@ public abstract class Enemy extends Entity {
 
         double dist = Math.sqrt(dx * dx + dy * dy);
 
-        double stopDistance = 5.0;   // damit er nicht jittert
+        double stopDistance = 5.0;
         if (dist < stopDistance) return;
 
-        // Richtung normalisieren (Länge = 1)
+
         double dirX = dx / dist;
         double dirY = dy / dist;
 

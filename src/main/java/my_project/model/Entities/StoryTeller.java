@@ -32,13 +32,13 @@ public class StoryTeller extends Entity {
     }
 
     public void speak(){
-        if (dialogQueue.isEmpty() & ETrue) {
+        if (dialogQueue.isEmpty()) {
             System.out.println("(NPC hat nichts mehr zu sagen)");
-            return;
         }
 
-
-        System.out.println(dialogQueue.poll());
+        if (!dialogQueue.isEmpty()){
+         System.out.println(dialogQueue.poll());
+        }
     }
 
     public void update(double dt) {
