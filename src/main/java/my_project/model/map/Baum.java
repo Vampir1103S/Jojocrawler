@@ -1,6 +1,7 @@
 package my_project.model.map;
 
 import KAGO_framework.view.DrawTool;
+import my_project.control.Collisions;
 
 public class Baum extends Environment{
 
@@ -16,5 +17,10 @@ public class Baum extends Environment{
     @Override
     public void draw(DrawTool drawTool){
         drawTool.drawImage(getMyImage(), x, y);
+    }
+
+    @Override
+    public void update(double dt) {
+
     }
 }
