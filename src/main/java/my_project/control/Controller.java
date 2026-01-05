@@ -40,7 +40,13 @@ public class Controller extends InteractiveGraphicalObject {
         deathscreen = new Deathscreen();
         player = new Player();
         dieb = new Dieb();
-        storytomole = new StoryTeller();
+
+        storytomole = new StoryTeller(500, 500, 10, 5, 10, 100, "Tomole", 30, 20);
+        //Story npc Dialog
+        storytomole.addDialogLine("Hallo!");
+        storytomole.addDialogLine("Ich bin Tomole.");
+        storytomole.addDialogLine("Drücke E für den nächsten Satz.");
+
         collisions = new Collisions();
         Enemy.setController(this);
 
@@ -58,6 +64,8 @@ public class Controller extends InteractiveGraphicalObject {
             }
         }
     }
+
+
 
 
     public void draw(DrawTool drawTool) {
@@ -112,12 +120,12 @@ public class Controller extends InteractiveGraphicalObject {
                 dieb.update(dt);
                 if (collisions.rectangleCollisions(player, dieb)){
                     //player.setHP(0);
-                    System.out.println("collisions calculated");
+                    //System.out.println("collisions calculated");
                 }
 
-                /*if (collisions.calculateColisions(player, storytomole) && storytomole.getETrue()){
+                if (collisions.rectangleCollisions(player, storytomole) && storytomole.getETrue()){
                     storytomole.speak();
-                }*/
+                }
                 break;
             case 2:
 
@@ -155,8 +163,10 @@ public class Controller extends InteractiveGraphicalObject {
     }
     @Override
     public void keyPressed(int key){
-        if(key== KeyEvent.VK_E){
-            storytomole.setETrue(true);
+        if (key == KeyEvent.VK_E) {
+            if (collisions.rectangleCollisions(player, storytomole)) {
+                storytomole.speak();
+            }
         }
         if(key == KeyEvent.VK_W){
             player.setIsDownWTrue();
@@ -194,6 +204,9 @@ public class Controller extends InteractiveGraphicalObject {
         if (player == null || e == null) return 0;
         return player.getYpos() - e.getYpos();
     }
+
+
+
 }
 
 

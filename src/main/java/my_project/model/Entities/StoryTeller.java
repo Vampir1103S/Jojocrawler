@@ -1,27 +1,47 @@
 package my_project.model.Entities;
 
 import KAGO_framework.view.DrawTool;
-
 import java.awt.*;
+import java.util.Queue;
+import java.util.ArrayDeque;
 
-public class StoryTeller extends Entity{
-    public StoryTeller() {
-        super(500,500,0,0,0,0,"Tomole",0,1);
-    }
+public class StoryTeller extends Entity {
+
     private boolean ETrue;
+
+
+    private Queue<String> dialogQueue;
+
+    public StoryTeller(int x, int y, double hp, int speed, double stamina, int defense,
+                       String name, int width, int height) {
+
+        super(x, y, hp, speed, stamina, defense, name, width, height);
+
+
+        dialogQueue = new ArrayDeque<>();
+    }
+
+
+    public void addDialogLine(String dialog) {
+        dialogQueue.add(dialog);
+    }
+
     public void draw(DrawTool drawTool){
         drawTool.setCurrentColor(Color.YELLOW);
         drawTool.drawFilledRectangle(xpos, ypos, 30, 60);
     }
 
     public void speak(){
-        System.out.print("Hello bin da");
+        if (dialogQueue.isEmpty() & ETrue) {
+            System.out.println("(NPC hat nichts mehr zu sagen)");
+            return;
+        }
+
+
+        System.out.println(dialogQueue.poll());
     }
 
-
-
     public void update(double dt) {
-
     }
 
     public boolean getETrue() {
