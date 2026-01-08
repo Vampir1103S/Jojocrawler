@@ -1,6 +1,5 @@
 package my_project.control;
 
-import KAGO_framework.model.GraphicalObject;
 import KAGO_framework.model.InteractiveGraphicalObject;
 import KAGO_framework.view.DrawTool;
 import my_project.model.Entities.*;
@@ -8,10 +7,7 @@ import my_project.model.map.Baum;
 import my_project.model.map.Bürgersteig;
 import my_project.view.Deathscreen;
 import my_project.view.UI;
-import my_project.control.Collisions;
 
-
-import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 
@@ -20,18 +16,16 @@ public class Controller extends InteractiveGraphicalObject {
     private UI ui;
     private Player player;
     private Deathscreen deathscreen;
-    private Entity entity;
     private Collisions collisions;
     private Bürgersteig[][] bürgersteig;
     private Baum[][] baum;
+
     private int hoehe = 10;
     private int breite = 10;
     private int bhoehe = 2;
     private int bbreite = 10;
 
-
-    //Enemies
-    private Enemy enemy;
+    // Enemies
     private Enemy dieb;
     private StoryTeller storytomole;
 
@@ -42,7 +36,6 @@ public class Controller extends InteractiveGraphicalObject {
         dieb = new Dieb();
 
         storytomole = new StoryTeller(500, 500, 10, 5, 10, 100, "Tomole", 30, 20);
-        //Story npc Dialog
         storytomole.addDialogLine("Hallo!");
         storytomole.addDialogLine("Ich bin Tomole.");
         storytomole.addDialogLine("Drücke E für den nächsten Satz.");
@@ -65,15 +58,16 @@ public class Controller extends InteractiveGraphicalObject {
         }
     }
 
-
-
+    public Player getPlayer() {
+        return player;
+    }
 
     public void draw(DrawTool drawTool) {
-        switch (scene){
+        switch (scene) {
             case 0:
                 ui.draw(drawTool);
+                break;
 
-            break;
             case 1:
                 for (int x = 0; x < bürgersteig.length; x++) {
                     for (int y = 0; y < bürgersteig[x].length; y++) {
@@ -86,132 +80,123 @@ public class Controller extends InteractiveGraphicalObject {
                     }
                 }
 
-                if (player.getHP() > 0) {
-                    player.draw(drawTool);
-                }
+                if (player.getHP() > 0) player.draw(drawTool);
                 dieb.draw(drawTool);
                 storytomole.draw(drawTool);
+                break;
 
-            break;
-            case 2:
-
-
-            break;
             case 3:
                 deathscreen.draw(drawTool);
                 break;
-
-            default:
-
-             break;
         }
     }
 
-
     @Override
-    public void update(double dt){
-        switch (scene){
+    public void update(double dt) {
+        switch (scene) {
             case 0:
                 ui.update(dt);
                 break;
-            case 1:
 
+            case 1:
                 player.update(dt);
                 dieb.update(dt);
-                if (collisions.rectangleCollisions(player, dieb)){
-                    //player.setHP(0);
-                    //System.out.println("collisions calculated");
+
+                //  Angriff: Hitbox trifft Enemy -> Schaden + Knockback
+                if (player.canDealHitNow()) {
+                    var hitbox = player.getAttackHitbox();
+
+                    if (hitbox.intersects(dieb.getXpos(), dieb.getYpos(), dieb.getWidth(), dieb.getHeight())) {
+
+                        // Schaden
+                        dieb.setHP(dieb.getHP() - player.getAttackDamage());
+
+                        // Knockback Richtung: weg vom Spieler
+                        double dx = dieb.getCenterX() - player.getCenterX();
+                        double dy = dieb.getCenterY() - player.getCenterY();
+                        double dist = Math.sqrt(dx * dx + dy * dy);
+
+                        if (dist != 0) {
+                            dx /= dist;
+                            dy /= dist;
+                        }
+
+                        double knockback = player.getKnockbackStrength();
+                        dieb.applyKnockback(dx * knockback, dy * knockback);
+
+
+                        // pro Angriff nur 1 Hit
+                        player.markHitDone();
+
+                        System.out.println("HIT! Dieb HP: " + dieb.getHP());
+                    }
                 }
 
-                if (collisions.rectangleCollisions(player, storytomole) && storytomole.getETrue()){
+                // deine bestehenden Collision Checks
+                if (collisions.rectangleCollisions(player, dieb)) {
+                    //player.setHP(0);
+                }
+
+                if (collisions.rectangleCollisions(player, storytomole) && storytomole.getETrue()) {
                     storytomole.speak();
                 }
                 break;
-            case 2:
 
-
-                break;
             case 3:
                 deathscreen.update(dt);
                 break;
-
-            default:
-
-                break;
         }
     }
-    public static void switchScene(int newSzene){
+
+    public static void switchScene(int newSzene) {
         scene = newSzene;
     }
 
     @Override
-    public void mouseClicked(MouseEvent e){
-        switch (scene){
+    public void mouseClicked(MouseEvent e) {
+        switch (scene) {
             case 0:
                 ui.mouseClicked(e);
                 break;
-            case 1:
-                //deathscreen.mouseClicked(e);
-                break;
-            case 2:
-                break;
+        }
+    }
 
-                default:
-                    break;
+    @Override
+    public void keyPressed(int key) {
+
+        //  X = Angriff
+        if (key == KeyEvent.VK_X) {
+            player.startAttack();
         }
 
-    }
-    @Override
-    public void keyPressed(int key){
+        // Dialog
         if (key == KeyEvent.VK_E) {
             if (collisions.rectangleCollisions(player, storytomole)) {
                 storytomole.speak();
             }
         }
-        if(key == KeyEvent.VK_W){
-            player.setIsDownWTrue();
-        }
-        if(key == KeyEvent.VK_A){
-            player.setIsDownATrue();
-        }
-        if(key == KeyEvent.VK_S){
-            player.setIsDownSTrue();
-        }
-        if(key == KeyEvent.VK_D){
-            player.setIsDownDTrue();
-        }
+
+        if (key == KeyEvent.VK_W) player.setIsDownWTrue();
+        if (key == KeyEvent.VK_A) player.setIsDownATrue();
+        if (key == KeyEvent.VK_S) player.setIsDownSTrue();
+        if (key == KeyEvent.VK_D) player.setIsDownDTrue();
     }
-    public void keyReleased(int key){
-        if(key == KeyEvent.VK_W){
-            player.setIsDownWFalse();
-        }
-        if(key == KeyEvent.VK_A){
-            player.setIsDownAFalse();
-        }
-        if(key == KeyEvent.VK_S){
-            player.setIsDownSFalse();
-        }
-        if(key == KeyEvent.VK_D){
-            player.setIsDownDFalse();
-        }
+
+    @Override
+    public void keyReleased(int key) {
+        if (key == KeyEvent.VK_W) player.setIsDownWFalse();
+        if (key == KeyEvent.VK_A) player.setIsDownAFalse();
+        if (key == KeyEvent.VK_S) player.setIsDownSFalse();
+        if (key == KeyEvent.VK_D) player.setIsDownDFalse();
     }
-    public double followPlayerX(Entity e){
+
+    public double followPlayerX(Entity e) {
         if (player == null || e == null) return 0;
         return player.getXpos() - e.getXpos();
     }
 
-    public double followPlayerY(Entity e){
+    public double followPlayerY(Entity e) {
         if (player == null || e == null) return 0;
         return player.getYpos() - e.getYpos();
     }
-    public Player getPlayer() {
-        return player;
-    }
-
-
-
 }
-
-
-
-
