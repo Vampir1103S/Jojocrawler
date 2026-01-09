@@ -135,7 +135,7 @@ public class Controller extends InteractiveGraphicalObject {
 
                         System.out.println("HIT! Dieb HP: " + dieb.getHP());
 
-                        /*if (collisions.rectangleCollisions(player, baum)){
+                        if (collisions.rectangleCollisions(player, baum)){
                             if (player.getFacingX() == 0 && player.getFacingY() == -1) {
                                 collisionW = false;
                             }else if (player.getFacingX() == -1 && player.getFacingY() == 0) {
@@ -145,7 +145,7 @@ public class Controller extends InteractiveGraphicalObject {
                             }else if (player.getFacingX() == 1 && player.getFacingY() == 0) {
                                 collisionD = false;
                             }
-                        }*/
+                        }
                     }
                 }
 
