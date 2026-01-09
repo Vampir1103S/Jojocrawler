@@ -13,6 +13,10 @@ import java.awt.event.MouseEvent;
 
 public class Controller extends InteractiveGraphicalObject {
     private static int scene = 0;
+    private boolean collisionW;
+    private boolean collisionA;
+    private boolean collisionS;
+    private boolean collisionD;
     private UI ui;
     private Player player;
     private Deathscreen deathscreen;
@@ -28,6 +32,7 @@ public class Controller extends InteractiveGraphicalObject {
     // Enemies
     private Enemy dieb;
     private StoryTeller storytomole;
+
 
     public Controller() {
         ui = new UI();
@@ -129,6 +134,18 @@ public class Controller extends InteractiveGraphicalObject {
                         player.markHitDone();
 
                         System.out.println("HIT! Dieb HP: " + dieb.getHP());
+
+                        /*if (collisions.rectangleCollisions(player, baum)){
+                            if (player.getFacingX() == 0 && player.getFacingY() == -1) {
+                                collisionW = false;
+                            }else if (player.getFacingX() == -1 && player.getFacingY() == 0) {
+                                collisionA = false;
+                            }else if (player.getFacingX() == 0 && player.getFacingY() == 1) {
+                                collisionW = false;
+                            }else if (player.getFacingX() == 1 && player.getFacingY() == 0) {
+                                collisionD = false;
+                            }
+                        }*/
                     }
                 }
 
@@ -175,11 +192,18 @@ public class Controller extends InteractiveGraphicalObject {
                 storytomole.speak();
             }
         }
-
-        if (key == KeyEvent.VK_W) player.setIsDownWTrue();
-        if (key == KeyEvent.VK_A) player.setIsDownATrue();
-        if (key == KeyEvent.VK_S) player.setIsDownSTrue();
-        if (key == KeyEvent.VK_D) player.setIsDownDTrue();
+        if(collisionW) {
+            if (key == KeyEvent.VK_W) player.setIsDownWTrue();
+        }
+        if(collisionA) {
+            if (key == KeyEvent.VK_A) player.setIsDownATrue();
+        }
+        if(collisionS) {
+            if (key == KeyEvent.VK_S) player.setIsDownSTrue();
+        }
+        if(collisionD) {
+            if (key == KeyEvent.VK_D) player.setIsDownDTrue();
+        }
     }
 
     @Override
