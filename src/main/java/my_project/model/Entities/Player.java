@@ -32,7 +32,7 @@ public class Player extends Entity {
     private int attackDamage = 10;
 
     public Player() {
-        super(100, 100, 100, 1, 1, 1, "hehe", 100, 150);
+        super(100, 500, 500, 1, 1, 1, "hehe", 100, 150);
     }
 
     public void draw(DrawTool drawTool) {
@@ -146,6 +146,24 @@ public class Player extends Entity {
 
         return new Rectangle2D.Double(x, y, hitW, hitH);
     }
+    public void updateCombat(double dt) {
+        // Cooldown
+        if (cooldownTimer > 0) cooldownTimer -= dt;
+
+        // Attack Timer
+        if (attacking) {
+            attackTimer -= dt;
+            if (attackTimer <= 0) {
+                attacking = false;
+            }
+        }
+    }
+
+    public void setFacing(int fx, int fy) {
+        this.facingX = fx;
+        this.facingY = fy;
+    }
+
 
 
     public boolean setIsDownWTrue() { isDownW = true; return isDownW; }
@@ -156,6 +174,9 @@ public class Player extends Entity {
     public boolean setIsDownSFalse() { isDownS = false; return isDownS; }
     public boolean setIsDownDTrue() { isDownD = true; return isDownD; }
     public boolean setIsDownDFalse() { isDownD = false; return isDownD; }
+    public int getFacingX() { return facingX; }
+    public int getFacingY() { return facingY; }
+
 
     public double getKnockbackStrength() {
         return knockbackStrength;

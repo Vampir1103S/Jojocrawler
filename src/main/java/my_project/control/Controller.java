@@ -13,14 +13,12 @@ import java.awt.event.MouseEvent;
 
 public class Controller extends InteractiveGraphicalObject {
     private static int scene = 0;
-    private boolean collisionW;
-    private boolean collisionA;
-    private boolean collisionS;
-    private boolean collisionD;
+
     private UI ui;
     private Player player;
     private Deathscreen deathscreen;
     private Collisions collisions;
+
     private Bürgersteig[][] bürgersteig;
     private Baum[][] baum;
 
@@ -33,6 +31,11 @@ public class Controller extends InteractiveGraphicalObject {
     private Enemy dieb;
     private StoryTeller storytomole;
 
+    // ✅ Controller verwaltet Tasten-Zustand (wichtig für Sliding)
+    private boolean wDown, aDown, sDown, dDown;
+
+    // ✅ gleiche Geschwindigkeit wie vorher im Player (dt * 250)
+    private final double moveSpeed = 250;
 
     public Controller() {
         ui = new UI();
@@ -56,8 +59,8 @@ public class Controller extends InteractiveGraphicalObject {
         }
 
         baum = new Baum[bbreite][bhoehe];
-        for (int x = 0; x < 10; x++) {
-            for (int y = 0; y < 2; y++) {
+        for (int x = 0; x < bbreite; x++) {
+            for (int y = 0; y < bhoehe; y++) {
                 baum[x][y] = new Baum(100 + x * 70, 100 + y * 200);
             }
         }
@@ -79,6 +82,7 @@ public class Controller extends InteractiveGraphicalObject {
                         bürgersteig[x][y].draw(drawTool);
                     }
                 }
+
                 for (int x = 0; x < baum.length; x++) {
                     for (int y = 0; y < baum[x].length; y++) {
                         baum[x][y].draw(drawTool);
@@ -104,56 +108,68 @@ public class Controller extends InteractiveGraphicalObject {
                 break;
 
             case 1:
-                player.update(dt);
+                // ✅ Player Combat/Attack Timer updaten (OHNE Bewegung)
+                player.updateCombat(dt);
+
+                // Enemy bewegt sich normal
                 dieb.update(dt);
 
-                //  Angriff: Hitbox trifft Enemy -> Schaden + Knockback
+                // ✅ gewünschte Bewegung aus Tasten berechnen
+                double dx = 0;
+                double dy = 0;
+
+                if (wDown) { dy -= moveSpeed * dt; player.setFacing(0, -1); }
+                if (sDown) { dy += moveSpeed * dt; player.setFacing(0,  1); }
+                if (aDown) { dx -= moveSpeed * dt; player.setFacing(-1, 0); }
+                if (dDown) { dx += moveSpeed * dt; player.setFacing( 1, 0); }
+
+                // ✅ SLIDING: erst X bewegen und prüfen
+                if (dx != 0) {
+                    double newX = player.getXpos() + dx;
+                    double oldX = player.getXpos();
+
+                    player.setXpos(newX);
+                    if (playerHitsAnyTree()) {
+                        player.setXpos(oldX); // nur X blockieren
+                    }
+                }
+
+                // ✅ SLIDING: dann Y bewegen und prüfen
+                if (dy != 0) {
+                    double newY = player.getYpos() + dy;
+                    double oldY = player.getYpos();
+
+                    player.setYpos(newY);
+                    if (playerHitsAnyTree()) {
+                        player.setYpos(oldY); // nur Y blockieren
+                    }
+                }
+
+                // ✅ Angriff: Hitbox trifft Enemy -> Schaden + Knockback
                 if (player.canDealHitNow()) {
                     var hitbox = player.getAttackHitbox();
 
                     if (hitbox.intersects(dieb.getXpos(), dieb.getYpos(), dieb.getWidth(), dieb.getHeight())) {
 
-                        // Schaden
                         dieb.setHP(dieb.getHP() - player.getAttackDamage());
 
-                        // Knockback Richtung: weg vom Spieler
-                        double dx = dieb.getCenterX() - player.getCenterX();
-                        double dy = dieb.getCenterY() - player.getCenterY();
-                        double dist = Math.sqrt(dx * dx + dy * dy);
+                        double kx = dieb.getCenterX() - player.getCenterX();
+                        double ky = dieb.getCenterY() - player.getCenterY();
+                        double dist = Math.sqrt(kx * kx + ky * ky);
 
                         if (dist != 0) {
-                            dx /= dist;
-                            dy /= dist;
+                            kx /= dist;
+                            ky /= dist;
                         }
 
                         double knockback = player.getKnockbackStrength();
-                        dieb.applyKnockback(dx * knockback, dy * knockback);
+                        dieb.applyKnockback(kx * knockback, ky * knockback);
 
-
-                        // pro Angriff nur 1 Hit
                         player.markHitDone();
-
-                        System.out.println("HIT! Dieb HP: " + dieb.getHP());
-
-                        if (collisions.rectangleCollisions(player, baum)){
-                            if (player.getFacingX() == 0 && player.getFacingY() == -1) {
-                                collisionW = false;
-                            }else if (player.getFacingX() == -1 && player.getFacingY() == 0) {
-                                collisionA = false;
-                            }else if (player.getFacingX() == 0 && player.getFacingY() == 1) {
-                                collisionW = false;
-                            }else if (player.getFacingX() == 1 && player.getFacingY() == 0) {
-                                collisionD = false;
-                            }
-                        }
                     }
                 }
 
-                // deine bestehenden Collision Checks
-                if (collisions.rectangleCollisions(player, dieb)) {
-                    //player.setHP(0);
-                }
-
+                // Dialog (optional)
                 if (collisions.rectangleCollisions(player, storytomole) && storytomole.getETrue()) {
                     storytomole.speak();
                 }
@@ -165,53 +181,49 @@ public class Controller extends InteractiveGraphicalObject {
         }
     }
 
+    // ✅ helper: prüft Player gegen alle Bäume (2D Array)
+    private boolean playerHitsAnyTree() {
+        for (int x = 0; x < baum.length; x++) {
+            for (int y = 0; y < baum[x].length; y++) {
+                if (collisions.rectangleCollisions(player, baum[x][y])) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     public static void switchScene(int newSzene) {
         scene = newSzene;
     }
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        switch (scene) {
-            case 0:
-                ui.mouseClicked(e);
-                break;
-        }
+        if (scene == 0) ui.mouseClicked(e);
     }
 
     @Override
     public void keyPressed(int key) {
+        if (key == KeyEvent.VK_X) player.startAttack();
 
-        //  X = Angriff
-        if (key == KeyEvent.VK_X) {
-            player.startAttack();
-        }
-
-        // Dialog
         if (key == KeyEvent.VK_E) {
             if (collisions.rectangleCollisions(player, storytomole)) {
                 storytomole.speak();
             }
         }
-        if(collisionW) {
-            if (key == KeyEvent.VK_W) player.setIsDownWTrue();
-        }
-        if(collisionA) {
-            if (key == KeyEvent.VK_A) player.setIsDownATrue();
-        }
-        if(collisionS) {
-            if (key == KeyEvent.VK_S) player.setIsDownSTrue();
-        }
-        if(collisionD) {
-            if (key == KeyEvent.VK_D) player.setIsDownDTrue();
-        }
+
+        if (key == KeyEvent.VK_W) wDown = true;
+        if (key == KeyEvent.VK_A) aDown = true;
+        if (key == KeyEvent.VK_S) sDown = true;
+        if (key == KeyEvent.VK_D) dDown = true;
     }
 
     @Override
     public void keyReleased(int key) {
-        if (key == KeyEvent.VK_W) player.setIsDownWFalse();
-        if (key == KeyEvent.VK_A) player.setIsDownAFalse();
-        if (key == KeyEvent.VK_S) player.setIsDownSFalse();
-        if (key == KeyEvent.VK_D) player.setIsDownDFalse();
+        if (key == KeyEvent.VK_W) wDown = false;
+        if (key == KeyEvent.VK_A) aDown = false;
+        if (key == KeyEvent.VK_S) sDown = false;
+        if (key == KeyEvent.VK_D) dDown = false;
     }
 
     public double followPlayerX(Entity e) {
