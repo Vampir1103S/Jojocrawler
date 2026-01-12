@@ -32,13 +32,13 @@ public class Player extends Entity {
     private int attackDamage = 10;
 
     public Player() {
-        super(100, 500, 500, 1, 1, 1, "hehe", 100, 150);
+        super(100, 500, 500, 1, 1, 1, "hehe", 60, 110);
     }
 
     public void draw(DrawTool drawTool) {
         // Player
         drawTool.setCurrentColor(Color.BLACK);
-        drawTool.drawFilledRectangle(xpos + 20, ypos + 20, width - 40, height - 40);
+        drawTool.drawFilledRectangle(xpos , ypos , width , height );
         drawTool.drawRectangle(xpos, ypos, width, height);
 
         // Debug: rote Attackbox

@@ -2,6 +2,7 @@ package my_project.control;
 
 import KAGO_framework.model.InteractiveGraphicalObject;
 import KAGO_framework.view.DrawTool;
+import my_project.Config;
 import my_project.model.Entities.*;
 import my_project.model.map.Baum;
 import my_project.model.map.Bürgersteig;
@@ -27,14 +28,13 @@ public class Controller extends InteractiveGraphicalObject {
     private int bhoehe = 2;
     private int bbreite = 10;
 
-    // Enemies
     private Enemy dieb;
     private StoryTeller storytomole;
 
-    // ✅ Controller verwaltet Tasten-Zustand (wichtig für Sliding)
+    // Tasten-Zustand für Sliding-Movement
     private boolean wDown, aDown, sDown, dDown;
 
-    // ✅ gleiche Geschwindigkeit wie vorher im Player (dt * 250)
+    // Bewegungsgeschwindigkeit
     private final double moveSpeed = 250;
 
     public Controller() {
@@ -108,49 +108,50 @@ public class Controller extends InteractiveGraphicalObject {
                 break;
 
             case 1:
-                // ✅ Player Combat/Attack Timer updaten (OHNE Bewegung)
+                // Combat/Attack Timer ohne Movement
                 player.updateCombat(dt);
 
-                // Enemy bewegt sich normal
+                // Enemy
                 dieb.update(dt);
 
-                // ✅ gewünschte Bewegung aus Tasten berechnen
-                double dx = 0;
-                double dy = 0;
-
+                // Bewegung aus Eingaben
+                double dx = 0, dy = 0;
                 if (wDown) { dy -= moveSpeed * dt; player.setFacing(0, -1); }
                 if (sDown) { dy += moveSpeed * dt; player.setFacing(0,  1); }
                 if (aDown) { dx -= moveSpeed * dt; player.setFacing(-1, 0); }
                 if (dDown) { dx += moveSpeed * dt; player.setFacing( 1, 0); }
 
-                // ✅ SLIDING: erst X bewegen und prüfen
+                // ✅ X-Achse bewegen + Screen-Grenze + Sliding
                 if (dx != 0) {
-                    double newX = player.getXpos() + dx;
                     double oldX = player.getXpos();
+                    double newX = oldX + dx;
+
+                    newX = Math.max(0, Math.min(newX, Config.WINDOW_WIDTH - player.getWidth()));
 
                     player.setXpos(newX);
                     if (playerHitsAnyTree()) {
-                        player.setXpos(oldX); // nur X blockieren
+                        player.setXpos(oldX);
                     }
                 }
 
-                // ✅ SLIDING: dann Y bewegen und prüfen
+                // ✅ Y-Achse bewegen + Screen-Grenze + Sliding
                 if (dy != 0) {
-                    double newY = player.getYpos() + dy;
                     double oldY = player.getYpos();
+                    double newY = oldY + dy;
+
+                    newY = Math.max(0, Math.min(newY, Config.WINDOW_HEIGHT - player.getHeight()));
 
                     player.setYpos(newY);
                     if (playerHitsAnyTree()) {
-                        player.setYpos(oldY); // nur Y blockieren
+                        player.setYpos(oldY);
                     }
                 }
 
-                // ✅ Angriff: Hitbox trifft Enemy -> Schaden + Knockback
+                // Angriff: Hitbox trifft Enemy -> Schaden + Knockback
                 if (player.canDealHitNow()) {
                     var hitbox = player.getAttackHitbox();
 
                     if (hitbox.intersects(dieb.getXpos(), dieb.getYpos(), dieb.getWidth(), dieb.getHeight())) {
-
                         dieb.setHP(dieb.getHP() - player.getAttackDamage());
 
                         double kx = dieb.getCenterX() - player.getCenterX();
@@ -181,7 +182,6 @@ public class Controller extends InteractiveGraphicalObject {
         }
     }
 
-    // ✅ helper: prüft Player gegen alle Bäume (2D Array)
     private boolean playerHitsAnyTree() {
         for (int x = 0; x < baum.length; x++) {
             for (int y = 0; y < baum[x].length; y++) {
