@@ -2,6 +2,7 @@ package my_project.control;
 
 import my_project.model.Entities.Entity;
 import my_project.model.map.Baum;
+import my_project.model.map.Environment;
 
 public class Collisions {
 
@@ -17,7 +18,7 @@ public class Collisions {
     }
 
     // ✅ Entity ↔ Baum (BufferedImage-Hitbox)
-    public boolean rectangleCollisions(Entity e, Baum b) {
+    public boolean rectangleCollisions(Entity e, Environment b) {
         if (e == null || b == null) return false;
 
         return e.getXpos() < b.getHitboxX() + b.getHitboxWidth() &&

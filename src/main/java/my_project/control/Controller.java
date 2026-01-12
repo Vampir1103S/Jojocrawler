@@ -5,7 +5,9 @@ import KAGO_framework.view.DrawTool;
 import my_project.Config;
 import my_project.model.Entities.*;
 import my_project.model.map.Baum;
+import my_project.model.map.BetonZaun;
 import my_project.model.map.Bürgersteig;
+import my_project.model.map.Grünfläche;
 import my_project.view.Deathscreen;
 import my_project.view.UI;
 
@@ -22,11 +24,15 @@ public class Controller extends InteractiveGraphicalObject {
 
     private Bürgersteig[][] bürgersteig;
     private Baum[][] baum;
+    private Grünfläche[][] grünfläche;
+    private BetonZaun[][] betonZaun;
 
     private int hoehe = 10;
     private int breite = 10;
     private int bhoehe = 2;
     private int bbreite = 10;
+    private int zhoehe = 2;
+    private int zbreite = 4;
 
     private Enemy dieb;
     private StoryTeller storytomole;
@@ -58,10 +64,19 @@ public class Controller extends InteractiveGraphicalObject {
             }
         }
 
+        betonZaun = new BetonZaun[zbreite][zhoehe];
+        for (int x = 0; x < zbreite; x++) {
+            for (int y = 0; y < zhoehe; y++) {
+                betonZaun[x][y] = new BetonZaun(130 + x * 70, 240 + y * 200);
+            }
+        }
+
         baum = new Baum[bbreite][bhoehe];
+        grünfläche = new Grünfläche[bbreite][bhoehe];
         for (int x = 0; x < bbreite; x++) {
             for (int y = 0; y < bhoehe; y++) {
                 baum[x][y] = new Baum(100 + x * 70, 100 + y * 200);
+                grünfläche[x][y] = new Grünfläche(100 + x * 70, 145 + y * 200);
             }
         }
     }
@@ -85,13 +100,23 @@ public class Controller extends InteractiveGraphicalObject {
 
                 for (int x = 0; x < baum.length; x++) {
                     for (int y = 0; y < baum[x].length; y++) {
-                        baum[x][y].draw(drawTool);
+                        grünfläche[x][y].draw(drawTool);
                     }
                 }
-
                 if (player.getHP() > 0) player.draw(drawTool);
                 dieb.draw(drawTool);
                 storytomole.draw(drawTool);
+
+                for (int x = 0; x < betonZaun.length; x++) {
+                    for (int y = 0; y < betonZaun[x].length; y++) {
+                        betonZaun[x][y].draw(drawTool);
+                    }
+                }
+                for (int x = 0; x < baum.length; x++) {
+                    for (int y = 0; y < baum[x].length; y++) {
+                        baum[x][y].draw(drawTool);
+                    }
+                }
                 break;
 
             case 3:
@@ -186,6 +211,13 @@ public class Controller extends InteractiveGraphicalObject {
         for (int x = 0; x < baum.length; x++) {
             for (int y = 0; y < baum[x].length; y++) {
                 if (collisions.rectangleCollisions(player, baum[x][y])) {
+                    return true;
+                }
+            }
+        }
+        for (int x = 0; x < betonZaun.length; x++) {
+            for (int y = 0; y < betonZaun[x].length; y++) {
+                if (collisions.rectangleCollisions(player, betonZaun[x][y])) {
                     return true;
                 }
             }
