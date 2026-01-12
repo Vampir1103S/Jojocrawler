@@ -2,6 +2,7 @@ package my_project.model.Entities;
 
 import KAGO_framework.view.DrawTool;
 import my_project.Config;
+import my_project.view.Graphics.SpriteSheet;
 
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
@@ -14,6 +15,10 @@ public class Player extends Entity {
     private boolean isDownD;
     private double knockbackStrength = 200;
 
+    private SpriteSheet spriteSheet2;
+    private int number = 0;
+    private int direction = 0;
+    private double timer = 0;
 
     // Facing für 4 Richtungen
     private int facingX = 0;  // -1 links, +1 rechts
@@ -33,13 +38,17 @@ public class Player extends Entity {
 
     public Player() {
         super(100, 500, 500, 1, 1, 1, "hehe", 60, 110);
+
+        spriteSheet2 = new SpriteSheet("Player-Sprite.png", 4, 4);
     }
 
     public void draw(DrawTool drawTool) {
         // Player
-        drawTool.setCurrentColor(Color.BLACK);
-        drawTool.drawFilledRectangle(xpos , ypos , width , height );
-        drawTool.drawRectangle(xpos, ypos, width, height);
+        //drawTool.setCurrentColor(Color.BLACK);
+        //drawTool.drawFilledRectangle(xpos , ypos , width , height );
+        //drawTool.drawRectangle(xpos, ypos, width, height);
+        spriteSheet2.setCurrent(direction, number);
+        spriteSheet2.draw(drawTool,xpos,ypos,5);
 
         // Debug: rote Attackbox
         if (attacking) {
@@ -57,21 +66,25 @@ public class Player extends Entity {
             ypos -= dt * 250;
             facingX = 0;
             facingY = -1;
+            direction = 3;
         }
         if (isDownA && xpos > 0) {
             xpos -= dt * 250;
             facingX = -1;
             facingY = 0;
+            direction = 2;
         }
         if (isDownS && ypos < Config.WINDOW_HEIGHT - height) {
             ypos += dt * 250;
             facingX = 0;
             facingY = 1;
+            direction = 0;
         }
         if (isDownD && xpos < Config.WINDOW_WIDTH - width) {
             xpos += dt * 250;
             facingX = 1;
             facingY = 0;
+            direction = 1;
         }
 
         // Cooldown
@@ -88,7 +101,32 @@ public class Player extends Entity {
         if (hp <= 0) {
             System.out.println("TOT");
         }
+
+        //animations shit
+        boolean isMoving = isDownW || isDownA || isDownS || isDownD;
+
+        if (isMoving) {
+            animatePlayer(dt);
+        } else {
+            number = 0;
+            timer = 0;
+        }
     }
+
+    private void animatePlayer(double dt) {
+        timer += dt;
+
+        if (timer >= 0.2) {
+            number++;
+            timer = 0;
+
+            if (number > 3) {
+                number = 0;
+            }
+        }
+        System.out.println("Frame: " + number);
+    }
+
 
     // Angriff starten
     public void startAttack() {
