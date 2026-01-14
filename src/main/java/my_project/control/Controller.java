@@ -135,16 +135,17 @@ public class Controller extends InteractiveGraphicalObject {
             case 1:
                 // Combat/Attack Timer ohne Movement
                 player.updateCombat(dt);
+                player.update(dt);
 
                 // Enemy
                 dieb.update(dt);
 
                 // Bewegung aus Eingaben
                 double dx = 0, dy = 0;
-                if (wDown) { dy -= moveSpeed * dt; player.setFacing(0, -1); }
-                if (sDown) { dy += moveSpeed * dt; player.setFacing(0,  1); }
-                if (aDown) { dx -= moveSpeed * dt; player.setFacing(-1, 0); }
-                if (dDown) { dx += moveSpeed * dt; player.setFacing( 1, 0); }
+                if (wDown) { dy -= moveSpeed * dt; player.setFacing(0, -1); player.setIsDownWTrue(); } else player.setIsDownWFalse();
+                if (sDown) { dy += moveSpeed * dt; player.setFacing(0,  1); player.setIsDownSTrue(); }else player.setIsDownSFalse();
+                if (aDown) { dx -= moveSpeed * dt; player.setFacing(-1, 0); player.setIsDownATrue(); }else player.setIsDownAFalse();
+                if (dDown) { dx += moveSpeed * dt; player.setFacing( 1, 0); player.setIsDownDTrue(); }else player.setIsDownDFalse();
 
                 // ✅ X-Achse bewegen + Screen-Grenze + Sliding
                 if (dx != 0) {
