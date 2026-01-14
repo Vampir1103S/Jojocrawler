@@ -1,6 +1,8 @@
 package my_project.model.Entities;
 
 import KAGO_framework.view.DrawTool;
+import my_project.view.Graphics.SpriteSheet;
+
 import java.awt.*;
 import java.util.Queue;
 import java.util.ArrayDeque;
@@ -8,7 +10,10 @@ import java.util.ArrayDeque;
 public class StoryTeller extends Entity {
 
     private boolean ETrue;
+    private SpriteSheet spriteSheet1;
 
+    private int direction = 0;
+    private double timer = 0;
 
     private Queue<String> dialogQueue;
 
@@ -19,6 +24,7 @@ public class StoryTeller extends Entity {
 
 
         dialogQueue = new ArrayDeque<>();
+        spriteSheet1 = new SpriteSheet("Dieb-Sprite.png", 4, 4);
     }
 
 
@@ -29,6 +35,9 @@ public class StoryTeller extends Entity {
     public void draw(DrawTool drawTool){
         drawTool.setCurrentColor(Color.YELLOW);
         drawTool.drawFilledRectangle(xpos, ypos, 30, 60);
+
+        spriteSheet1.draw(drawTool,xpos,ypos,5);
+        spriteSheet1.setCurrent(direction,0);
     }
 
     public void speak(){
@@ -39,6 +48,7 @@ public class StoryTeller extends Entity {
         if (!dialogQueue.isEmpty()){
          System.out.println(dialogQueue.poll());
         }
+        direction = 1;
     }
 
     public void update(double dt) {

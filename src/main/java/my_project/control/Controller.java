@@ -4,10 +4,7 @@ import KAGO_framework.model.InteractiveGraphicalObject;
 import KAGO_framework.view.DrawTool;
 import my_project.Config;
 import my_project.model.Entities.*;
-import my_project.model.map.Baum;
-import my_project.model.map.BetonZaun;
-import my_project.model.map.Bürgersteig;
-import my_project.model.map.Grünfläche;
+import my_project.model.map.*;
 import my_project.view.Deathscreen;
 import my_project.view.UI;
 
@@ -135,16 +132,46 @@ public class Controller extends InteractiveGraphicalObject {
             case 1:
                 // Combat/Attack Timer ohne Movement
                 player.updateCombat(dt);
+                player.update(dt);
+                // ===== ENEMY → PLAYER ANGRIFF =====
+                if (dieb.canDealHitNow()) {
+                    var enemyHitbox = dieb.getAttackHitbox();
+
+                    if (enemyHitbox.intersects(
+                            player.getXpos(), player.getYpos(),
+                            player.getWidth(), player.getHeight())) {
+
+                        // Schaden
+                        player.setHP(player.getHP() - dieb.getAttackDamage());
+
+                        // kleiner Knockback
+                        double kx = player.getCenterX() - dieb.getCenterX();
+                        double ky = player.getCenterY() - dieb.getCenterY();
+                        double dist = Math.sqrt(kx * kx + ky * ky);
+
+                        if (dist != 0) {
+                            kx /= dist;
+                            ky /= dist;
+                        }
+
+                        double knockback = 40;
+                        player.setXpos(player.getXpos() + kx * knockback);
+                        player.setYpos(player.getYpos() + ky * knockback);
+
+                        dieb.markHitDone();
+                    }
+                }
+
 
                 // Enemy
                 dieb.update(dt);
 
                 // Bewegung aus Eingaben
                 double dx = 0, dy = 0;
-                if (wDown) { dy -= moveSpeed * dt; player.setFacing(0, -1); }
-                if (sDown) { dy += moveSpeed * dt; player.setFacing(0,  1); }
-                if (aDown) { dx -= moveSpeed * dt; player.setFacing(-1, 0); }
-                if (dDown) { dx += moveSpeed * dt; player.setFacing( 1, 0); }
+                if (wDown) { dy -= moveSpeed * dt; player.setFacing(0, -1); player.setIsDownWTrue(); } else player.setIsDownWFalse();
+                if (sDown) { dy += moveSpeed * dt; player.setFacing(0,  1); player.setIsDownSTrue(); }else player.setIsDownSFalse();
+                if (aDown) { dx -= moveSpeed * dt; player.setFacing(-1, 0); player.setIsDownATrue(); }else player.setIsDownAFalse();
+                if (dDown) { dx += moveSpeed * dt; player.setFacing( 1, 0); player.setIsDownDTrue(); }else player.setIsDownDFalse();
 
                 // ✅ X-Achse bewegen + Screen-Grenze + Sliding
                 if (dx != 0) {
@@ -215,6 +242,7 @@ public class Controller extends InteractiveGraphicalObject {
                 }
             }
         }
+
         for (int x = 0; x < betonZaun.length; x++) {
             for (int y = 0; y < betonZaun[x].length; y++) {
                 if (collisions.rectangleCollisions(player, betonZaun[x][y])) {
@@ -244,6 +272,21 @@ public class Controller extends InteractiveGraphicalObject {
             }
         }
 
+        if (key == KeyEvent.VK_Q) {
+            System.out.println("Q gedrückt");
+            for (int x = 0; x < baum.length; x++) {
+                for (int y = 0; y < baum[x].length; y++) {
+                    System.out.println("Q gedrückt und überprüft");
+                    System.out.println(baum[x][y].getHitboxX());
+                    if (collisions.rectangleBreak(player, baum[x][y])) {
+                        System.out.println("Q gedrückt und break");
+                        baum[x][y].setNachRechts(true);
+                        System.out.println(baum[x][y].getNachRechts());
+                    }
+                }
+            }
+        }
+
         if (key == KeyEvent.VK_W) wDown = true;
         if (key == KeyEvent.VK_A) aDown = true;
         if (key == KeyEvent.VK_S) sDown = true;
@@ -267,4 +310,5 @@ public class Controller extends InteractiveGraphicalObject {
         if (player == null || e == null) return 0;
         return player.getYpos() - e.getYpos();
     }
+
 }

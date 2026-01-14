@@ -44,11 +44,11 @@ public class Player extends Entity {
 
     public void draw(DrawTool drawTool) {
         // Player
-        //drawTool.setCurrentColor(Color.BLACK);
-        //drawTool.drawFilledRectangle(xpos , ypos , width , height );
-        //drawTool.drawRectangle(xpos, ypos, width, height);
+        drawTool.setCurrentColor(Color.BLACK);
+        drawTool.drawFilledRectangle(xpos , ypos , width , height );
+        drawTool.drawRectangle(xpos, ypos, width, height);
         spriteSheet2.setCurrent(direction, number);
-        spriteSheet2.draw(drawTool,xpos,ypos,5);
+        spriteSheet2.draw(drawTool,xpos - 12,ypos - 10,5);
 
         // Debug: rote Attackbox
         if (attacking) {
@@ -58,34 +58,12 @@ public class Player extends Entity {
         }
     }
 
-    @Override
+
     public void update(double dt) {
 
+
         // Movement + Facing
-        if (isDownW && ypos > 0) {
-            ypos -= dt * 250;
-            facingX = 0;
-            facingY = -1;
-            direction = 3;
-        }
-        if (isDownA && xpos > 0) {
-            xpos -= dt * 250;
-            facingX = -1;
-            facingY = 0;
-            direction = 2;
-        }
-        if (isDownS && ypos < Config.WINDOW_HEIGHT - height) {
-            ypos += dt * 250;
-            facingX = 0;
-            facingY = 1;
-            direction = 0;
-        }
-        if (isDownD && xpos < Config.WINDOW_WIDTH - width) {
-            xpos += dt * 250;
-            facingX = 1;
-            facingY = 0;
-            direction = 1;
-        }
+
 
         // Cooldown
         if (cooldownTimer > 0) cooldownTimer -= dt;
@@ -103,9 +81,19 @@ public class Player extends Entity {
         }
 
         //animations shit
-        boolean isMoving = isDownW || isDownA || isDownS || isDownD;
 
-        if (isMoving) {
+
+        if (isDownW || isDownA || isDownS || isDownD) {
+
+            if(isDownW) {
+                direction = 3;
+            }else if(isDownA) {
+                direction = 2;
+            }else if(isDownS) {
+                direction = 0;
+            }else if(isDownD) {
+                direction = 1;
+            }
             animatePlayer(dt);
         } else {
             number = 0;
@@ -116,7 +104,7 @@ public class Player extends Entity {
     private void animatePlayer(double dt) {
         timer += dt;
 
-        if (timer >= 0.2) {
+        if (timer >= 0.15) {
             number++;
             timer = 0;
 
