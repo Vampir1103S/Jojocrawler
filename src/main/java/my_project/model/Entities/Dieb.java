@@ -30,8 +30,14 @@ public class Dieb extends Enemy {
     public void update(double dt) {
         super.update(dt);
         timer = timer + dt;
-        moveDieb(dt);
 
+//        if() {
+//
+//            moveDieb(dt);
+//        }else{
+//            nummer = 0;
+//            timer = 0;
+//        }
     }
 
     private void moveDieb(double dt) {
