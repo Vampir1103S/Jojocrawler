@@ -133,6 +133,35 @@ public class Controller extends InteractiveGraphicalObject {
                 // Combat/Attack Timer ohne Movement
                 player.updateCombat(dt);
                 player.update(dt);
+                // ===== ENEMY → PLAYER ANGRIFF =====
+                if (dieb.canDealHitNow()) {
+                    var enemyHitbox = dieb.getAttackHitbox();
+
+                    if (enemyHitbox.intersects(
+                            player.getXpos(), player.getYpos(),
+                            player.getWidth(), player.getHeight())) {
+
+                        // Schaden
+                        player.setHP(player.getHP() - dieb.getAttackDamage());
+
+                        // kleiner Knockback
+                        double kx = player.getCenterX() - dieb.getCenterX();
+                        double ky = player.getCenterY() - dieb.getCenterY();
+                        double dist = Math.sqrt(kx * kx + ky * ky);
+
+                        if (dist != 0) {
+                            kx /= dist;
+                            ky /= dist;
+                        }
+
+                        double knockback = 40;
+                        player.setXpos(player.getXpos() + kx * knockback);
+                        player.setYpos(player.getYpos() + ky * knockback);
+
+                        dieb.markHitDone();
+                    }
+                }
+
 
                 // Enemy
                 dieb.update(dt);
