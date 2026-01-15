@@ -4,6 +4,7 @@ import KAGO_framework.model.InteractiveGraphicalObject;
 import KAGO_framework.view.DrawTool;
 import my_project.Config;
 import my_project.model.Entities.*;
+import my_project.model.items.Consumables.HealingPotion;
 import my_project.model.map.*;
 import my_project.view.Deathscreen;
 import my_project.view.UI;
@@ -18,6 +19,7 @@ public class Controller extends InteractiveGraphicalObject {
     private Player player;
     private Deathscreen deathscreen;
     private Collisions collisions;
+    private HealingPotion healingPotion;
 
     private Bürgersteig[][] bürgersteig;
     private Baum[][] baum;
@@ -53,6 +55,8 @@ public class Controller extends InteractiveGraphicalObject {
 
         collisions = new Collisions();
         Enemy.setController(this);
+
+        healingPotion = new HealingPotion();
 
         bürgersteig = new Bürgersteig[breite][hoehe];
         for (int x = 0; x < breite; x++) {
@@ -154,7 +158,7 @@ public class Controller extends InteractiveGraphicalObject {
                             ky /= dist;
                         }
 
-                        double knockback = 40;
+                        double knockback = 5;
                         player.setXpos(player.getXpos() + kx * knockback);
                         player.setYpos(player.getYpos() + ky * knockback);
 
@@ -196,6 +200,15 @@ public class Controller extends InteractiveGraphicalObject {
                     player.setYpos(newY);
                     if (playerHitsAnyTree()) {
                         player.setYpos(oldY);
+                    }
+                }
+
+                if (healingPotion.getHealing()) {
+                    if (healingPotion.getAmount() > 0) {
+                        player.setHP(player.getHP() + 20);
+                        healingPotion.setHealing(false);
+                        healingPotion.setAmount(healingPotion.getAmount() - 1);
+                        System.out.println(player.getHP());
                     }
                 }
 
@@ -260,6 +273,7 @@ public class Controller extends InteractiveGraphicalObject {
     @Override
     public void mouseClicked(MouseEvent e) {
         if (scene == 0) ui.mouseClicked(e);
+        healingPotion.mouseClicked(e);
     }
 
     @Override
@@ -272,7 +286,7 @@ public class Controller extends InteractiveGraphicalObject {
             }
         }
 
-        if (key == KeyEvent.VK_Q) {
+        /*if (key == KeyEvent.VK_Q) {
             System.out.println("Q gedrückt");
             for (int x = 0; x < baum.length; x++) {
                 for (int y = 0; y < baum[x].length; y++) {
@@ -285,7 +299,7 @@ public class Controller extends InteractiveGraphicalObject {
                     }
                 }
             }
-        }
+        }*/
 
         if (key == KeyEvent.VK_W) wDown = true;
         if (key == KeyEvent.VK_A) aDown = true;
