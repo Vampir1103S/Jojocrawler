@@ -39,7 +39,7 @@ public abstract class Enemy extends Entity {
     }
 
     public void draw(DrawTool drawTool) {
-        // Zeichnung erfolgt im Dieb (SpriteSheet)
+
     }
 
     @Override
@@ -48,7 +48,7 @@ public abstract class Enemy extends Entity {
 
         Player p = controller.getPlayer();
 
-        // ===== Timer =====
+
         if (cooldownTimer > 0) cooldownTimer -= dt;
 
         if (attacking) {
@@ -56,13 +56,13 @@ public abstract class Enemy extends Entity {
             if (attackTimer <= 0) attacking = false;
         }
 
-        // ===== Ziel =====
+
         double dx = p.getCenterX() - getCenterX();
         double dy = p.getCenterY() - getCenterY();
         double dist = Math.sqrt(dx * dx + dy * dy);
         if (dist == 0) return;
 
-        // ===== Facing =====
+
         if (Math.abs(dx) > Math.abs(dy)) {
             facingX = (dx >= 0) ? 1 : -1;
             facingY = 0;
@@ -71,7 +71,7 @@ public abstract class Enemy extends Entity {
             facingX = 0;
         }
 
-        // ===== Movement =====
+
         double move = dt * (100 * speed);
 
         if (!attacking) {
@@ -88,7 +88,7 @@ public abstract class Enemy extends Entity {
         }
     }
 
-    // ===== Attack API =====
+
     public void startAttack() {
         if (!attacking && cooldownTimer <= 0) {
             attacking = true;

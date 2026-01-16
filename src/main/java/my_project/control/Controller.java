@@ -120,6 +120,7 @@ public class Controller extends InteractiveGraphicalObject {
                 }
                 break;
 
+
             case 3:
                 deathscreen.draw(drawTool);
                 break;

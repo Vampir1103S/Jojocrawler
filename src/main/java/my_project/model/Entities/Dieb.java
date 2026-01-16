@@ -25,6 +25,12 @@ public class Dieb extends Enemy {
         drawTool.drawFilledRectangle(xpos,ypos, 50, 100);
         spriteSheet1.draw(drawTool,xpos,ypos,5);
         spriteSheet1.setCurrent(richtung,nummer);
+
+        if(attacking){
+            var hb = getAttackHitbox();
+            drawTool.setCurrentColor(Color.RED);
+            drawTool.drawFilledRectangle(hb.getX(), hb.getY(), hb.getWidth(), hb.getHeight());
+        }
     }
 
     public void update(double dt) {
