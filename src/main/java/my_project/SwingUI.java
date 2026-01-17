@@ -1,5 +1,6 @@
 package my_project;
 
+import my_project.model.Entities.StoryTeller;
 import my_project.model.items.Inventory;
 
 import javax.swing.*;
@@ -14,7 +15,7 @@ public class SwingUI {
     public JComponent mainPanel;
 
 
-    public SwingUI() {
+    public SwingUI(StoryTeller storytomole) {
         outputField.setText("Du musst die Taste E drücken.");
 
         outputField.addKeyListener(new KeyAdapter() {
@@ -22,7 +23,8 @@ public class SwingUI {
             public void keyPressed(KeyEvent e) {
                 super.keyPressed(e);
                 if (e.getKeyCode() == KeyEvent.VK_E) {
-                    outputField.setText("Du hast die Taste E gedrückt.");
+                    String dialog = storytomole.speak();
+                    outputField.setText(dialog);
                 }
             }
         });

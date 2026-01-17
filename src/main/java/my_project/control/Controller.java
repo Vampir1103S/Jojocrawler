@@ -47,28 +47,29 @@ public class Controller extends InteractiveGraphicalObject {
 
     public Controller() {
 
+
+        ui = new UI();
+        deathscreen = new Deathscreen();
+        player = new Player();
+        dieb = new Dieb();
+        storytomole = new StoryTeller(500, 500, 10, 5, 10, 100, "Tomole", 30, 20);
+        storytomole.addDialogLine("Hallo!");
+        storytomole.addDialogLine("Ich bin Tomole.");
+        storytomole.addDialogLine("Drücke E für den nächsten Satz.");
+        collisions = new Collisions();
+        Enemy.setController(this);
+
         SwingUtilities.invokeLater(() -> {
             JFrame frame = new JFrame("SwingUI");
 
-            SwingUI ui = new SwingUI();
+            SwingUI ui = new SwingUI(storytomole);
 
             frame.setContentPane(ui.outputField);
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             frame.setPreferredSize(new Dimension(600, 600));
             frame.pack();
             frame.setVisible(true);
-
         });
-
-        ui = new UI();
-        deathscreen = new Deathscreen();
-        player = new Player();
-        dieb = new Dieb();
-
-        storytomole = new StoryTeller(500, 500, 10, 5, 10, 100, "Tomole", 30, 20);
-
-        collisions = new Collisions();
-        Enemy.setController(this);
 
         healingPotion = new HealingPotion();
 
