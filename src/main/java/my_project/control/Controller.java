@@ -3,14 +3,25 @@ package my_project.control;
 import KAGO_framework.model.InteractiveGraphicalObject;
 import KAGO_framework.view.DrawTool;
 import my_project.Config;
+import my_project.SwingUI;
 import my_project.model.Entities.*;
+import my_project.model.items.Inventory;
+import my_project.model.items.Item;
+import my_project.model.items.Weapons;
+import my_project.model.items.Consumables.Potions;
 import my_project.model.items.Consumables.HealingPotion;
 import my_project.model.map.*;
 import my_project.view.Deathscreen;
 import my_project.view.UI;
 
+import javax.swing.*; // ✅ FEHLTE (SwingUtilities, JFrame, etc.)
+
+import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
+import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Controller extends InteractiveGraphicalObject {
     private static int scene = 0;
@@ -36,27 +47,50 @@ public class Controller extends InteractiveGraphicalObject {
     private Enemy dieb;
     private StoryTeller storytomole;
 
-    // Tasten-Zustand für Sliding-Movement
+    // Movement (sliding)
     private boolean wDown, aDown, sDown, dDown;
-
-    // Bewegungsgeschwindigkeit
     private final double moveSpeed = 250;
+
+    // ===== INVENTAR / HOTBAR =====
+    private final Inventory inventory = new Inventory();
+    private boolean inventoryOpen = false;
+
+    // Mausposition für "Hover + E"
+    private int mouseX = 0;
+    private int mouseY = 0;
+
+    // Inventar UI Bereiche (2 Felder / Buttons)
+    private Rectangle2D weaponField = new Rectangle2D.Double(80, 750, 320, 70);
+    private Rectangle2D potionField = new Rectangle2D.Double(80, 840, 320, 70);
 
     public Controller() {
         ui = new UI();
         deathscreen = new Deathscreen();
         player = new Player();
         dieb = new Dieb();
-
         storytomole = new StoryTeller(500, 500, 10, 5, 10, 100, "Tomole", 30, 20);
         storytomole.addDialogLine("Hallo!");
         storytomole.addDialogLine("Ich bin Tomole.");
         storytomole.addDialogLine("Drücke E für den nächsten Satz.");
-
         collisions = new Collisions();
         Enemy.setController(this);
 
+        SwingUtilities.invokeLater(() -> {
+            JFrame frame = new JFrame("SwingUI");
+
+            SwingUI ui = new SwingUI(storytomole);
+
+            frame.setContentPane(ui.outputField);
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.setPreferredSize(new Dimension(600, 600));
+            frame.pack();
+            frame.setVisible(true);
+        });
+
         healingPotion = new HealingPotion();
+
+        // Beispiel: Potion liegt im Inventar (damit Swing was anzeigen kann)
+        inventory.addItem(healingPotion);
 
         bürgersteig = new Bürgersteig[breite][hoehe];
         for (int x = 0; x < breite; x++) {
@@ -104,6 +138,7 @@ public class Controller extends InteractiveGraphicalObject {
                         grünfläche[x][y].draw(drawTool);
                     }
                 }
+
                 if (player.getHP() > 0) player.draw(drawTool);
                 dieb.draw(drawTool);
                 storytomole.draw(drawTool);
@@ -118,6 +153,13 @@ public class Controller extends InteractiveGraphicalObject {
                         baum[x][y].draw(drawTool);
                     }
                 }
+
+                // ===== Hotbar immer anzeigen =====
+                drawHotbar(drawTool);
+
+                // ===== Inventar Overlay =====
+                if (inventoryOpen) drawInventoryOverlay(drawTool);
+
                 break;
 
             case 3:
@@ -134,10 +176,13 @@ public class Controller extends InteractiveGraphicalObject {
                 break;
 
             case 1:
-                // Combat/Attack Timer ohne Movement
-                player.updateCombat(dt);
+                // Player/Combat
                 player.update(dt);
-                // ===== ENEMY → PLAYER ANGRIFF =====
+
+                // Enemy
+                dieb.update(dt);
+
+                // ===== Enemy → Player Hit =====
                 if (dieb.canDealHitNow()) {
                     var enemyHitbox = dieb.getAttackHitbox();
 
@@ -148,7 +193,7 @@ public class Controller extends InteractiveGraphicalObject {
                         // Schaden
                         player.setHP(player.getHP() - dieb.getAttackDamage());
 
-                        // kleiner Knockback
+                        // Knockback weg vom Enemy
                         double kx = player.getCenterX() - dieb.getCenterX();
                         double ky = player.getCenterY() - dieb.getCenterY();
                         double dist = Math.sqrt(kx * kx + ky * ky);
@@ -158,75 +203,71 @@ public class Controller extends InteractiveGraphicalObject {
                             ky /= dist;
                         }
 
-                        double knockback = 5;
-                        player.setXpos(player.getXpos() + kx * knockback);
-                        player.setYpos(player.getYpos() + ky * knockback);
+                        double knockback = 80; // 🔧 HIER stellst du die Stärke ein (z.B. 40..200)
+
+                        double newX = player.getXpos() + kx * knockback;
+                        double newY = player.getYpos() + ky * knockback;
+
+                        // Optional: im Screen halten
+                        newX = Math.max(0, Math.min(newX, Config.WINDOW_WIDTH - player.getWidth()));
+                        newY = Math.max(0, Math.min(newY, Config.WINDOW_HEIGHT - player.getHeight()));
+
+                        player.setXpos(newX);
+                        player.setYpos(newY);
 
                         dieb.markHitDone();
                     }
                 }
 
 
-                // Enemy
-                dieb.update(dt);
+                // ===== Movement nur wenn Inventar NICHT offen =====
+                if (!inventoryOpen) {
+                    double dx = 0, dy = 0;
+                    if (wDown) { dy -= moveSpeed * dt; player.setFacing(0, -1); player.setIsDownWTrue(); } else player.setIsDownWFalse();
+                    if (sDown) { dy += moveSpeed * dt; player.setFacing(0,  1); player.setIsDownSTrue(); } else player.setIsDownSFalse();
+                    if (aDown) { dx -= moveSpeed * dt; player.setFacing(-1, 0); player.setIsDownATrue(); } else player.setIsDownAFalse();
+                    if (dDown) { dx += moveSpeed * dt; player.setFacing( 1, 0); player.setIsDownDTrue(); } else player.setIsDownDFalse();
 
-                // Bewegung aus Eingaben
-                double dx = 0, dy = 0;
-                if (wDown) { dy -= moveSpeed * dt; player.setFacing(0, -1); player.setIsDownWTrue(); } else player.setIsDownWFalse();
-                if (sDown) { dy += moveSpeed * dt; player.setFacing(0,  1); player.setIsDownSTrue(); }else player.setIsDownSFalse();
-                if (aDown) { dx -= moveSpeed * dt; player.setFacing(-1, 0); player.setIsDownATrue(); }else player.setIsDownAFalse();
-                if (dDown) { dx += moveSpeed * dt; player.setFacing( 1, 0); player.setIsDownDTrue(); }else player.setIsDownDFalse();
+                    // X-Achse + Screen-Grenze + Sliding
+                    if (dx != 0) {
+                        double oldX = player.getXpos();
+                        double newX = oldX + dx;
+                        newX = Math.max(0, Math.min(newX, Config.WINDOW_WIDTH - player.getWidth()));
+                        player.setXpos(newX);
+                        if (playerHitsAnyTree()) player.setXpos(oldX);
+                    }
 
-                // ✅ X-Achse bewegen + Screen-Grenze + Sliding
-                if (dx != 0) {
-                    double oldX = player.getXpos();
-                    double newX = oldX + dx;
-
-                    newX = Math.max(0, Math.min(newX, Config.WINDOW_WIDTH - player.getWidth()));
-
-                    player.setXpos(newX);
-                    if (playerHitsAnyTree()) {
-                        player.setXpos(oldX);
+                    // Y-Achse + Screen-Grenze + Sliding
+                    if (dy != 0) {
+                        double oldY = player.getYpos();
+                        double newY = oldY + dy;
+                        newY = Math.max(0, Math.min(newY, Config.WINDOW_HEIGHT - player.getHeight()));
+                        player.setYpos(newY);
+                        if (playerHitsAnyTree()) player.setYpos(oldY);
                     }
                 }
 
-                // ✅ Y-Achse bewegen + Screen-Grenze + Sliding
-                if (dy != 0) {
-                    double oldY = player.getYpos();
-                    double newY = oldY + dy;
-
-                    newY = Math.max(0, Math.min(newY, Config.WINDOW_HEIGHT - player.getHeight()));
-
-                    player.setYpos(newY);
-                    if (playerHitsAnyTree()) {
-                        player.setYpos(oldY);
-                    }
-                }
-
+                // ===== Potion Effekt (dein vorhandenes System) =====
                 if (healingPotion.getHealing()) {
                     if (healingPotion.getAmount() > 0) {
                         player.setHP(player.getHP() + 20);
                         healingPotion.setHealing(false);
                         healingPotion.setAmount(healingPotion.getAmount() - 1);
-                        System.out.println(player.getHP());
+                    } else {
+                        healingPotion.setHealing(false);
                     }
                 }
 
-                // Angriff: Hitbox trifft Enemy -> Schaden + Knockback
+                // ===== Player → Enemy Hit =====
                 if (player.canDealHitNow()) {
                     var hitbox = player.getAttackHitbox();
-
                     if (hitbox.intersects(dieb.getXpos(), dieb.getYpos(), dieb.getWidth(), dieb.getHeight())) {
                         dieb.setHP(dieb.getHP() - player.getAttackDamage());
 
                         double kx = dieb.getCenterX() - player.getCenterX();
                         double ky = dieb.getCenterY() - player.getCenterY();
                         double dist = Math.sqrt(kx * kx + ky * ky);
-
-                        if (dist != 0) {
-                            kx /= dist;
-                            ky /= dist;
-                        }
+                        if (dist != 0) { kx /= dist; ky /= dist; }
 
                         double knockback = player.getKnockbackStrength();
                         dieb.applyKnockback(kx * knockback, ky * knockback);
@@ -235,7 +276,7 @@ public class Controller extends InteractiveGraphicalObject {
                     }
                 }
 
-                // Dialog (optional)
+                // Dialog
                 if (collisions.rectangleCollisions(player, storytomole) && storytomole.getETrue()) {
                     storytomole.speak();
                 }
@@ -247,20 +288,142 @@ public class Controller extends InteractiveGraphicalObject {
         }
     }
 
+    // ===== Hotbar zeichnen =====
+    private void drawHotbar(DrawTool drawTool) {
+        int y = 980;
+        int slotW = 220;
+        int slotH = 70;
+
+        // Slot 1 (Waffe)
+        drawTool.setCurrentColor(new Color(0, 0, 0, 160));
+        drawTool.drawFilledRectangle(40, y, slotW, slotH);
+        drawTool.setCurrentColor(Color.WHITE);
+        drawTool.drawRectangle(40, y, slotW, slotH);
+
+        // Slot 2 (Potion)
+        drawTool.setCurrentColor(new Color(0, 0, 0, 160));
+        drawTool.drawFilledRectangle(280, y, slotW, slotH);
+        drawTool.setCurrentColor(Color.WHITE);
+        drawTool.drawRectangle(280, y, slotW, slotH);
+
+        // Texte
+        drawTool.formatText("Arial", 0, 18);
+        drawTool.drawText(55, y + 25, "Slot 1 (Waffe) [1]");
+        drawTool.drawText(295, y + 25, "Slot 2 (Potion) [2]");
+
+        Weapons w = inventory.getSelectedWeapon();
+        Potions p = inventory.getSelectedPotion();
+
+        drawTool.drawText(55, y + 50, ">> " + inventory.getDisplayName(w));
+        drawTool.drawText(295, y + 50, ">> " + inventory.getDisplayName(p));
+
+        // Markierung aktiver Slot
+        if (inventory.getActiveSlot() == 1) {
+            drawTool.setCurrentColor(Color.YELLOW);
+            drawTool.drawRectangle(40, y, slotW, slotH);
+        } else {
+            drawTool.setCurrentColor(Color.YELLOW);
+            drawTool.drawRectangle(280, y, slotW, slotH);
+        }
+    }
+
+    // ===== Inventar Overlay zeichnen =====
+    private void drawInventoryOverlay(DrawTool drawTool) {
+        drawTool.setCurrentColor(new Color(0, 0, 0, 180));
+        drawTool.drawFilledRectangle(40, 40, 600, 920);
+
+        drawTool.setCurrentColor(Color.WHITE);
+        drawTool.drawRectangle(40, 40, 600, 920);
+
+        drawTool.formatText("Arial", 1, 26);
+        drawTool.drawText(70, 80, "INVENTAR (I zum Schließen)");
+
+        drawTool.formatText("Arial", 0, 18);
+        drawTool.drawText(70, 120, "Aufzählung Items:");
+        int y = 150;
+
+        for (Item item : inventory.getItems()) {
+            drawTool.drawText(80, y, "- " + inventory.getDisplayName(item));
+            y += 22;
+            if (y > 700) break;
+        }
+
+        // Felder für "E zum Öffnen"
+        boolean overWeapon = weaponField.contains(mouseX, mouseY);
+        boolean overPotion = potionField.contains(mouseX, mouseY);
+
+        drawTool.setCurrentColor(overWeapon ? new Color(255, 255, 255, 90) : new Color(255, 255, 255, 40));
+        drawTool.drawFilledRectangle(weaponField.getX(), weaponField.getY(), weaponField.getWidth(), weaponField.getHeight());
+        drawTool.setCurrentColor(Color.WHITE);
+        drawTool.drawRectangle(weaponField.getX(), weaponField.getY(), weaponField.getWidth(), weaponField.getHeight());
+        drawTool.drawText((int)weaponField.getX() + 15, (int)weaponField.getY() + 40, "Waffe zu Slot 1 hinzufügen (Hover + E)");
+
+        drawTool.setCurrentColor(overPotion ? new Color(255, 255, 255, 90) : new Color(255, 255, 255, 40));
+        drawTool.drawFilledRectangle(potionField.getX(), potionField.getY(), potionField.getWidth(), potionField.getHeight());
+        drawTool.setCurrentColor(Color.WHITE);
+        drawTool.drawRectangle(potionField.getX(), potionField.getY(), potionField.getWidth(), potionField.getHeight());
+        drawTool.drawText((int)potionField.getX() + 15, (int)potionField.getY() + 40, "Potion zu Slot 2 hinzufügen (Hover + E)");
+
+        drawTool.drawText(70, 930, "1/2 = Slot in Hand | C = scroll | X = benutzen");
+    }
+
+    // ===== Hover + E öffnet Swing Auswahl =====
+    private void tryOpenSwingForHoveredField() {
+        if (!inventoryOpen) return;
+
+        boolean overWeapon = weaponField.contains(mouseX, mouseY);
+        boolean overPotion = potionField.contains(mouseX, mouseY);
+
+        if (overWeapon) {
+            List<Weapons> options = collectWeaponsFromInventory();
+            Weapons chosen = SwingUI.chooseWeapon(options);
+            if (chosen != null) inventory.addWeaponToSlot(chosen);
+        } else if (overPotion) {
+            List<Potions> options = collectPotionsFromInventory();
+            Potions chosen = SwingUI.choosePotion(options);
+            if (chosen != null) inventory.addPotionToSlot(chosen);
+        }
+    }
+
+    private List<Weapons> collectWeaponsFromInventory() {
+        List<Weapons> list = new ArrayList<>();
+        for (Item item : inventory.getItems()) {
+            if (item instanceof Weapons) list.add((Weapons) item);
+        }
+        return list;
+    }
+
+    private List<Potions> collectPotionsFromInventory() {
+        List<Potions> list = new ArrayList<>();
+        for (Item item : inventory.getItems()) {
+            if (item instanceof Potions) list.add((Potions) item);
+        }
+        return list;
+    }
+
+    // ===== Item benutzen (X) =====
+    private void useActiveSlotItem() {
+        if (inventory.getActiveSlot() == 1) {
+            player.startAttack();
+        } else {
+            Potions p = inventory.getSelectedPotion();
+            if (p == null) return;
+
+            if (p instanceof HealingPotion) {
+                healingPotion.setHealing(true);
+            }
+        }
+    }
+
     private boolean playerHitsAnyTree() {
         for (int x = 0; x < baum.length; x++) {
             for (int y = 0; y < baum[x].length; y++) {
-                if (collisions.rectangleCollisions(player, baum[x][y])) {
-                    return true;
-                }
+                if (collisions.rectangleCollisions(player, baum[x][y])) return true;
             }
         }
-
         for (int x = 0; x < betonZaun.length; x++) {
             for (int y = 0; y < betonZaun[x].length; y++) {
-                if (collisions.rectangleCollisions(player, betonZaun[x][y])) {
-                    return true;
-                }
+                if (collisions.rectangleCollisions(player, betonZaun[x][y])) return true;
             }
         }
         return false;
@@ -274,37 +437,41 @@ public class Controller extends InteractiveGraphicalObject {
     public void mouseClicked(MouseEvent e) {
         if (scene == 0) ui.mouseClicked(e);
         healingPotion.mouseClicked(e);
+
+        mouseX = e.getX();
+        mouseY = e.getY();
     }
 
     @Override
     public void keyPressed(int key) {
-        if (key == KeyEvent.VK_X) player.startAttack();
+        if (key == KeyEvent.VK_I) {
+            inventoryOpen = !inventoryOpen;
+            return;
+        }
+
+        if (key == KeyEvent.VK_1) inventory.setActiveSlot(1);
+        if (key == KeyEvent.VK_2) inventory.setActiveSlot(2);
+
+        if (key == KeyEvent.VK_C) inventory.scrollActiveSlot();
+
+        if (key == KeyEvent.VK_X) useActiveSlotItem();
 
         if (key == KeyEvent.VK_E) {
-            if (collisions.rectangleCollisions(player, storytomole)) {
-                storytomole.speak();
+            if (inventoryOpen) {
+                tryOpenSwingForHoveredField();
+            } else {
+                if (collisions.rectangleCollisions(player, storytomole)) {
+                    storytomole.speak();
+                }
             }
         }
 
-        /*if (key == KeyEvent.VK_Q) {
-            System.out.println("Q gedrückt");
-            for (int x = 0; x < baum.length; x++) {
-                for (int y = 0; y < baum[x].length; y++) {
-                    System.out.println("Q gedrückt und überprüft");
-                    System.out.println(baum[x][y].getHitboxX());
-                    if (collisions.rectangleBreak(player, baum[x][y])) {
-                        System.out.println("Q gedrückt und break");
-                        baum[x][y].setNachRechts(true);
-                        System.out.println(baum[x][y].getNachRechts());
-                    }
-                }
-            }
-        }*/
-
-        if (key == KeyEvent.VK_W) wDown = true;
-        if (key == KeyEvent.VK_A) aDown = true;
-        if (key == KeyEvent.VK_S) sDown = true;
-        if (key == KeyEvent.VK_D) dDown = true;
+        if (!inventoryOpen) {
+            if (key == KeyEvent.VK_W) wDown = true;
+            if (key == KeyEvent.VK_A) aDown = true;
+            if (key == KeyEvent.VK_S) sDown = true;
+            if (key == KeyEvent.VK_D) dDown = true;
+        }
     }
 
     @Override
@@ -314,15 +481,4 @@ public class Controller extends InteractiveGraphicalObject {
         if (key == KeyEvent.VK_S) sDown = false;
         if (key == KeyEvent.VK_D) dDown = false;
     }
-
-    public double followPlayerX(Entity e) {
-        if (player == null || e == null) return 0;
-        return player.getXpos() - e.getXpos();
-    }
-
-    public double followPlayerY(Entity e) {
-        if (player == null || e == null) return 0;
-        return player.getYpos() - e.getYpos();
-    }
-
 }

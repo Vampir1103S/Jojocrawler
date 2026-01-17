@@ -40,15 +40,12 @@ public class StoryTeller extends Entity {
         spriteSheet1.setCurrent(direction,0);
     }
 
-    public void speak(){
+    public String speak(){
         if (dialogQueue.isEmpty()) {
-            System.out.println("(NPC hat nichts mehr zu sagen)");
-        }
-
-        if (!dialogQueue.isEmpty()){
-         System.out.println(dialogQueue.poll());
+            return "(NPC hat nichts mehr zu sagen)";
         }
         direction = 1;
+        return dialogQueue.poll();
     }
 
     public void update(double dt) {

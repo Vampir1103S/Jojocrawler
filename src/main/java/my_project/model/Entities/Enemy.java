@@ -21,8 +21,8 @@ public abstract class Enemy extends Entity {
 
     protected int attackDamage = 6;
 
-    // Distanz, ab der Enemy angreift
-    protected double attackRange = 70;
+    // Aggro / Stop-Distanz
+    protected double stopFactorInAggro = 0.85; // 0.85 = bleibt etwas früher stehen
 
     // Facing (4 Richtungen)
     protected int facingX = 0;
@@ -33,13 +33,16 @@ public abstract class Enemy extends Entity {
     protected double hitH = 55;
     protected double hitOffset = 10;
 
+    // Wenn er "schräg" steht: ein bisschen ausrichten, damit Hitbox trifft
+    protected double alignFactor = 0.9;
+
     public Enemy(double xpos, double ypos, double hp, double speed, double stamina,
                  int defense, String name, double width, double height) {
         super(xpos, ypos, hp, speed, stamina, defense, name, width, height);
     }
 
     public void draw(DrawTool drawTool) {
-        // Zeichnung erfolgt im Dieb (SpriteSheet)
+        // leer (Dieb zeichnet selbst)
     }
 
     @Override
@@ -56,39 +59,66 @@ public abstract class Enemy extends Entity {
             if (attackTimer <= 0) attacking = false;
         }
 
-        // ===== Ziel =====
-        double dx = p.getCenterX() - getCenterX();
-        double dy = p.getCenterY() - getCenterY();
-        double dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist == 0) return;
+        // ===== Richtung zum Player =====
+        double dxC = p.getCenterX() - this.getCenterX();
+        double dyC = p.getCenterY() - this.getCenterY();
 
-        // ===== Facing =====
-        if (Math.abs(dx) > Math.abs(dy)) {
-            facingX = (dx >= 0) ? 1 : -1;
+        if (Math.abs(dxC) > Math.abs(dyC)) {
+            facingX = (dxC >= 0) ? 1 : -1;
             facingY = 0;
         } else {
-            facingY = (dy >= 0) ? 1 : -1;
+            facingY = (dyC >= 0) ? 1 : -1;
             facingX = 0;
         }
 
-        // ===== Movement =====
+        // ===== Aggro-Box vom Player =====
+        Rectangle2D aggro = p.getEnemyAggroBox();
+
+        // Enemy Rect
+        Rectangle2D myRect = new Rectangle2D.Double(xpos, ypos, width, height);
+
         double move = dt * (100 * speed);
 
-        if (!attacking) {
-            double stopDist = attackRange * 0.85;
-
-            if (dist > stopDist) {
-                xpos += (dx / dist) * move;
-                ypos += (dy / dist) * move;
+        // ===== 1) Wenn NICHT in Aggro: normal zum Player laufen =====
+        if (!aggro.intersects(myRect)) {
+            if (!attacking) {
+                double dist = Math.sqrt(dxC * dxC + dyC * dyC);
+                if (dist > 0) {
+                    xpos += (dxC / dist) * move;
+                    ypos += (dyC / dist) * move;
+                }
             }
+            return;
+        }
 
-            if (cooldownTimer <= 0 && dist <= attackRange) {
+        // ===== 2) Wenn IN Aggro: früher stoppen + ausrichten =====
+        if (!attacking) {
+            // Stop-Distanz = etwas innerhalb der Aggro-Kante
+            // Wir nehmen als "Stop" nicht distanzbasiert, sondern:
+            // -> Er bewegt sich nur noch, um die Hitbox sauber auszurichten.
+
+            if (facingX != 0) {
+                // links/rechts: Y ausrichten (sonst schlägt er "in die Luft")
+                if (Math.abs(dyC) > 2) {
+                    ypos += Math.signum(dyC) * (move * alignFactor);
+                }
+            } else {
+                // oben/unten: X ausrichten
+                if (Math.abs(dxC) > 2) {
+                    xpos += Math.signum(dxC) * (move * alignFactor);
+                }
+            }
+        }
+
+        // ===== 3) Angriff nur starten, wenn Hitbox JETZT wirklich trifft =====
+        if (!attacking && cooldownTimer <= 0) {
+            Rectangle2D hb = getAttackHitbox();
+            if (hb.intersects(p.getXpos(), p.getYpos(), p.getWidth(), p.getHeight())) {
                 startAttack();
             }
         }
     }
 
-    // ===== Attack API =====
     public void startAttack() {
         if (!attacking && cooldownTimer <= 0) {
             attacking = true;
@@ -119,13 +149,17 @@ public abstract class Enemy extends Entity {
         double x = px + pw / 2.0 - hitW / 2.0;
         double y = py + ph / 2.0 - hitH / 2.0;
 
-        if (facingX == 1) {
+        if (facingX == 1) {           // rechts
             x = px + pw + hitOffset;
-        } else if (facingX == -1) {
+            y = py + ph / 2.0 - hitH / 2.0;
+        } else if (facingX == -1) {   // links
             x = px - hitW - hitOffset;
-        } else if (facingY == -1) {
+            y = py + ph / 2.0 - hitH / 2.0;
+        } else if (facingY == -1) {   // oben
+            x = px + pw / 2.0 - hitW / 2.0;
             y = py - hitH - hitOffset;
-        } else {
+        } else {                      // unten
+            x = px + pw / 2.0 - hitW / 2.0;
             y = py + ph + hitOffset;
         }
 
@@ -140,4 +174,36 @@ public abstract class Enemy extends Entity {
     public static void setController(Controller con) {
         controller = con;
     }
+    protected void drawDebugBoxes(DrawTool drawTool) {
+        if (controller == null || controller.getPlayer() == null) return;
+
+        // 🟦 Aggro-Box (vom Player)
+        var aggro = controller.getPlayer().getEnemyAggroBox();
+        drawTool.setCurrentColor(new java.awt.Color(0, 0, 255, 60));
+        drawTool.drawFilledRectangle(
+                aggro.getX(), aggro.getY(),
+                aggro.getWidth(), aggro.getHeight()
+        );
+        drawTool.setCurrentColor(java.awt.Color.BLUE);
+        drawTool.drawRectangle(
+                aggro.getX(), aggro.getY(),
+                aggro.getWidth(), aggro.getHeight()
+        );
+
+        // 🔴 Attack-Box (nur wenn angreifend)
+        if (attacking) {
+            var hb = getAttackHitbox();
+            drawTool.setCurrentColor(new java.awt.Color(255, 0, 0, 120));
+            drawTool.drawFilledRectangle(
+                    hb.getX(), hb.getY(),
+                    hb.getWidth(), hb.getHeight()
+            );
+            drawTool.setCurrentColor(java.awt.Color.RED);
+            drawTool.drawRectangle(
+                    hb.getX(), hb.getY(),
+                    hb.getWidth(), hb.getHeight()
+            );
+        }
+    }
+
 }

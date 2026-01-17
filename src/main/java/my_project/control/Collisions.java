@@ -27,12 +27,4 @@ public class Collisions {
                 e.getYpos() + e.getHeight() > b.getHitboxY();
     }
 
-    public boolean rectangleBreak(Entity e, Environment b) {
-        if (e == null || b == null) return false;
-
-        return e.getXpos() < b.getHitboxXb() + b.getHitboxWidthb() &&
-                e.getXpos() + e.getWidth() > b.getHitboxXb() &&
-                e.getYpos() < b.getHitboxYb() + b.getHitboxHeightb() &&
-                e.getYpos() + e.getHeight() > b.getHitboxYb();
-    }
 }

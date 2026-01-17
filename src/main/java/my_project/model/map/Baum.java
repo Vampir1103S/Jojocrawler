@@ -51,8 +51,9 @@ public class Baum extends Environment {
 
     @Override
     public void update(double dt) {
-        // nichts
+
     }
+
 
 
     // ✅ Bildgröße direkt aus BufferedImage
@@ -90,7 +91,7 @@ public class Baum extends Environment {
         return (image != null) ? image.getHeight() : 0;
     }
 
-    // ✅ Hitbox (aus Bildgröße berechnet)
+
     public double getHitboxX() {
         return x + getImageWidth() * hitboxXOffsetFactor;
     }
