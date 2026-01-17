@@ -3,7 +3,6 @@ package my_project.model.Entities;
 import KAGO_framework.view.DrawTool;
 import my_project.control.Controller;
 
-import java.awt.*;
 import java.awt.geom.Rectangle2D;
 
 public abstract class Enemy extends Entity {
@@ -22,10 +21,8 @@ public abstract class Enemy extends Entity {
 
     protected int attackDamage = 6;
 
-    // ===== AGGRO-BOX (Rechteck) =====
-    // -> Damit steuerst du die Größe der Aggrobox
-    protected double aggroW = 100;
-    protected double aggroH = 220;
+    // Aggro / Stop-Distanz
+    protected double stopFactorInAggro = 0.85; // 0.85 = bleibt etwas früher stehen
 
     // Facing (4 Richtungen)
     protected int facingX = 0;
@@ -36,74 +33,22 @@ public abstract class Enemy extends Entity {
     protected double hitH = 55;
     protected double hitOffset = 10;
 
-    // Debug-Rendering
-    protected boolean showAggroBox = true;     // blaues Aggro-Rechteck
-    protected boolean showAttackBox = true;    // rote Attackbox NUR beim Angriff
+    // Wenn er "schräg" steht: ein bisschen ausrichten, damit Hitbox trifft
+    protected double alignFactor = 0.9;
 
     public Enemy(double xpos, double ypos, double hp, double speed, double stamina,
                  int defense, String name, double width, double height) {
         super(xpos, ypos, hp, speed, stamina, defense, name, width, height);
     }
 
-    // ===== Helper: Enemy-Körper als Rechteck =====
-    protected Rectangle2D getBodyRect() {
-        return new Rectangle2D.Double(xpos, ypos, width, height);
-    }
-
-    // ===== Helper: Aggro-Box um den Spieler (zentriert) =====
-    public Rectangle2D getAggroBox(Player p) {
-        double x = p.getCenterX() - aggroW / 2.0;
-        double y = p.getCenterY() - aggroH / 2.0;
-        return new Rectangle2D.Double(x, y, aggroW, aggroH);
-    }
-
-    // ===== Helper: Attack-Hitbox abhängig von Facing =====
-    public Rectangle2D getAttackHitbox() {
-        double px = xpos;
-        double py = ypos;
-        double pw = width;
-        double ph = height;
-
-        double x = px + pw / 2.0 - hitW / 2.0;
-        double y = py + ph / 2.0 - hitH / 2.0;
-
-        if (facingX == 1) { // rechts
-            x = px + pw + hitOffset;
-        } else if (facingX == -1) { // links
-            x = px - hitW - hitOffset;
-        } else if (facingY == -1) { // oben
-            y = py - hitH - hitOffset;
-        } else { // unten
-            y = py + ph + hitOffset;
-        }
-
-        return new Rectangle2D.Double(x, y, hitW, hitH);
-    }
-
-    // ===== Debug Zeichnen (Aggro + Attack) =====
-    public void drawDebugBoxes(DrawTool drawTool) {
-        if (controller == null || controller.getPlayer() == null) return;
-        Player p = controller.getPlayer();
-
-        if (showAggroBox) {
-            Rectangle2D ag = getAggroBox(p);
-            drawTool.setCurrentColor(new Color(0, 0, 255, 80));
-            drawTool.drawFilledRectangle(ag.getX(), ag.getY(), ag.getWidth(), ag.getHeight());
-            drawTool.setCurrentColor(new Color(0, 0, 255, 160));
-            drawTool.drawRectangle(ag.getX(), ag.getY(), ag.getWidth(), ag.getHeight());
-        }
-
-        // Attackbox nur sichtbar, wenn er gerade angreift
-        if (attacking && showAttackBox) {
-            Rectangle2D hb = getAttackHitbox();
-            drawTool.setCurrentColor(new Color(255, 0, 0, 120));
-            drawTool.drawFilledRectangle(hb.getX(), hb.getY(), hb.getWidth(), hb.getHeight());
-        }
+    public void draw(DrawTool drawTool) {
+        // leer (Dieb zeichnet selbst)
     }
 
     @Override
     public void update(double dt) {
         if (controller == null || controller.getPlayer() == null) return;
+
         Player p = controller.getPlayer();
 
         // ===== Timer =====
@@ -114,56 +59,62 @@ public abstract class Enemy extends Entity {
             if (attackTimer <= 0) attacking = false;
         }
 
-        // ===== Facing Richtung Player (4-way) =====
-        double dx = p.getCenterX() - getCenterX();
-        double dy = p.getCenterY() - getCenterY();
+        // ===== Richtung zum Player =====
+        double dxC = p.getCenterX() - this.getCenterX();
+        double dyC = p.getCenterY() - this.getCenterY();
 
-        if (Math.abs(dx) > Math.abs(dy)) {
-            facingX = (dx >= 0) ? 1 : -1;
+        if (Math.abs(dxC) > Math.abs(dyC)) {
+            facingX = (dxC >= 0) ? 1 : -1;
             facingY = 0;
         } else {
-            facingY = (dy >= 0) ? 1 : -1;
+            facingY = (dyC >= 0) ? 1 : -1;
             facingX = 0;
         }
 
-        Rectangle2D aggro = getAggroBox(p);
-        Rectangle2D myBody = getBodyRect();
+        // ===== Aggro-Box vom Player =====
+        Rectangle2D aggro = p.getEnemyAggroBox();
 
-        boolean inAggro = aggro.intersects(myBody.getX(), myBody.getY(), myBody.getWidth(), myBody.getHeight());
+        // Enemy Rect
+        Rectangle2D myRect = new Rectangle2D.Double(xpos, ypos, width, height);
 
         double move = dt * (100 * speed);
 
-        // ===== 1) Nicht in Aggro -> verfolgen =====
-        if (!inAggro && !attacking) {
-            double dist = Math.sqrt(dx * dx + dy * dy);
-            if (dist > 0) {
-                xpos += (dx / dist) * move;
-                ypos += (dy / dist) * move;
+        // ===== 1) Wenn NICHT in Aggro: normal zum Player laufen =====
+        if (!aggro.intersects(myRect)) {
+            if (!attacking) {
+                double dist = Math.sqrt(dxC * dxC + dyC * dyC);
+                if (dist > 0) {
+                    xpos += (dxC / dist) * move;
+                    ypos += (dyC / dist) * move;
+                }
             }
             return;
         }
 
-        // ===== 2) In Aggro -> stehen bleiben + ggf. leicht ausrichten =====
-        // (hilft gegen Eckfälle, damit Attackbox wirklich trifft)
+        // ===== 2) Wenn IN Aggro: früher stoppen + ausrichten =====
         if (!attacking) {
-            double alignSpeed = move * 0.6;
+            // Stop-Distanz = etwas innerhalb der Aggro-Kante
+            // Wir nehmen als "Stop" nicht distanzbasiert, sondern:
+            // -> Er bewegt sich nur noch, um die Hitbox sauber auszurichten.
 
             if (facingX != 0) {
-                // links/rechts: Y ausrichten
-                if (Math.abs(dy) > 3) ypos += Math.signum(dy) * alignSpeed;
+                // links/rechts: Y ausrichten (sonst schlägt er "in die Luft")
+                if (Math.abs(dyC) > 2) {
+                    ypos += Math.signum(dyC) * (move * alignFactor);
+                }
             } else {
                 // oben/unten: X ausrichten
-                if (Math.abs(dx) > 3) xpos += Math.signum(dx) * alignSpeed;
-            }
-
-            // ===== 3) Attack START nur wenn Attackbox JETZT den Player trifft =====
-            if (cooldownTimer <= 0) {
-                Rectangle2D atk = getAttackHitbox();
-                boolean hitPossible = atk.intersects(p.getXpos(), p.getYpos(), p.getWidth(), p.getHeight());
-
-                if (hitPossible) {
-                    startAttack();
+                if (Math.abs(dxC) > 2) {
+                    xpos += Math.signum(dxC) * (move * alignFactor);
                 }
+            }
+        }
+
+        // ===== 3) Angriff nur starten, wenn Hitbox JETZT wirklich trifft =====
+        if (!attacking && cooldownTimer <= 0) {
+            Rectangle2D hb = getAttackHitbox();
+            if (hb.intersects(p.getXpos(), p.getYpos(), p.getWidth(), p.getHeight())) {
+                startAttack();
             }
         }
     }
@@ -189,6 +140,32 @@ public abstract class Enemy extends Entity {
         return attackDamage;
     }
 
+    public Rectangle2D getAttackHitbox() {
+        double px = xpos;
+        double py = ypos;
+        double pw = width;
+        double ph = height;
+
+        double x = px + pw / 2.0 - hitW / 2.0;
+        double y = py + ph / 2.0 - hitH / 2.0;
+
+        if (facingX == 1) {           // rechts
+            x = px + pw + hitOffset;
+            y = py + ph / 2.0 - hitH / 2.0;
+        } else if (facingX == -1) {   // links
+            x = px - hitW - hitOffset;
+            y = py + ph / 2.0 - hitH / 2.0;
+        } else if (facingY == -1) {   // oben
+            x = px + pw / 2.0 - hitW / 2.0;
+            y = py - hitH - hitOffset;
+        } else {                      // unten
+            x = px + pw / 2.0 - hitW / 2.0;
+            y = py + ph + hitOffset;
+        }
+
+        return new Rectangle2D.Double(x, y, hitW, hitH);
+    }
+
     public void applyKnockback(double fx, double fy) {
         xpos += fx;
         ypos += fy;
@@ -197,10 +174,36 @@ public abstract class Enemy extends Entity {
     public static void setController(Controller con) {
         controller = con;
     }
+    protected void drawDebugBoxes(DrawTool drawTool) {
+        if (controller == null || controller.getPlayer() == null) return;
 
-    // Optional: Aggrobox kleiner/größer machen
-    public void setAggroSize(double w, double h) {
-        this.aggroW = w;
-        this.aggroH = h;
+        // 🟦 Aggro-Box (vom Player)
+        var aggro = controller.getPlayer().getEnemyAggroBox();
+        drawTool.setCurrentColor(new java.awt.Color(0, 0, 255, 60));
+        drawTool.drawFilledRectangle(
+                aggro.getX(), aggro.getY(),
+                aggro.getWidth(), aggro.getHeight()
+        );
+        drawTool.setCurrentColor(java.awt.Color.BLUE);
+        drawTool.drawRectangle(
+                aggro.getX(), aggro.getY(),
+                aggro.getWidth(), aggro.getHeight()
+        );
+
+        // 🔴 Attack-Box (nur wenn angreifend)
+        if (attacking) {
+            var hb = getAttackHitbox();
+            drawTool.setCurrentColor(new java.awt.Color(255, 0, 0, 120));
+            drawTool.drawFilledRectangle(
+                    hb.getX(), hb.getY(),
+                    hb.getWidth(), hb.getHeight()
+            );
+            drawTool.setCurrentColor(java.awt.Color.RED);
+            drawTool.drawRectangle(
+                    hb.getX(), hb.getY(),
+                    hb.getWidth(), hb.getHeight()
+            );
+        }
     }
+
 }

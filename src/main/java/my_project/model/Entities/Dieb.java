@@ -32,6 +32,9 @@ public class Dieb extends Enemy {
             drawTool.drawRectangle(hb.getX(), hb.getY(), hb.getWidth(), hb.getHeight());
         }
         drawDebugBoxes(drawTool);
+
+
+
     }
 
     @Override
