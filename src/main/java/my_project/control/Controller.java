@@ -3,12 +3,15 @@ package my_project.control;
 import KAGO_framework.model.InteractiveGraphicalObject;
 import KAGO_framework.view.DrawTool;
 import my_project.Config;
+import my_project.SwingUI;
 import my_project.model.Entities.*;
 import my_project.model.items.Consumables.HealingPotion;
 import my_project.model.map.*;
 import my_project.view.Deathscreen;
 import my_project.view.UI;
 
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 
@@ -43,15 +46,26 @@ public class Controller extends InteractiveGraphicalObject {
     private final double moveSpeed = 250;
 
     public Controller() {
+
+        SwingUtilities.invokeLater(() -> {
+            JFrame frame = new JFrame("SwingUI");
+
+            SwingUI ui = new SwingUI();
+
+            frame.setContentPane(ui.outputField);
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.setPreferredSize(new Dimension(600, 600));
+            frame.pack();
+            frame.setVisible(true);
+
+        });
+
         ui = new UI();
         deathscreen = new Deathscreen();
         player = new Player();
         dieb = new Dieb();
 
         storytomole = new StoryTeller(500, 500, 10, 5, 10, 100, "Tomole", 30, 20);
-        storytomole.addDialogLine("Hallo!");
-        storytomole.addDialogLine("Ich bin Tomole.");
-        storytomole.addDialogLine("Drücke E für den nächsten Satz.");
 
         collisions = new Collisions();
         Enemy.setController(this);
