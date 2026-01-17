@@ -36,6 +36,7 @@ public class Controller extends InteractiveGraphicalObject {
     private Baum[][] baum;
     private Grünfläche[][] grünfläche;
     private BetonZaun[][] betonZaun;
+    private Background background;
 
     private int hoehe = 10;
     private int breite = 10;
@@ -73,6 +74,7 @@ public class Controller extends InteractiveGraphicalObject {
         storytomole.addDialogLine("Ich bin Tomole.");
         storytomole.addDialogLine("Drücke E für den nächsten Satz.");
         collisions = new Collisions();
+        background = new Background();
         Enemy.setController(this);
 
         SwingUtilities.invokeLater(() -> {
@@ -127,6 +129,9 @@ public class Controller extends InteractiveGraphicalObject {
                 break;
 
             case 1:
+
+                background.draw(drawTool,1);
+
                 for (int x = 0; x < bürgersteig.length; x++) {
                     for (int y = 0; y < bürgersteig[x].length; y++) {
                         bürgersteig[x][y].draw(drawTool);
@@ -162,6 +167,15 @@ public class Controller extends InteractiveGraphicalObject {
 
                 break;
 
+            case 2:
+                background.draw(drawTool,2);
+
+                if (player.getHP() > 0) player.draw(drawTool);
+                dieb.draw(drawTool);
+                storytomole.draw(drawTool);
+
+                break;
+
             case 3:
                 deathscreen.draw(drawTool);
                 break;
@@ -176,6 +190,10 @@ public class Controller extends InteractiveGraphicalObject {
                 break;
 
             case 1:
+
+
+
+
                 // Player/Combat
                 player.update(dt);
 
