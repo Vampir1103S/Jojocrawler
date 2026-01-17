@@ -136,7 +136,7 @@ public class Controller extends InteractiveGraphicalObject {
 
             case 1:
                 // Combat/Attack Timer ohne Movement
-                player.updateCombat(dt);
+                
                 player.update(dt);
                 // ===== ENEMY → PLAYER ANGRIFF =====
                 if (dieb.canDealHitNow()) {
