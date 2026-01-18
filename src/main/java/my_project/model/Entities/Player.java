@@ -34,7 +34,7 @@ public class Player extends Entity {
     private Inventory inventory;
 
     public Player() {
-        super(100, 500, 100, 30, 1, 1, "hehe", 60, 110);
+        super(100, 100, 100, 30, 1, 1, "hehe", 60, 110);
         spriteSheet2 = new SpriteSheet("Player-Sprite.png", 4, 4);
     }
 
@@ -70,6 +70,10 @@ public class Player extends Entity {
             drawTool.drawRectangle(hb.getX(), hb.getY(), hb.getWidth(), hb.getHeight());
         }
     }
+    public void resetPlayerPosition(int xpos,int ypos){
+        this.xpos = 100;
+        this.ypos = 500;
+    }
 
     @Override
     public void update(double dt) {
@@ -91,7 +95,10 @@ public class Player extends Entity {
             timer = 0;
         }
     }
-
+    public void resetPlayerPosition(){
+        this.xpos = 100;
+        this.ypos = 500;
+    }
     private void animatePlayer(double dt) {
         timer += dt;
         if (timer >= 0.15) {

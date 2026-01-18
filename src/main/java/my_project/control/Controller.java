@@ -44,7 +44,12 @@ public class Controller extends InteractiveGraphicalObject {
 
     // Level
     private Gate gate;
+    private Gate backgate;
     private LevelOne level1;
+    int deathcount = 0;
+    private boolean backgateUnlocked = false;
+    private boolean wave2Started = false; // damit reset/spawn nur 1x passiert
+
 
     private int hoehe = 10;
     private int breite = 10;
@@ -107,6 +112,7 @@ public class Controller extends InteractiveGraphicalObject {
         // ===== Level =====
         level1 = new LevelOne();
         gate = new Gate(800, 200, 200, 200);
+        backgate = new Gate(1200,200,200,200);
 
 
         //Enemy
@@ -253,8 +259,13 @@ public class Controller extends InteractiveGraphicalObject {
                 deathscreen.draw(drawTool);
                 break;
 
+
             case 4:
                 level1.draw(drawTool);
+
+                if (backgateUnlocked) {
+                    backgate.draw(drawTool);
+                }
 
                 for (int i = 0; i < enemies.length; i++) {
                     for (int j = 0; j < enemies[0].length; j++) {
@@ -265,6 +276,8 @@ public class Controller extends InteractiveGraphicalObject {
                 }
 
                 player.draw(drawTool);
+                break;
+
 
                 /*drawHotbar(drawTool);
                 if (inventoryOpen) drawInventoryOverlay(drawTool);
@@ -321,15 +334,32 @@ public class Controller extends InteractiveGraphicalObject {
                 break;
 
             case 4:
+                if (backgateUnlocked && collisions.rectangleCollisions(player, backgate)) {
+                    switchScene(1);
+                }
 
-                int toteFeinde = 0;
+
+
                 for (int i = 0; i < enemies.length; i++) {
                     for (int j = 0; j < enemies[0].length; j++) {
                         if (enemies[i][j].getHP() <= 0) {
-                            toteFeinde += 1;
+                            deathcount += 1;
                         }
                     }
                 }
+                if (deathcount == 16) {
+                    backgateUnlocked = true;
+
+                    if (!wave2Started) {
+                        wave2Started = true;
+                        deathcount = 0;              // so wie du es willst: löst aus und resettet
+                        player.resetPlayerPosition();
+                        spawnEnemies(2);
+                    }
+                }
+
+
+
 
                 player.update(dt);
 
