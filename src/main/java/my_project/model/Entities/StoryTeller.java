@@ -24,7 +24,7 @@ public class StoryTeller extends Entity {
 
 
         dialogQueue = new ArrayDeque<>();
-        spriteSheet1 = new SpriteSheet("Dieb-Sprite.png", 4, 4);
+        spriteSheet1 = new SpriteSheet("Storyteller-Sprite.png", 2, 1);
     }
 
 
@@ -37,7 +37,7 @@ public class StoryTeller extends Entity {
         drawTool.drawFilledRectangle(xpos, ypos, 80, 60);
 
         spriteSheet1.draw(drawTool,xpos,ypos,5);
-        spriteSheet1.setCurrent(direction,0);
+        spriteSheet1.setCurrent(0,direction);
     }
 
     public String speak(){
