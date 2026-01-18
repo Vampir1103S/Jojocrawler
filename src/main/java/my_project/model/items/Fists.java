@@ -3,7 +3,7 @@ package my_project.model.items;
 public class Fists extends Weapons {
 
     public Fists() {
-        damage = 6;
+        damage = 4;
         hitW = 45;
         hitH = 45;
         offset = 6;

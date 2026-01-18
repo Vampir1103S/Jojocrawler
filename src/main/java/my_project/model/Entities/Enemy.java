@@ -22,9 +22,17 @@ public class Enemy extends Entity {
     protected double cooldownTimer = 0;
     protected double attackCooldown = 0.6;
     protected int attackDamage = 10;
+    protected int direction = 0;
 
     // Bewegung / KI
     protected double speed = 120;
+    protected boolean runAway = false;
+
+    public void setRunAway(boolean runAway) {
+        this.runAway = runAway;
+    }
+
+    protected double runAwayTimer = 0;
 
     public Enemy(double hp, double xpos, double ypos,
                  double xspeed, double yspeed, int acc,
@@ -42,6 +50,10 @@ public class Enemy extends Entity {
         if (controller == null) return;
         Player p = controller.getPlayer();
         if (p == null) return;
+
+        if (!attacking) {
+            lookAtPlayer(p); // 👈 HIER
+        }
 
         // Timer
         if (cooldownTimer > 0) cooldownTimer -= dt;
@@ -66,6 +78,10 @@ public class Enemy extends Entity {
         moveTowardsPlayer(p, dt);
     }
 
+    public boolean getRunAway() {
+        return runAway;
+    }
+
     protected void moveTowardsPlayer(Player p, double dt) {
         double dx = p.getCenterX() - getCenterX();
         double dy = p.getCenterY() - getCenterY();
@@ -79,8 +95,20 @@ public class Enemy extends Entity {
         // Facing setzen (damit Enemy beim Laufen in die Richtung schaut)
         setFacingFromVector(dx, dy);
 
-        xpos += dx * speed * dt;
-        ypos += dy * speed * dt;
+        if (runAway){
+            runAwayTimer = 0.3;
+            runAway = false;
+        }
+
+        if (runAwayTimer > 0) {
+            runAwayTimer -= dt;
+            xpos -= dx * speed * dt;
+            ypos -= dy * speed * dt;
+        } else {
+            xpos += dx * speed * dt;
+            ypos += dy * speed * dt;
+        }
+
 
         // ✅ FIX: Clamp nach Movement, sonst kann Enemy offscreen verschwinden
         clampToScreen();
@@ -96,11 +124,19 @@ public class Enemy extends Entity {
         if (Math.abs(dx) > Math.abs(dy)) {
             if (dx > 0) { facingX = 1; facingY = 0; }
             else { facingX = -1; facingY = 0; }
-        } else {
-            if (dy > 0) { facingX = 0; facingY = 1; }
+          } else {
+             if (dy > 0) { facingX = 0; facingY = 1; }
             else { facingX = 0; facingY = -1; }
         }
+
+//        if (ypos > player.getYpos()) direction = 0;    //unten
+//        else if (xpos < getXpos()) direction = 1;    //rechts
+//        else if (xpos > getXpos()) direction = 2;    //links
+//        else if (ypos < getYpos()) direction = 3;    //oben
+
     }
+
+
 
     public void startAttack() {
         if (!attacking && cooldownTimer <= 0) {
@@ -125,7 +161,7 @@ public class Enemy extends Entity {
 
     // AttackHitbox wie beim Player: abhängig von facing
     public Rectangle2D getAttackHitbox() {
-        double hitW = 0, hitH = 0, offset = 10;
+        double hitW = 40, hitH = 40, offset = 10;
 
         double x = xpos + width / 2 - hitW / 2;
         double y = ypos + height / 2 - hitH / 2;
@@ -155,4 +191,31 @@ public class Enemy extends Entity {
         xpos = Math.max(0, Math.min(xpos, Config.WINDOW_WIDTH - width));
         ypos = Math.max(0, Math.min(ypos, Config.WINDOW_HEIGHT - height));
     }
+
+    protected void lookAtPlayer(Player p) {
+        if (p == null) return;
+
+        double dx = p.getCenterX() - getCenterX();
+        double dy = p.getCenterY() - getCenterY();
+
+        // horizontale vs vertikale Dominanz
+        if (Math.abs(dx) > Math.abs(dy)) {
+            if (dx > 0) {
+                facingX = 1; facingY = 0;
+                direction = 1; // rechts
+            } else {
+                facingX = -1; facingY = 0;
+                direction = 2; // links
+            }
+        } else {
+            if (dy > 0) {
+                facingX = 0; facingY = 1;
+                direction = 0; // unten
+            } else {
+                facingX = 0; facingY = -1;
+                direction = 3; // oben
+            }
+        }
+    }
+
 }

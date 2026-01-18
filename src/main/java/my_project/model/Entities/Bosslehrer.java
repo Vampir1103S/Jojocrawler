@@ -6,21 +6,22 @@ import my_project.view.Graphics.SpriteSheet;
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
 
-public class Dieb extends Enemy {
+public class Bosslehrer extends Enemy {
 
     private SpriteSheet spriteSheet1;
-    private double timer = 0;
+    private int timer = 0;
     private int number = 0;
+    private int direction = 0;
 
-    public Dieb(double xpos, double ypos, double hp, double speed, double stamina, int defense, String name, double width,double height) {
+    public Bosslehrer(double xpos, double ypos, double hp, double speed, double stamina, int defense, String name, double width,double height) {
         super( xpos,  ypos,  hp, speed,  stamina,  defense, name,  width, height);
         spriteSheet1 = new SpriteSheet("Dieb-Sprite.png", 4, 4);
 
         // Optional feinjustieren
-        this.attackDamage = 10;
-        this.attackCooldown = 0.6;
+        this.attackDamage = 30;
+        this.attackCooldown = 0.8;
         this.attackDuration = 0.12;
-        this.speed = 140;
+        this.speed = 120;
     }
 
     @Override
@@ -46,7 +47,14 @@ public class Dieb extends Enemy {
     @Override
     public void update(double dt) {
         super.update(dt);
-            animateDieb(dt);
+
+
+        if (facingX == 1 && facingY == 0) direction = 3;    //oben
+        else if (facingX == -1 && facingY == 0) direction = 2;    //links
+        else if (facingX == 0 && facingY == -1) direction = 0;    //unten
+        else if (facingX == 0 && facingY == 1) direction = 1;    //rechts
+        animateDieb(dt);
+
     }
 
     private void animateDieb(double dt) {

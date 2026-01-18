@@ -27,6 +27,7 @@ public class Controller extends InteractiveGraphicalObject {
     private Player player;
 
     private Deathscreen deathscreen;
+    private Background background;
     private Collisions collisions;
 
     // Items / Inventory
@@ -43,7 +44,12 @@ public class Controller extends InteractiveGraphicalObject {
 
     // Level
     private Gate gate;
+    private Gate backgate;
     private LevelOne level1;
+    int deathcount = 0;
+    private boolean backgateUnlocked = false;
+    private boolean wave2Started = false; // damit reset/spawn nur 1x passiert
+
 
     private int hoehe = 10;
     private int breite = 10;
@@ -52,18 +58,17 @@ public class Controller extends InteractiveGraphicalObject {
     private int zhoehe = 2;
     private int zbreite = 4;
 
-    // Enemies
-    private Enemy dieb;           // Single enemy for Scene 1
-    private Enemy[][] enemies;    // Swarm for Scene 4
-
-    // NPC
+    private Enemy dieb;
+    private Enemy kind;
+    private Enemy enemies[][];
+    private Enemy secenemies[][];
     private StoryTeller storytomole;
 
     // Movement
     private boolean wDown, aDown, sDown, dDown;
     private final double moveSpeed = 250;
 
-    // Inventory Overlay
+    // ===== INVENTAR / HOTBAR =====
     private boolean inventoryOpen = false;
     private int mouseX = 0;
     private int mouseY = 0;
@@ -77,21 +82,19 @@ public class Controller extends InteractiveGraphicalObject {
         collisions = new Collisions();
 
         player = new Player();
-
-        // ===== Inventory + Items =====
-        inventory = new Inventory();
+        background = new Background();
 
         fists = new Fists();
         sword = new Sword();
 
-        inventory.addItem(fists);
-        inventory.addItem(sword);
+        //inventory.addItem(fists);
+        //inventory.addItem(sword);
 
         // Start: Spieler hat Fists im Loadout
-        inventory.addWeaponToLoadout(fists);
+        //inventory.addWeaponToLoadout(fists);
 
         healingPotion = new HealingPotion();
-        inventory.addItem(healingPotion);
+        //inventory.addItem(healingPotion);
 
         // Player bekommt Inventory (falls Player es nutzt)
         player.setInventory(inventory);
@@ -100,16 +103,24 @@ public class Controller extends InteractiveGraphicalObject {
         storytomole = new StoryTeller(500, 500, 10, 5, 10, 100, "Tomole", 30, 20);
         storytomole.addDialogLine("Hallo!");
         storytomole.addDialogLine("Ich bin Tomole.");
-        storytomole.addDialogLine("Drücke E für den nächsten Satz.");
+        storytomole.addDialogLine("Eine komische Präsenz hat seine Klauen in unsere Stadt getrieben.");
+        storytomole.addDialogLine("Fast alle haben diese Stadt, die sonst so vor Leben blühte verlassen.");
+        storytomole.addDialogLine("begib dich zum Bahnhof um weiteres zu finden!");
+
+        collisions = new Collisions();
 
         // ===== Level =====
         level1 = new LevelOne();
         gate = new Gate(800, 200, 200, 200);
+        backgate = new Gate(1200,200,200,200);
 
-        // ===== Enemies =====
+
+        //Enemy
         enemies = new Enemy[4][4];
-        spawnEnemies(1);
-        dieb = enemies[0][0]; // Scene 1 nutzt einen Gegner
+        secenemies = new Enemy[4][4];
+        kind = enemies[0][0];
+        //spawnEnemies(1);
+        spawnEnemies(3);
 
         Enemy.setController(this);
 
@@ -124,7 +135,11 @@ public class Controller extends InteractiveGraphicalObject {
             frame.setVisible(true);
         });
 
-        // ===== Map bauen =====
+        healingPotion = new HealingPotion();
+
+        // Beispiel: Potion liegt im Inventar (damit Swing was anzeigen kann)
+        //inventory.addItem(healingPotion);
+
         bürgersteig = new Bürgersteig[breite][hoehe];
         for (int x = 0; x < breite; x++) {
             for (int y = 0; y < hoehe; y++) {
@@ -153,17 +168,23 @@ public class Controller extends InteractiveGraphicalObject {
         return player;
     }
 
-    // =================== Enemy Spawning ===================
-
-    private Enemy createEnemyByType(int enemyType, int x, int y) {
+    private Enemy createEnemyByType(int enemyType,int x ,int y) {
         if (enemyType == 1) {
-            // WICHTIG: Falls dein Dieb-Konstruktor anders ist, hier anpassen!
-            return new Dieb(x, y, 20, 1, 5, 20, "Dieb", 30, 30);
+            // Dieb-Constructor wie bei dir:
+            return new Dieb(x, y, 50, 1, 5, 20, "Dieb", 30, 30);
+        }else if (enemyType == 2) {
+            return new Kind(x, y, 40, 1, 5, 20, "Kind", 30, 30);
+        }else if(enemyType == 3){
+            return new Bosslehrer(x, y, 110, 1, 5, 20, "Bosslehrer", 40, 60);
         }
+
+        // if (enemyType == 2) return new Ninja(); oder andere Enemey Typen
+
         return null;
     }
 
     private void spawnEnemies(int enemyType) {
+
         int rows = enemies.length;
         int cols = enemies[0].length;
 
@@ -177,7 +198,11 @@ public class Controller extends InteractiveGraphicalObject {
             for (int j = 0; j < cols; j++) {
                 double x = startX + j * swarmX;
                 double y = startY + i * swarmY;
-                enemies[i][j] = createEnemyByType(enemyType, (int) x, (int) y);
+                if (enemies[i][j] == null) {
+                    enemies[i][j] = createEnemyByType(enemyType, (int) x, (int) y);
+                }else if (secenemies[i][j] == null) {
+                    secenemies[i][j] = createEnemyByType(enemyType, (int) x, (int) y);
+                }
             }
         }
     }
@@ -191,7 +216,9 @@ public class Controller extends InteractiveGraphicalObject {
                 break;
 
             case 1:
-                // Tiles
+
+                background.draw(drawTool,1);
+
                 for (int x = 0; x < bürgersteig.length; x++) {
                     for (int y = 0; y < bürgersteig[x].length; y++) {
                         bürgersteig[x][y].draw(drawTool);
@@ -224,7 +251,7 @@ public class Controller extends InteractiveGraphicalObject {
                 gate.draw(drawTool);
 
                 // UI
-                drawHotbar(drawTool);
+                //drawHotbar(drawTool);
                 if (inventoryOpen) drawInventoryOverlay(drawTool);
                 break;
 
@@ -232,8 +259,13 @@ public class Controller extends InteractiveGraphicalObject {
                 deathscreen.draw(drawTool);
                 break;
 
+
             case 4:
                 level1.draw(drawTool);
+
+                if (backgateUnlocked) {
+                    backgate.draw(drawTool);
+                }
 
                 for (int i = 0; i < enemies.length; i++) {
                     for (int j = 0; j < enemies[0].length; j++) {
@@ -244,10 +276,12 @@ public class Controller extends InteractiveGraphicalObject {
                 }
 
                 player.draw(drawTool);
-
-                drawHotbar(drawTool);
-                if (inventoryOpen) drawInventoryOverlay(drawTool);
                 break;
+
+
+                /*drawHotbar(drawTool);
+                if (inventoryOpen) drawInventoryOverlay(drawTool);
+                break;*/
         }
     }
 
@@ -271,6 +305,19 @@ public class Controller extends InteractiveGraphicalObject {
                 handleMovement(dt);
                 handleHealingPotion();
 
+                // ===== Potion Effekt (dein vorhandenes System) =====
+                if (healingPotion.getHealing()) {
+                    if (healingPotion.getAmount() > 0) {
+                        player.setHP(player.getHP() + 20);
+                        healingPotion.setHealing(false);
+                        healingPotion.setAmount(healingPotion.getAmount() - 1);
+                    } else {
+                        healingPotion.setHealing(false);
+                    }
+                }
+
+
+                // Dialog
                 if (collisions.rectangleCollisions(player, storytomole) && storytomole.getETrue()) {
                     storytomole.speak();
                 }
@@ -278,6 +325,8 @@ public class Controller extends InteractiveGraphicalObject {
                 if (collisions.rectangleCollisions(player, gate)) {
                     switchScene(4);
                 }
+
+
                 break;
 
             case 3:
@@ -285,6 +334,33 @@ public class Controller extends InteractiveGraphicalObject {
                 break;
 
             case 4:
+                if (backgateUnlocked && collisions.rectangleCollisions(player, backgate)) {
+                    switchScene(1);
+                }
+
+
+
+                for (int i = 0; i < enemies.length; i++) {
+                    for (int j = 0; j < enemies[0].length; j++) {
+                        if (enemies[i][j].getHP() <= 0) {
+                            deathcount += 1;
+                        }
+                    }
+                }
+                if (deathcount == 16) {
+                    backgateUnlocked = true;
+
+                    if (!wave2Started) {
+                        wave2Started = true;
+                        deathcount = 0;              // so wie du es willst: löst aus und resettet
+                        player.resetPlayerPosition();
+                        spawnEnemies(2);
+                    }
+                }
+
+
+
+
                 player.update(dt);
 
                 // Enemies update
@@ -355,13 +431,20 @@ public class Controller extends InteractiveGraphicalObject {
         Rectangle2D enemyHitbox = e.getAttackHitbox();
         if (enemyHitbox.intersects(player.getXpos(), player.getYpos(), player.getWidth(), player.getHeight())) {
             player.setHP(player.getHP() - e.getAttackDamage());
-
+            if (e instanceof Kind){
+                e.setRunAway(true);
+            }
             double kx = player.getCenterX() - e.getCenterX();
             double ky = player.getCenterY() - e.getCenterY();
             double dist = Math.sqrt(kx * kx + ky * ky);
             if (dist != 0) { kx /= dist; ky /= dist; }
-
             double knockback = 80;
+
+            if (e instanceof Bosslehrer){
+                knockback = 200;
+            }else {
+                knockback = 80;
+            }
 
             double newX = player.getXpos() + kx * knockback;
             double newY = player.getYpos() + ky * knockback;
@@ -440,15 +523,20 @@ public class Controller extends InteractiveGraphicalObject {
     }
 
     private boolean playerHitsAnyTree() {
-        for (int x = 0; x < baum.length; x++) {
-            for (int y = 0; y < baum[x].length; y++) {
-                if (collisions.rectangleCollisions(player, baum[x][y])) return true;
-            }
-        }
-        for (int x = 0; x < betonZaun.length; x++) {
-            for (int y = 0; y < betonZaun[x].length; y++) {
-                if (collisions.rectangleCollisions(player, betonZaun[x][y])) return true;
-            }
+        switch (scene) {
+            case 1:
+
+                for (int x = 0; x < baum.length; x++) {
+                    for (int y = 0; y < baum[x].length; y++) {
+                        if (collisions.rectangleCollisions(player, baum[x][y])) return true;
+                    }
+                }
+                for (int x = 0; x < betonZaun.length; x++) {
+                    for (int y = 0; y < betonZaun[x].length; y++) {
+                        if (collisions.rectangleCollisions(player, betonZaun[x][y])) return true;
+                    }
+                }
+                break;
         }
         return false;
     }
@@ -460,35 +548,39 @@ public class Controller extends InteractiveGraphicalObject {
         int slotW = 220;
         int slotH = 70;
 
+        // Slot 1 (Waffe)
         drawTool.setCurrentColor(new Color(0, 0, 0, 160));
         drawTool.drawFilledRectangle(40, y, slotW, slotH);
         drawTool.setCurrentColor(Color.WHITE);
         drawTool.drawRectangle(40, y, slotW, slotH);
 
+        // Slot 2 (Potion)
         drawTool.setCurrentColor(new Color(0, 0, 0, 160));
         drawTool.drawFilledRectangle(280, y, slotW, slotH);
         drawTool.setCurrentColor(Color.WHITE);
         drawTool.drawRectangle(280, y, slotW, slotH);
 
+        // Texte
         drawTool.formatText("Arial", 0, 18);
         drawTool.drawText(55, y + 25, "Slot 1 (Waffe) [1]");
         drawTool.drawText(295, y + 25, "Slot 2 (Potion) [2]");
 
-        Weapons w = inventory.getSelectedWeapon();
-        Potions p = inventory.getSelectedPotion();
+        //Weapons w = inventory.getSelectedWeapon();
+        //Potions p = inventory.getSelectedPotion();
 
-        drawTool.drawText(55, y + 50, ">> " + inventory.getDisplayName(w));
-        drawTool.drawText(295, y + 50, ">> " + inventory.getDisplayName(p));
+        //drawTool.drawText(55, y + 50, ">> " + inventory.getDisplayName(w));
+        //drawTool.drawText(295, y + 50, ">> " + inventory.getDisplayName(p));
 
-        if (inventory.getActiveSlot() == 1) {
+        /*if (inventory.getActiveSlot() == 1) {
             drawTool.setCurrentColor(Color.YELLOW);
             drawTool.drawRectangle(40, y, slotW, slotH);
         } else {
             drawTool.setCurrentColor(Color.YELLOW);
             drawTool.drawRectangle(280, y, slotW, slotH);
-        }
+        }*/
     }
 
+    // ===== Inventar Overlay zeichnen =====
     private void drawInventoryOverlay(DrawTool drawTool) {
         drawTool.setCurrentColor(new Color(0, 0, 0, 180));
         drawTool.drawFilledRectangle(40, 40, 600, 920);
@@ -509,6 +601,7 @@ public class Controller extends InteractiveGraphicalObject {
             if (y > 700) break;
         }
 
+        // Felder für "E zum Öffnen"
         boolean overWeapon = weaponField.contains(mouseX, mouseY);
         boolean overPotion = potionField.contains(mouseX, mouseY);
 
@@ -527,24 +620,22 @@ public class Controller extends InteractiveGraphicalObject {
         drawTool.drawText(70, 930, "1/2 = Slot in Hand | C = scroll | X = benutzen");
     }
 
+    // ===== Hover + E öffnet Swing Auswahl =====
     private void tryOpenSwingForHoveredField() {
         if (!inventoryOpen) return;
 
         boolean overWeapon = weaponField.contains(mouseX, mouseY);
         boolean overPotion = potionField.contains(mouseX, mouseY);
 
-        if (overWeapon) {
-            List<Weapons> available = collectWeaponsFromInventory();
-            List<Weapons> current = inventory.getWeaponLoadoutCopy();
-            List<Weapons> edited = SwingUI.editWeaponsLoadout(available, current);
-            if (edited != null) inventory.setWeaponLoadout(edited);
-
-        } else if (overPotion) {
-            List<Potions> available = collectPotionsFromInventory();
-            List<Potions> current = inventory.getPotionLoadoutCopy();
-            List<Potions> edited = SwingUI.editPotionsLoadout(available, current);
-            if (edited != null) inventory.setPotionLoadout(edited);
-        }
+//        if (overWeapon) {
+//            List<Weapons> options = collectWeaponsFromInventory();
+//            Weapons chosen = SwingUI.chooseWeapon(options);
+//            if (chosen != null) inventory.addWeaponToSlot(chosen);
+//        } else if (overPotion) {
+//            List<Potions> options = collectPotionsFromInventory();
+//            Potions chosen = SwingUI.choosePotion(options);
+//            if (chosen != null) inventory.addPotionToSlot(chosen);
+//        }
     }
 
     private List<Weapons> collectWeaponsFromInventory() {
@@ -563,7 +654,19 @@ public class Controller extends InteractiveGraphicalObject {
         return list;
     }
 
-    // =================== INPUT ===================
+    // ===== Item benutzen (X) =====
+    private void useActiveSlotItem() {
+        if (inventory.getActiveSlot() == 1) {
+            player.startAttack();
+        } else {
+            Potions p = inventory.getSelectedPotion();
+            if (p == null) return;
+
+            if (p instanceof HealingPotion) {
+                healingPotion.setHealing(true);
+            }
+        }
+    }
 
     public static void switchScene(int newSzene) {
         scene = newSzene;
@@ -591,12 +694,12 @@ public class Controller extends InteractiveGraphicalObject {
         if (key == KeyEvent.VK_C) inventory.scrollActiveSlot();
 
         if (key == KeyEvent.VK_X) {
-            if (inventory.getActiveSlot() == 1) {
+            //if (inventory.getActiveSlot() == 1) {
                 player.startAttack();
-            } else {
+            /*} else {
                 Potions p = inventory.getSelectedPotion();
                 if (p instanceof HealingPotion) healingPotion.setHealing(true);
-            }
+            }*/
         }
 
         if (key == KeyEvent.VK_E) {
