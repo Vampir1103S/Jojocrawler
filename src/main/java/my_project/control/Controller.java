@@ -111,7 +111,7 @@ public class Controller extends InteractiveGraphicalObject {
         secenemies = new Enemy[4][4];
         kind = enemies[0][0];
         //spawnEnemies(1);
-        spawnEnemies(2);
+        spawnEnemies(3);
 
         Enemy.setController(this);
 
@@ -162,9 +162,11 @@ public class Controller extends InteractiveGraphicalObject {
     private Enemy createEnemyByType(int enemyType,int x ,int y) {
         if (enemyType == 1) {
             // Dieb-Constructor wie bei dir:
-            return new Dieb(x, y, 40, 1, 5, 20, "Dieb", 30, 30);
+            return new Dieb(x, y, 50, 1, 5, 20, "Dieb", 30, 30);
         }else if (enemyType == 2) {
-            return new Kind(x, y, 20, 1, 5, 20, "Kind", 30, 30);
+            return new Kind(x, y, 40, 1, 5, 20, "Kind", 30, 30);
+        }else if(enemyType == 3){
+            return new Bosslehrer(x, y, 110, 1, 5, 20, "Bosslehrer", 40, 60);
         }
 
         // if (enemyType == 2) return new Ninja(); oder andere Enemey Typen
@@ -307,6 +309,8 @@ public class Controller extends InteractiveGraphicalObject {
                 if (collisions.rectangleCollisions(player, gate)) {
                     switchScene(4);
                 }
+
+
                 break;
 
             case 3:
@@ -314,6 +318,16 @@ public class Controller extends InteractiveGraphicalObject {
                 break;
 
             case 4:
+
+                int toteFeinde = 0;
+                for (int i = 0; i < enemies.length; i++) {
+                    for (int j = 0; j < enemies[0].length; j++) {
+                        if (enemies[i][j].getHP() <= 0) {
+                            toteFeinde += 1;
+                        }
+                    }
+                }
+
                 player.update(dt);
 
                 // Enemies update
@@ -384,17 +398,20 @@ public class Controller extends InteractiveGraphicalObject {
         Rectangle2D enemyHitbox = e.getAttackHitbox();
         if (enemyHitbox.intersects(player.getXpos(), player.getYpos(), player.getWidth(), player.getHeight())) {
             player.setHP(player.getHP() - e.getAttackDamage());
-            System.out.println(e.getRunAway());
             if (e instanceof Kind){
                 e.setRunAway(true);
-                System.out.println(e.getRunAway());
             }
             double kx = player.getCenterX() - e.getCenterX();
             double ky = player.getCenterY() - e.getCenterY();
             double dist = Math.sqrt(kx * kx + ky * ky);
             if (dist != 0) { kx /= dist; ky /= dist; }
-
             double knockback = 80;
+
+            if (e instanceof Bosslehrer){
+                knockback = 200;
+            }else {
+                knockback = 80;
+            }
 
             double newX = player.getXpos() + kx * knockback;
             double newY = player.getYpos() + ky * knockback;
