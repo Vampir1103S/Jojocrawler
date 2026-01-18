@@ -546,16 +546,20 @@ public class Controller extends InteractiveGraphicalObject {
     }
 
     private boolean playerHitsAnyTree() {
-        /*for (int x = 0; x < baum.length; x++) {
-            for (int y = 0; y < baum[x].length; y++) {
-                if (collisions.rectangleCollisions(player, baum[x][y])) return true;
-            }
+        switch (scene) {
+            case 1:
+                for (int x = 0; x < baum.length; x++) {
+                    for (int y = 0; y < baum[x].length; y++) {
+                        if (collisions.rectangleCollisions(player, baum[x][y])) return true;
+                    }
+                }
+                for (int x = 0; x < betonZaun.length; x++) {
+                    for (int y = 0; y < betonZaun[x].length; y++) {
+                        if (collisions.rectangleCollisions(player, betonZaun[x][y])) return true;
+                    }
+                }
+                break;
         }
-        for (int x = 0; x < betonZaun.length; x++) {
-            for (int y = 0; y < betonZaun[x].length; y++) {
-                if (collisions.rectangleCollisions(player, betonZaun[x][y])) return true;
-            }
-        }*/
         return false;
     }
 
