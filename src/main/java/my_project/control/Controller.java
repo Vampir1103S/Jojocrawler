@@ -157,7 +157,6 @@ public class Controller extends InteractiveGraphicalObject {
 
     private Enemy createEnemyByType(int enemyType, int x, int y) {
         if (enemyType == 1) {
-            // WICHTIG: Falls dein Dieb-Konstruktor anders ist, hier anpassen!
             return new Dieb(x, y, 20, 1, 5, 20, "Dieb", 30, 30);
         }
         return null;
@@ -206,7 +205,6 @@ public class Controller extends InteractiveGraphicalObject {
 
                 // Entities
                 if (player.getHP() > 0) player.draw(drawTool);
-                if (dieb != null && dieb.getHP() > 0) dieb.draw(drawTool);
                 storytomole.draw(drawTool);
 
                 // Objects
@@ -263,10 +261,6 @@ public class Controller extends InteractiveGraphicalObject {
             case 1:
                 // Reihenfolge wichtig: Combat / Enemy-Hit vor Movement/Inventar
                 player.update(dt);
-                if (dieb != null && dieb.getHP() > 0) dieb.update(dt);
-
-                handleEnemyHitsPlayer(dieb);
-                handlePlayerHitsEnemy(dieb);
 
                 handleMovement(dt);
                 handleHealingPotion();
