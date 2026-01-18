@@ -508,15 +508,15 @@ public class Controller extends InteractiveGraphicalObject {
         boolean overWeapon = weaponField.contains(mouseX, mouseY);
         boolean overPotion = potionField.contains(mouseX, mouseY);
 
-        if (overWeapon) {
-            List<Weapons> options = collectWeaponsFromInventory();
-            Weapons chosen = SwingUI.chooseWeapon(options);
-            if (chosen != null) inventory.addWeaponToSlot(chosen);
-        } else if (overPotion) {
-            List<Potions> options = collectPotionsFromInventory();
-            Potions chosen = SwingUI.choosePotion(options);
-            if (chosen != null) inventory.addPotionToSlot(chosen);
-        }
+//        if (overWeapon) {
+//            List<Weapons> options = collectWeaponsFromInventory();
+//            Weapons chosen = SwingUI.chooseWeapon(options);
+//            if (chosen != null) inventory.addWeaponToSlot(chosen);
+//        } else if (overPotion) {
+//            List<Potions> options = collectPotionsFromInventory();
+//            Potions chosen = SwingUI.choosePotion(options);
+//            if (chosen != null) inventory.addPotionToSlot(chosen);
+//        }
     }
 
     private List<Weapons> collectWeaponsFromInventory() {
