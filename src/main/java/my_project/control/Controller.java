@@ -39,6 +39,7 @@ public class Controller extends InteractiveGraphicalObject {
     private Baum[][] baum;
     private Grünfläche[][] grünfläche;
     private BetonZaun[][] betonZaun;
+    private Background background;
 
     //Level
 
@@ -76,6 +77,7 @@ public class Controller extends InteractiveGraphicalObject {
         ui = new UI();
         deathscreen = new Deathscreen();
         player = new Player();
+        background = new Background();
 
 
 
@@ -184,6 +186,8 @@ public class Controller extends InteractiveGraphicalObject {
                 break;
 
             case 1:
+
+                background.draw(drawTool,1);
 
                 for (int x = 0; x < bürgersteig.length; x++) {
                     for (int y = 0; y < bürgersteig[x].length; y++) {
