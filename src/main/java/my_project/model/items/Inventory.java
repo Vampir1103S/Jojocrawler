@@ -7,21 +7,21 @@ import java.util.List;
 
 public class Inventory {
 
-    // Alles, was du besitzt (nur Aufzählung im Inventar)
+    // Besitzliste (Inventar-Aufzählung)
     private final List<Item> items = new ArrayList<>();
 
-    // Hotbar-Listen (NRW Standard: List / ArrayList)
-    private final List<Weapons> weaponSlotList = new ArrayList<>();
-    private final List<Potions> potionSlotList = new ArrayList<>();
+    // Slot 1 (Waffen-Loadout)
+    private final List<Weapons> weaponLoadout = new ArrayList<>();
 
-    // Welcher Slot ist "in der Hand" aktiv? 1=Weapon, 2=Potion
+    // Slot 2 (Potion-Loadout)
+    private final List<Potions> potionLoadout = new ArrayList<>();
+
     private int activeSlot = 1;
 
-    // Scroll-Index für C
     private int weaponIndex = 0;
     private int potionIndex = 0;
 
-    // ===== Items verwalten =====
+    // ===== Items =====
     public void addItem(Item item) {
         if (item != null) items.add(item);
     }
@@ -30,26 +30,7 @@ public class Inventory {
         return items;
     }
 
-    // ===== Slot-Listen füllen (über Swing Auswahl) =====
-    public void addWeaponToSlot(Weapons w) {
-        if (w != null) weaponSlotList.add(w);
-        if (weaponSlotList.size() == 1) weaponIndex = 0;
-    }
-
-    public void addPotionToSlot(Potions p) {
-        if (p != null) potionSlotList.add(p);
-        if (potionSlotList.size() == 1) potionIndex = 0;
-    }
-
-    public List<Weapons> getWeaponSlotList() {
-        return weaponSlotList;
-    }
-
-    public List<Potions> getPotionSlotList() {
-        return potionSlotList;
-    }
-
-    // ===== Slot wählen (1/2) =====
+    // ===== Active Slot =====
     public void setActiveSlot(int slot) {
         if (slot == 1 || slot == 2) activeSlot = slot;
     }
@@ -58,35 +39,75 @@ public class Inventory {
         return activeSlot;
     }
 
-    // ===== Scrollen (C) =====
-    public void scrollActiveSlot() {
-        if (activeSlot == 1) {
-            if (!weaponSlotList.isEmpty()) {
-                weaponIndex = (weaponIndex + 1) % weaponSlotList.size();
-            }
-        } else {
-            if (!potionSlotList.isEmpty()) {
-                potionIndex = (potionIndex + 1) % potionSlotList.size();
-            }
-        }
+    // ===== Loadout Copy/Set (für Swing Editor V1) =====
+    public List<Weapons> getWeaponLoadoutCopy() {
+        return new ArrayList<>(weaponLoadout);
     }
 
-    // ===== Aktuelles Item in Hand =====
+    public void setWeaponLoadout(List<Weapons> newOrder) {
+        weaponLoadout.clear();
+        if (newOrder != null) {
+            for (Weapons w : newOrder) {
+                if (w != null && !weaponLoadout.contains(w)) weaponLoadout.add(w); // keine Duplikate
+            }
+        }
+        weaponIndex = Math.min(weaponIndex, Math.max(0, weaponLoadout.size() - 1));
+        if (weaponIndex < 0) weaponIndex = 0;
+    }
+
+    public List<Potions> getPotionLoadoutCopy() {
+        return new ArrayList<>(potionLoadout);
+    }
+
+    public void setPotionLoadout(List<Potions> newOrder) {
+        potionLoadout.clear();
+        if (newOrder != null) {
+            for (Potions p : newOrder) {
+                if (p != null) potionLoadout.add(p); // Potions dürfen doppelt
+            }
+        }
+        potionIndex = Math.min(potionIndex, Math.max(0, potionLoadout.size() - 1));
+        if (potionIndex < 0) potionIndex = 0;
+    }
+
+    // ===== Für Hotbar Anzeige =====
     public Weapons getSelectedWeapon() {
-        if (weaponSlotList.isEmpty()) return null;
-        weaponIndex = Math.max(0, Math.min(weaponIndex, weaponSlotList.size() - 1));
-        return weaponSlotList.get(weaponIndex);
+        if (weaponLoadout.isEmpty()) return null;
+        weaponIndex = Math.max(0, Math.min(weaponIndex, weaponLoadout.size() - 1));
+        return weaponLoadout.get(weaponIndex);
     }
 
     public Potions getSelectedPotion() {
-        if (potionSlotList.isEmpty()) return null;
-        potionIndex = Math.max(0, Math.min(potionIndex, potionSlotList.size() - 1));
-        return potionSlotList.get(potionIndex);
+        if (potionLoadout.isEmpty()) return null;
+        potionIndex = Math.max(0, Math.min(potionIndex, potionLoadout.size() - 1));
+        return potionLoadout.get(potionIndex);
     }
 
-    // ===== Anzeige-Name (ohne Item-Klasse ändern zu müssen) =====
+    // ===== Scroll (C) =====
+    public void scrollActiveSlot() {
+        if (activeSlot == 1) {
+            if (weaponLoadout.isEmpty()) return;
+            weaponIndex = (weaponIndex + 1) % weaponLoadout.size();
+        } else {
+            if (potionLoadout.isEmpty()) return;
+            potionIndex = (potionIndex + 1) % potionLoadout.size();
+        }
+    }
+
+    // ===== Anzeige-Name =====
     public String getDisplayName(Object obj) {
         if (obj == null) return "-";
-        return obj.getClass().getSimpleName();
+        return obj.toString();
+    }
+
+    // Optional Helper (wenn du schnell default loadout setzen willst)
+    public void addWeaponToLoadout(Weapons w) {
+        if (w == null) return;
+        if (!weaponLoadout.contains(w)) weaponLoadout.add(w);
+    }
+
+    public void addPotionToLoadout(Potions p) {
+        if (p == null) return;
+        potionLoadout.add(p);
     }
 }

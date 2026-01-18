@@ -8,6 +8,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.util.ArrayList;
 import java.util.List;
 
 public class SwingUI {
@@ -17,8 +18,10 @@ public class SwingUI {
 
     // ====== NPC / Story SwingUI (wie vorher) ======
     public SwingUI(StoryTeller storytomole) {
-        // Wichtig: outputField/mainPanel werden meist durch IntelliJ .form initialisiert
-        // -> Wenn du kein .form nutzt, musst du outputField selbst erstellen.
+        // Falls du kein IntelliJ .form benutzt: sicherstellen, dass outputField existiert
+        if (outputField == null) {
+            outputField = new JTextField();
+        }
 
         outputField.setText("Du musst die Taste E drücken.");
 
@@ -34,79 +37,186 @@ public class SwingUI {
         });
     }
 
-    // ====== INVENTAR-SWING: Waffen auswählen ======
-    public static Weapons chooseWeapon(List<Weapons> options) {
-        if (options == null || options.isEmpty()) {
-            JOptionPane.showMessageDialog(
-                    null,
-                    "Keine Waffen im Inventar gefunden!",
-                    "Waffen-Auswahl",
-                    JOptionPane.INFORMATION_MESSAGE
-            );
-            return null;
-        }
+    // ============================================================
+    // ====== LOADOUT EDITOR (V1): Zwei Listen + Buttons ===========
+    // ============================================================
 
-        DefaultListModel<Weapons> model = new DefaultListModel<>();
-        for (Weapons w : options) model.addElement(w);
+    // Waffen-Loadout bearbeiten: Inventar links, Slot-Reihenfolge rechts
+    public static List<Weapons> editWeaponsLoadout(List<Weapons> available, List<Weapons> current) {
+        DefaultListModel<Weapons> left = new DefaultListModel<>();
+        DefaultListModel<Weapons> right = new DefaultListModel<>();
 
-        JList<Weapons> list = new JList<>(model);
-        list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        list.setCellRenderer(new DefaultListCellRenderer() {
-            @Override
-            public Component getListCellRendererComponent(
-                    JList<?> jList, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+        if (available != null) for (Weapons w : available) left.addElement(w);
+        if (current != null) for (Weapons w : current) right.addElement(w);
 
-                super.getListCellRendererComponent(jList, value, index, isSelected, cellHasFocus);
+        JList<Weapons> invList = new JList<>(left);
+        JList<Weapons> slotList = new JList<>(right);
 
-                if (value == null) {
-                    setText("null");
-                } else {
-                    // Anzeige-Name: falls toString nicht überschrieben ist -> Klassenname
-                    String txt = value.toString();
-                    if (txt == null || txt.trim().isEmpty() || txt.contains("@")) {
-                        txt = value.getClass().getSimpleName();
-                    }
-                    setText(txt);
-                }
-                return this;
-            }
+        invList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        slotList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
+        // schöner Renderer (falls toString nicht sauber ist)
+        invList.setCellRenderer(simpleRenderer());
+        slotList.setCellRenderer(simpleRenderer());
+
+        JButton add = new JButton(">> Add");
+        JButton remove = new JButton("<< Remove");
+        JButton up = new JButton("Up");
+        JButton down = new JButton("Down");
+
+        add.addActionListener(e -> {
+            Weapons w = invList.getSelectedValue();
+            if (w == null) return;
+            if (!modelContains(right, w)) right.addElement(w); // keine Duplikate bei Waffen
         });
 
-        JScrollPane pane = new JScrollPane(list);
-        pane.setPreferredSize(new Dimension(420, 260));
+        remove.addActionListener(e -> {
+            Weapons w = slotList.getSelectedValue();
+            if (w == null) return;
+            right.removeElement(w);
+        });
+
+        up.addActionListener(e -> {
+            int i = slotList.getSelectedIndex();
+            if (i <= 0) return;
+            Weapons w = right.getElementAt(i);
+            right.remove(i);
+            right.add(i - 1, w);
+            slotList.setSelectedIndex(i - 1);
+        });
+
+        down.addActionListener(e -> {
+            int i = slotList.getSelectedIndex();
+            if (i < 0 || i >= right.getSize() - 1) return;
+            Weapons w = right.getElementAt(i);
+            right.remove(i);
+            right.add(i + 1, w);
+            slotList.setSelectedIndex(i + 1);
+        });
+
+        JPanel buttonsMid = new JPanel(new GridLayout(4, 1, 6, 6));
+        buttonsMid.add(add);
+        buttonsMid.add(remove);
+        buttonsMid.add(up);
+        buttonsMid.add(down);
+
+        JPanel panel = new JPanel(new BorderLayout(10, 10));
+        panel.add(wrap("Inventar (Waffen)", invList), BorderLayout.WEST);
+        panel.add(buttonsMid, BorderLayout.CENTER);
+        panel.add(wrap("Slot 1 Loadout (C-scroll)", slotList), BorderLayout.EAST);
 
         int result = JOptionPane.showConfirmDialog(
                 null,
-                pane,
-                "Waffe zu Slot 1 hinzufügen",
+                panel,
+                "Waffen-Loadout bearbeiten",
                 JOptionPane.OK_CANCEL_OPTION,
                 JOptionPane.PLAIN_MESSAGE
         );
 
-        if (result == JOptionPane.OK_OPTION) {
-            return list.getSelectedValue();
-        }
-        return null;
+        if (result != JOptionPane.OK_OPTION) return null;
+
+        List<Weapons> out = new ArrayList<>();
+        for (int i = 0; i < right.getSize(); i++) out.add(right.getElementAt(i));
+        return out;
     }
 
-    // ====== INVENTAR-SWING: Potions auswählen ======
-    public static Potions choosePotion(List<Potions> options) {
-        if (options == null || options.isEmpty()) {
-            JOptionPane.showMessageDialog(
-                    null,
-                    "Keine Potions im Inventar gefunden!",
-                    "Potion-Auswahl",
-                    JOptionPane.INFORMATION_MESSAGE
-            );
-            return null;
+    // Potions-Loadout bearbeiten: Duplikate sind erlaubt (z.B. 2 Heiltränke)
+    public static List<Potions> editPotionsLoadout(List<Potions> available, List<Potions> current) {
+        DefaultListModel<Potions> left = new DefaultListModel<>();
+        DefaultListModel<Potions> right = new DefaultListModel<>();
+
+        if (available != null) for (Potions p : available) left.addElement(p);
+        if (current != null) for (Potions p : current) right.addElement(p);
+
+        JList<Potions> invList = new JList<>(left);
+        JList<Potions> slotList = new JList<>(right);
+
+        invList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        slotList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
+        invList.setCellRenderer(simpleRenderer());
+        slotList.setCellRenderer(simpleRenderer());
+
+        JButton add = new JButton(">> Add");
+        JButton remove = new JButton("<< Remove");
+        JButton up = new JButton("Up");
+        JButton down = new JButton("Down");
+
+        add.addActionListener(e -> {
+            Potions p = invList.getSelectedValue();
+            if (p == null) return;
+            right.addElement(p); // Potions dürfen doppelt
+        });
+
+        remove.addActionListener(e -> {
+            Potions p = slotList.getSelectedValue();
+            if (p == null) return;
+            right.removeElement(p);
+        });
+
+        up.addActionListener(e -> {
+            int i = slotList.getSelectedIndex();
+            if (i <= 0) return;
+            Potions p = right.getElementAt(i);
+            right.remove(i);
+            right.add(i - 1, p);
+            slotList.setSelectedIndex(i - 1);
+        });
+
+        down.addActionListener(e -> {
+            int i = slotList.getSelectedIndex();
+            if (i < 0 || i >= right.getSize() - 1) return;
+            Potions p = right.getElementAt(i);
+            right.remove(i);
+            right.add(i + 1, p);
+            slotList.setSelectedIndex(i + 1);
+        });
+
+        JPanel buttonsMid = new JPanel(new GridLayout(4, 1, 6, 6));
+        buttonsMid.add(add);
+        buttonsMid.add(remove);
+        buttonsMid.add(up);
+        buttonsMid.add(down);
+
+        JPanel panel = new JPanel(new BorderLayout(10, 10));
+        panel.add(wrap("Inventar (Potions)", invList), BorderLayout.WEST);
+        panel.add(buttonsMid, BorderLayout.CENTER);
+        panel.add(wrap("Slot 2 Loadout (C-scroll)", slotList), BorderLayout.EAST);
+
+        int result = JOptionPane.showConfirmDialog(
+                null,
+                panel,
+                "Potion-Loadout bearbeiten",
+                JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.PLAIN_MESSAGE
+        );
+
+        if (result != JOptionPane.OK_OPTION) return null;
+
+        List<Potions> out = new ArrayList<>();
+        for (int i = 0; i < right.getSize(); i++) out.add(right.getElementAt(i));
+        return out;
+    }
+
+    // ===== Helper =====
+    private static <T> boolean modelContains(DefaultListModel<T> model, T value) {
+        for (int i = 0; i < model.size(); i++) {
+            if (model.getElementAt(i) == value) return true;
         }
+        return false;
+    }
 
-        DefaultListModel<Potions> model = new DefaultListModel<>();
-        for (Potions p : options) model.addElement(p);
+    private static JComponent wrap(String title, JList<?> list) {
+        JScrollPane sp = new JScrollPane(list);
+        sp.setPreferredSize(new Dimension(320, 280));
+        JPanel p = new JPanel(new BorderLayout());
+        p.add(new JLabel(title), BorderLayout.NORTH);
+        p.add(sp, BorderLayout.CENTER);
+        return p;
+    }
 
-        JList<Potions> list = new JList<>(model);
-        list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        list.setCellRenderer(new DefaultListCellRenderer() {
+    private static DefaultListCellRenderer simpleRenderer() {
+        return new DefaultListCellRenderer() {
             @Override
             public Component getListCellRendererComponent(
                     JList<?> jList, Object value, int index, boolean isSelected, boolean cellHasFocus) {
@@ -124,22 +234,6 @@ public class SwingUI {
                 }
                 return this;
             }
-        });
-
-        JScrollPane pane = new JScrollPane(list);
-        pane.setPreferredSize(new Dimension(420, 260));
-
-        int result = JOptionPane.showConfirmDialog(
-                null,
-                pane,
-                "Potion zu Slot 2 hinzufügen",
-                JOptionPane.OK_CANCEL_OPTION,
-                JOptionPane.PLAIN_MESSAGE
-        );
-
-        if (result == JOptionPane.OK_OPTION) {
-            return list.getSelectedValue();
-        }
-        return null;
+        };
     }
 }
