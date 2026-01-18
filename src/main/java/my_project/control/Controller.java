@@ -27,6 +27,7 @@ public class Controller extends InteractiveGraphicalObject {
     private Player player;
 
     private Deathscreen deathscreen;
+    private Background background;
     private Collisions collisions;
 
     // Items / Inventory
@@ -63,7 +64,6 @@ public class Controller extends InteractiveGraphicalObject {
     private final double moveSpeed = 250;
 
     // ===== INVENTAR / HOTBAR =====
-    private final Inventory inventory = new Inventory();
     private boolean inventoryOpen = false;
     private int mouseX = 0;
     private int mouseY = 0;
@@ -82,14 +82,14 @@ public class Controller extends InteractiveGraphicalObject {
         fists = new Fists();
         sword = new Sword();
 
-        inventory.addItem(fists);
-        inventory.addItem(sword);
+        //inventory.addItem(fists);
+        //inventory.addItem(sword);
 
         // Start: Spieler hat Fists im Loadout
-        inventory.addWeaponToLoadout(fists);
+        //inventory.addWeaponToLoadout(fists);
 
         healingPotion = new HealingPotion();
-        inventory.addItem(healingPotion);
+        //inventory.addItem(healingPotion);
 
         // Player bekommt Inventory (falls Player es nutzt)
         player.setInventory(inventory);
@@ -129,7 +129,7 @@ public class Controller extends InteractiveGraphicalObject {
         healingPotion = new HealingPotion();
 
         // Beispiel: Potion liegt im Inventar (damit Swing was anzeigen kann)
-        inventory.addItem(healingPotion);
+        //inventory.addItem(healingPotion);
 
         bürgersteig = new Bürgersteig[breite][hoehe];
         for (int x = 0; x < breite; x++) {
@@ -240,7 +240,7 @@ public class Controller extends InteractiveGraphicalObject {
                 gate.draw(drawTool);
 
                 // UI
-                drawHotbar(drawTool);
+                //drawHotbar(drawTool);
                 if (inventoryOpen) drawInventoryOverlay(drawTool);
                 break;
 
@@ -261,9 +261,9 @@ public class Controller extends InteractiveGraphicalObject {
 
                 player.draw(drawTool);
 
-                drawHotbar(drawTool);
+                /*drawHotbar(drawTool);
                 if (inventoryOpen) drawInventoryOverlay(drawTool);
-                break;
+                break;*/
         }
     }
 
@@ -515,19 +515,19 @@ public class Controller extends InteractiveGraphicalObject {
         drawTool.drawText(55, y + 25, "Slot 1 (Waffe) [1]");
         drawTool.drawText(295, y + 25, "Slot 2 (Potion) [2]");
 
-        Weapons w = inventory.getSelectedWeapon();
-        Potions p = inventory.getSelectedPotion();
+        //Weapons w = inventory.getSelectedWeapon();
+        //Potions p = inventory.getSelectedPotion();
 
-        drawTool.drawText(55, y + 50, ">> " + inventory.getDisplayName(w));
-        drawTool.drawText(295, y + 50, ">> " + inventory.getDisplayName(p));
+        //drawTool.drawText(55, y + 50, ">> " + inventory.getDisplayName(w));
+        //drawTool.drawText(295, y + 50, ">> " + inventory.getDisplayName(p));
 
-        if (inventory.getActiveSlot() == 1) {
+        /*if (inventory.getActiveSlot() == 1) {
             drawTool.setCurrentColor(Color.YELLOW);
             drawTool.drawRectangle(40, y, slotW, slotH);
         } else {
             drawTool.setCurrentColor(Color.YELLOW);
             drawTool.drawRectangle(280, y, slotW, slotH);
-        }
+        }*/
     }
 
     // ===== Inventar Overlay zeichnen =====
@@ -644,12 +644,12 @@ public class Controller extends InteractiveGraphicalObject {
         if (key == KeyEvent.VK_C) inventory.scrollActiveSlot();
 
         if (key == KeyEvent.VK_X) {
-            if (inventory.getActiveSlot() == 1) {
+            //if (inventory.getActiveSlot() == 1) {
                 player.startAttack();
-            } else {
+            /*} else {
                 Potions p = inventory.getSelectedPotion();
                 if (p instanceof HealingPotion) healingPotion.setHealing(true);
-            }
+            }*/
         }
 
         if (key == KeyEvent.VK_E) {

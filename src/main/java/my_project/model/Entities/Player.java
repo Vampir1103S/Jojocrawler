@@ -34,7 +34,7 @@ public class Player extends Entity {
     private Inventory inventory;
 
     public Player() {
-        super(100, 500, 500, 30, 1, 1, "hehe", 60, 110);
+        super(100, 100, 100, 30, 1, 1, "hehe", 60, 110);
         spriteSheet2 = new SpriteSheet("Player-Sprite.png", 4, 4);
     }
 
@@ -47,6 +47,9 @@ public class Player extends Entity {
         drawTool.setCurrentColor(Color.BLACK);
         drawTool.drawFilledRectangle(xpos, ypos, width, height);
         drawTool.drawRectangle(xpos, ypos, width, height);
+        drawTool.setCurrentColor(new Color(255, 0, 0, 255));
+        drawTool.drawRectangle(17, 17, 205, 35);
+        drawTool.drawFilledRectangle(20, 20, hp*2, 30);
 
         spriteSheet2.setCurrent(direction, number);
         spriteSheet2.draw(drawTool, xpos - 12, ypos - 10, 5);
