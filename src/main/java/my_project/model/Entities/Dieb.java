@@ -9,6 +9,9 @@ import java.awt.geom.Rectangle2D;
 public class Dieb extends Enemy {
 
     private SpriteSheet spriteSheet1;
+    private int timer = 0;
+    private int number = 0;
+    private int direction = 0;
 
     public Dieb(double xpos, double ypos, double hp, double speed, double stamina, int defense, String name, double width,double height) {
         super( xpos,  ypos,  hp, speed,  stamina,  defense, name,  width, height);
@@ -27,6 +30,7 @@ public class Dieb extends Enemy {
         drawTool.drawFilledRectangle(xpos, ypos, width, height);
         drawTool.drawRectangle(xpos, ypos, width, height);
 
+        spriteSheet1.setCurrent(direction, number);
         spriteSheet1.draw(drawTool, xpos, ypos, 5);
 
         if (attacking) {
@@ -43,5 +47,21 @@ public class Dieb extends Enemy {
     @Override
     public void update(double dt) {
         super.update(dt);
+
+
+            if (facingX == 1 && facingY == 0) direction = 3;    //oben
+            else if (facingX == -1 && facingY == 0) direction = 2;    //links
+            else if (facingX == 0 && facingY == -1) direction = 0;    //unten
+            else if (facingX == 0 && facingY == 1) direction = 1;    //rechts
+            animateDieb(dt);
+
+    }
+
+    private void animateDieb(double dt) {
+        timer += dt;
+        if (timer >= 0.15) {
+            number = (number + 1) % 4;
+            timer = 0;
+        }
     }
 }
