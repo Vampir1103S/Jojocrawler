@@ -98,8 +98,8 @@ public class Player extends Entity {
     }
 
     public Rectangle2D getEnemyAggroBox() {
-        double rangeX = 60;
-        double rangeY = 60;
+        double rangeX = 40;
+        double rangeY = 40;
 
         return new Rectangle2D.Double(
                 xpos - rangeX,

@@ -52,11 +52,10 @@ public class Controller extends InteractiveGraphicalObject {
     private int zhoehe = 2;
     private int zbreite = 4;
 
-    // Enemies
-    private Enemy dieb;           // Single enemy for Scene 1
-    private Enemy[][] enemies;    // Swarm for Scene 4
-
-    // NPC
+    private Enemy dieb;
+    private Enemy kind;
+    private Enemy enemies[][];
+    private Enemy secenemies[][];
     private StoryTeller storytomole;
 
     // Movement
@@ -106,10 +105,13 @@ public class Controller extends InteractiveGraphicalObject {
         level1 = new LevelOne();
         gate = new Gate(800, 200, 200, 200);
 
-        // ===== Enemies =====
+
+        //Enemy
         enemies = new Enemy[4][4];
-        spawnEnemies(1);
-        dieb = enemies[0][0]; // Scene 1 nutzt einen Gegner
+        secenemies = new Enemy[4][4];
+        kind = enemies[0][0];
+        //spawnEnemies(1);
+        spawnEnemies(2);
 
         Enemy.setController(this);
 
@@ -157,8 +159,10 @@ public class Controller extends InteractiveGraphicalObject {
 
     private Enemy createEnemyByType(int enemyType, int x, int y) {
         if (enemyType == 1) {
-            // WICHTIG: Falls dein Dieb-Konstruktor anders ist, hier anpassen!
-            return new Dieb(x, y, 20, 1, 5, 20, "Dieb", 30, 30);
+            // Dieb-Constructor wie bei dir:
+            return new Dieb(x, y, 40, 1, 5, 20, "Dieb", 30, 30);
+        }else if (enemyType == 2) {
+            return new Kind(x, y, 20, 1, 5, 20, "Kind", 30, 30);
         }
         return null;
     }
@@ -177,7 +181,11 @@ public class Controller extends InteractiveGraphicalObject {
             for (int j = 0; j < cols; j++) {
                 double x = startX + j * swarmX;
                 double y = startY + i * swarmY;
-                enemies[i][j] = createEnemyByType(enemyType, (int) x, (int) y);
+                if (enemies[i][j] == null) {
+                    enemies[i][j] = createEnemyByType(enemyType, (int) x, (int) y);
+                }else if (secenemies[i][j] == null) {
+                    secenemies[i][j] = createEnemyByType(enemyType, (int) x, (int) y);
+                }
             }
         }
     }
@@ -351,15 +359,24 @@ public class Controller extends InteractiveGraphicalObject {
     private void handleEnemyHitsPlayer(Enemy e) {
         if (e == null) return;
         if (!e.canDealHitNow()) return;
+        System.out.println(e.getRunAway());
 
         Rectangle2D enemyHitbox = e.getAttackHitbox();
         if (enemyHitbox.intersects(player.getXpos(), player.getYpos(), player.getWidth(), player.getHeight())) {
             player.setHP(player.getHP() - e.getAttackDamage());
+            System.out.println(e.getRunAway());
+            if (e instanceof Kind){
+                e.setRunAway(true);
+                System.out.println(e.getRunAway());
+            }
 
             double kx = player.getCenterX() - e.getCenterX();
             double ky = player.getCenterY() - e.getCenterY();
             double dist = Math.sqrt(kx * kx + ky * ky);
-            if (dist != 0) { kx /= dist; ky /= dist; }
+            if (dist != 0) {
+                kx /= dist;
+                ky /= dist;
+            }
 
             double knockback = 80;
 
@@ -393,6 +410,7 @@ public class Controller extends InteractiveGraphicalObject {
             e.applyKnockback(kx * kb, ky * kb);
 
             player.markHitDone();
+
         }
     }
 
@@ -440,15 +458,20 @@ public class Controller extends InteractiveGraphicalObject {
     }
 
     private boolean playerHitsAnyTree() {
-        for (int x = 0; x < baum.length; x++) {
-            for (int y = 0; y < baum[x].length; y++) {
-                if (collisions.rectangleCollisions(player, baum[x][y])) return true;
-            }
-        }
-        for (int x = 0; x < betonZaun.length; x++) {
-            for (int y = 0; y < betonZaun[x].length; y++) {
-                if (collisions.rectangleCollisions(player, betonZaun[x][y])) return true;
-            }
+        switch (scene) {
+            case 1:
+
+                for (int x = 0; x < baum.length; x++) {
+                    for (int y = 0; y < baum[x].length; y++) {
+                        if (collisions.rectangleCollisions(player, baum[x][y])) return true;
+                    }
+                }
+                for (int x = 0; x < betonZaun.length; x++) {
+                    for (int y = 0; y < betonZaun[x].length; y++) {
+                        if (collisions.rectangleCollisions(player, betonZaun[x][y])) return true;
+                    }
+                }
+                break;
         }
         return false;
     }

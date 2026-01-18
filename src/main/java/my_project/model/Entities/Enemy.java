@@ -25,6 +25,13 @@ public class Enemy extends Entity {
 
     // Bewegung / KI
     protected double speed = 120;
+    protected boolean runAway = false;
+
+    public void setRunAway(boolean runAway) {
+        this.runAway = runAway;
+    }
+
+    protected double runAwayTimer = 0;
 
     public Enemy(double hp, double xpos, double ypos,
                  double xspeed, double yspeed, int acc,
@@ -66,6 +73,10 @@ public class Enemy extends Entity {
         moveTowardsPlayer(p, dt);
     }
 
+    public boolean getRunAway() {
+        return runAway;
+    }
+
     protected void moveTowardsPlayer(Player p, double dt) {
         double dx = p.getCenterX() - getCenterX();
         double dy = p.getCenterY() - getCenterY();
@@ -79,8 +90,20 @@ public class Enemy extends Entity {
         // Facing setzen (damit Enemy beim Laufen in die Richtung schaut)
         setFacingFromVector(dx, dy);
 
-        xpos += dx * speed * dt;
-        ypos += dy * speed * dt;
+        if (runAway){
+            runAwayTimer = 0.3;
+            runAway = false;
+        }
+
+        if (runAwayTimer > 0) {
+            runAwayTimer -= dt;
+            xpos -= dx * speed * dt;
+            ypos -= dy * speed * dt;
+        } else {
+            xpos += dx * speed * dt;
+            ypos += dy * speed * dt;
+        }
+
 
         // ✅ FIX: Clamp nach Movement, sonst kann Enemy offscreen verschwinden
         clampToScreen();
@@ -125,7 +148,7 @@ public class Enemy extends Entity {
 
     // AttackHitbox wie beim Player: abhängig von facing
     public Rectangle2D getAttackHitbox() {
-        double hitW = 0, hitH = 0, offset = 10;
+        double hitW = 40, hitH = 40, offset = 10;
 
         double x = xpos + width / 2 - hitW / 2;
         double y = ypos + height / 2 - hitH / 2;
