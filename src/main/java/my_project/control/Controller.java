@@ -6,7 +6,6 @@ import my_project.Config;
 import my_project.SwingUI;
 import my_project.model.Entities.*;
 import my_project.model.items.*;
-import my_project.model.items.Consumables.HealingPotion;
 import my_project.model.items.Consumables.Potions;
 import my_project.model.map.*;
 import my_project.view.Deathscreen;
@@ -17,7 +16,10 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class Controller extends InteractiveGraphicalObject {
@@ -27,27 +29,29 @@ public class Controller extends InteractiveGraphicalObject {
     private Player player;
 
     private Deathscreen deathscreen;
-    private Background background;
     private Collisions collisions;
+
+
+    private Background background;
 
     // Items / Inventory
     private Inventory inventory;
-    private HealingPotion healingPotion;
 
-    // Map
-    private Bürgersteig[][] bürgersteig;
-    private Baum[][] baum;
-    private Grünfläche[][] grünfläche;
-    private BetonZaun[][] betonZaun;
+    // Map (aus V2)
+//    private Bürgersteig[][] bürgersteig;
+//    private Baum[][] baum;
+//    private Grünfläche[][] grünfläche;
+//    private BetonZaun[][] betonZaun;
 
     // Level
     private Gate gate;
-    private Gate backgate;
     private LevelOne level1;
-    int deathcount = 0;
-    private boolean backgateUnlocked = false;
-    private boolean wave2Started = false; // damit reset/spawn nur 1x passiert
 
+    // ✅ aus V1: Backgate + Wave-Logic
+    private Gate backgate;
+    private int deathcount = 0;
+    private boolean backgateUnlocked = false;
+    private boolean wave2Started = false;
 
     private int hoehe = 10;
     private int breite = 10;
@@ -56,17 +60,21 @@ public class Controller extends InteractiveGraphicalObject {
     private int zhoehe = 2;
     private int zbreite = 4;
 
-    private Enemy dieb;
-    private Enemy kind;
-    private Enemy enemies[][];
-    private Enemy secenemies[][];
+    // Enemies
+    private Enemy dieb;           // Single enemy for Scene 1
+    private Enemy[][] enemies;    // Swarm for Scene 4
+
+    // ✅ aus V1: zweite Welle-Array
+    private Enemy[][] secenemies;
+
+    // NPCs
     private StoryTeller storytomole;
     private MerchantNPC merchant;
 
     // Movement
     private boolean wDown, aDown, sDown, dDown;
 
-    // ===== INVENTAR / HOTBAR =====
+    // Inventory Overlay
     private boolean inventoryOpen = false;
 
     // ✅ IMPORTANT: Hover needs live mouse position
@@ -86,47 +94,42 @@ public class Controller extends InteractiveGraphicalObject {
         deathscreen = new Deathscreen();
         collisions = new Collisions();
 
-        player = new Player();
+        // ✅ aus V1
         background = new Background();
 
-        fists = new Fists();
-        sword = new Sword();
+        player = new Player();
 
-        //inventory.addItem(fists);
-        //inventory.addItem(sword);
-
-        // Start: Spieler hat Fists im Loadout
-        //inventory.addWeaponToLoadout(fists);
-
-        healingPotion = new HealingPotion();
-        //inventory.addItem(healingPotion);
-
+        // ✅ INVENTORY (Bugfix vs V1)
+        inventory = new Inventory();
         player.setInventory(inventory);
 
         // ===== NPCs =====
         storytomole = new StoryTeller(500, 500, 10, 5, 10, 100, "Tomole", 30, 20);
+        // V1 Story (mehr Lines) + kompatibel zu V2
         storytomole.addDialogLine("Hallo!");
         storytomole.addDialogLine("Ich bin Tomole.");
         storytomole.addDialogLine("Eine komische Präsenz hat seine Klauen in unsere Stadt getrieben.");
         storytomole.addDialogLine("Fast alle haben diese Stadt, die sonst so vor Leben blühte verlassen.");
-        storytomole.addDialogLine("begib dich zum Bahnhof um weiteres zu finden!");
-
-        collisions = new Collisions();
+        storytomole.addDialogLine("Begib dich zum Bahnhof um weiteres zu finden!");
 
         merchant = new MerchantNPC(560, 500);
 
         // ===== Level =====
         level1 = new LevelOne();
         gate = new Gate(800, 200, 200, 200);
-        backgate = new Gate(1200,200,200,200);
 
+        // ✅ Backgate aus V1
+        backgate = new Gate(1200, 200, 200, 200);
 
-        //Enemy
+        // ===== Enemies =====
         enemies = new Enemy[4][4];
         secenemies = new Enemy[4][4];
-        kind = enemies[0][0];
-        //spawnEnemies(1);
+
+        // V1: direkt Bosslehrer; V2: Dieb
+        // Ich spawne wie V1 Bosslehrer als erste Welle,
+        // aber setze "dieb" trotzdem auf enemies[0][0], damit Scene1 nichts crasht.
         spawnEnemies(3);
+        dieb = enemies[0][0];
 
         Enemy.setController(this);
 
@@ -141,56 +144,51 @@ public class Controller extends InteractiveGraphicalObject {
             frame.setVisible(true);
         });
 
-        healingPotion = new HealingPotion();
-
-        // Beispiel: Potion liegt im Inventar (damit Swing was anzeigen kann)
-        //inventory.addItem(healingPotion);
-
-        bürgersteig = new Bürgersteig[breite][hoehe];
-        for (int x = 0; x < breite; x++) {
-            for (int y = 0; y < hoehe; y++) {
-                bürgersteig[x][y] = new Bürgersteig(100 + x * 30, 100 + y * 30);
-            }
-        }
-
-        betonZaun = new BetonZaun[zbreite][zhoehe];
-        for (int x = 0; x < zbreite; x++) {
-            for (int y = 0; y < zhoehe; y++) {
-                betonZaun[x][y] = new BetonZaun(130 + x * 70, 240 + y * 200);
-            }
-        }
-
-        baum = new Baum[bbreite][bhoehe];
-        grünfläche = new Grünfläche[bbreite][bhoehe];
-        for (int x = 0; x < bbreite; x++) {
-            for (int y = 0; y < bhoehe; y++) {
-                baum[x][y] = new Baum(100 + x * 70, 100 + y * 200);
-                grünfläche[x][y] = new Grünfläche(100 + x * 70, 145 + y * 200);
-            }
-        }
+        // ===== Map bauen (V2) =====
+//        bürgersteig = new Bürgersteig[breite][hoehe];
+//        for (int x = 0; x < breite; x++) {
+//            for (int y = 0; y < hoehe; y++) {
+//                bürgersteig[x][y] = new Bürgersteig(100 + x * 30, 100 + y * 30);
+//            }
+//        }
+//
+//        betonZaun = new BetonZaun[zbreite][zhoehe];
+//        for (int x = 0; x < zbreite; x++) {
+//            for (int y = 0; y < zhoehe; y++) {
+//                betonZaun[x][y] = new BetonZaun(130 + x * 70, 240 + y * 200);
+//            }
+//        }
+//
+//        baum = new Baum[bbreite][bhoehe];
+//        grünfläche = new Grünfläche[bbreite][bhoehe];
+//        for (int x = 0; x < bbreite; x++) {
+//            for (int y = 0; y < bhoehe; y++) {
+//                baum[x][y] = new Baum(100 + x * 70, 100 + y * 200);
+//                grünfläche[x][y] = new Grünfläche(100 + x * 70, 145 + y * 200);
+//            }
+//        }
     }
 
     public Player getPlayer() {
         return player;
     }
 
-    private Enemy createEnemyByType(int enemyType,int x ,int y) {
+    // =================== Enemy Spawning ===================
+
+    private Enemy createEnemyByType(int enemyType, int x, int y) {
         if (enemyType == 1) {
-            // Dieb-Constructor wie bei dir:
-            return new Dieb(x, y, 50, 1, 5, 20, "Dieb", 30, 30);
-        }else if (enemyType == 2) {
+            return new Dieb(x, y, 20, 1, 5, 20, "Dieb", 30, 30);
+        } else if (enemyType == 2) {
+            // ✅ aus V1
             return new Kind(x, y, 40, 1, 5, 20, "Kind", 30, 30);
-        }else if(enemyType == 3){
+        } else if (enemyType == 3) {
+            // ✅ aus V1
             return new Bosslehrer(x, y, 110, 1, 5, 20, "Bosslehrer", 40, 60);
         }
-
-        // if (enemyType == 2) return new Ninja(); oder andere Enemey Typen
-
         return null;
     }
 
     private void spawnEnemies(int enemyType) {
-
         int rows = enemies.length;
         int cols = enemies[0].length;
 
@@ -204,9 +202,11 @@ public class Controller extends InteractiveGraphicalObject {
             for (int j = 0; j < cols; j++) {
                 double x = startX + j * swarmX;
                 double y = startY + i * swarmY;
+
+                // ✅ Logik aus V1: erst enemies füllen, dann secenemies (Wave2)
                 if (enemies[i][j] == null) {
                     enemies[i][j] = createEnemyByType(enemyType, (int) x, (int) y);
-                }else if (secenemies[i][j] == null) {
+                } else if (secenemies[i][j] == null) {
                     secenemies[i][j] = createEnemyByType(enemyType, (int) x, (int) y);
                 }
             }
@@ -222,40 +222,48 @@ public class Controller extends InteractiveGraphicalObject {
                 break;
 
             case 1:
-                // Tiles
-                for (int x = 0; x < bürgersteig.length; x++) {
-                    for (int y = 0; y < bürgersteig[x].length; y++) {
-                        bürgersteig[x][y].draw(drawTool);
-                    }
-                }
+                // ✅ Hintergrund aus V1
+                background.draw(drawTool, 1);
 
-                for (int x = 0; x < baum.length; x++) {
-                    for (int y = 0; y < baum[x].length; y++) {
-                        grünfläche[x][y].draw(drawTool);
-                    }
-                }
+                // (Map aus V2: optional, du kannst es lassen/entfernen – ich lasse V2-Style bestehen)
+//                for (int x = 0; x < bürgersteig.length; x++) {
+//                    for (int y = 0; y < bürgersteig[x].length; y++) {
+//                        bürgersteig[x][y].draw(drawTool);
+//                    }
+//                }
+//
+//                for (int x = 0; x < baum.length; x++) {
+//                    for (int y = 0; y < baum[x].length; y++) {
+//                        grünfläche[x][y].draw(drawTool);
+//                    }
+//                }
 
                 if (player.getHP() > 0) player.draw(drawTool);
+
+                // optional: falls dieb in Scene1 noch genutzt wird
                 if (dieb != null && dieb.getHP() > 0) dieb.draw(drawTool);
 
                 storytomole.draw(drawTool);
                 merchant.draw(drawTool);
 
-                for (int x = 0; x < betonZaun.length; x++) {
-                    for (int y = 0; y < betonZaun[x].length; y++) {
-                        betonZaun[x][y].draw(drawTool);
-                    }
-                }
-                for (int x = 0; x < baum.length; x++) {
-                    for (int y = 0; y < baum[x].length; y++) {
-                        baum[x][y].draw(drawTool);
-                    }
-                }
+//                for (int x = 0; x < betonZaun.length; x++) {
+//                    for (int y = 0; y < betonZaun[x].length; y++) {
+//                        betonZaun[x][y].draw(drawTool);
+//                    }
+//                }
+//                for (int x = 0; x < baum.length; x++) {
+//                    for (int y = 0; y < baum[x].length; y++) {
+//                        baum[x][y].draw(drawTool);
+//                    }
+//                }
 
                 gate.draw(drawTool);
 
-                // UI
+                for (CoinDrop c : coinDrops) c.draw(drawTool);
+
                 drawHotbar(drawTool);
+                drawHPBar(drawTool);
+
                 if (inventoryOpen) drawInventoryOverlay(drawTool);
                 break;
 
@@ -263,13 +271,10 @@ public class Controller extends InteractiveGraphicalObject {
                 deathscreen.draw(drawTool);
                 break;
 
-
             case 4:
                 level1.draw(drawTool);
 
-                if (backgateUnlocked) {
-                    backgate.draw(drawTool);
-                }
+                if (backgateUnlocked) backgate.draw(drawTool);
 
                 for (int i = 0; i < enemies.length; i++) {
                     for (int j = 0; j < enemies[0].length; j++) {
@@ -281,14 +286,13 @@ public class Controller extends InteractiveGraphicalObject {
 
                 player.draw(drawTool);
 
+                for (CoinDrop c : coinDrops) c.draw(drawTool);
+
                 drawHotbar(drawTool);
+                drawHPBar(drawTool);
+
                 if (inventoryOpen) drawInventoryOverlay(drawTool);
                 break;
-
-
-                /*drawHotbar(drawTool);
-                if (inventoryOpen) drawInventoryOverlay(drawTool);
-                break;*/
         }
     }
 
@@ -303,11 +307,11 @@ public class Controller extends InteractiveGraphicalObject {
 
             case 1:
                 player.update(dt);
-                if (dieb != null && dieb.getHP() > 0) dieb.update(dt);
 
-                handleEnemyHitsPlayer(dieb);
-                handlePlayerHitsEnemy(dieb);
+                // falls Scene1 noch einen Gegner hat
 
+
+                // Coin Drop (falls in Scene1 genutzt)
                 if (dieb != null && dieb.getHP() <= 0 && !enemiesThatAlreadyDropped.contains(dieb)) {
                     enemiesThatAlreadyDropped.add(dieb);
                     int coins = ThreadLocalRandom.current().nextInt(1, 6);
@@ -315,15 +319,13 @@ public class Controller extends InteractiveGraphicalObject {
                 }
 
                 handleMovement(dt);
-                handleHealingPotion();
 
-                if (collisions.rectangleCollisions(player, storytomole) && storytomole.getETrue()) {
-                    storytomole.speak();
-                }
-
+                // Gate -> Szene4
                 if (collisions.rectangleCollisions(player, gate)) {
                     switchScene(4);
                 }
+
+                handleCoinPickup();
                 break;
 
             case 3:
@@ -331,35 +333,36 @@ public class Controller extends InteractiveGraphicalObject {
                 break;
 
             case 4:
+                // ✅ Backgate zurück zu Szene1
                 if (backgateUnlocked && collisions.rectangleCollisions(player, backgate)) {
                     switchScene(1);
                 }
 
-
-
+                // ✅ Wave1 deathcount (nur 1x pro Frame korrekt zählen)
+                int aliveOrDeadCount = 0;
                 for (int i = 0; i < enemies.length; i++) {
                     for (int j = 0; j < enemies[0].length; j++) {
-                        if (enemies[i][j].getHP() <= 0) {
-                            deathcount += 1;
-                        }
+                        Enemy e = enemies[i][j];
+                        if (e == null) continue;
+                        if (e.getHP() <= 0) aliveOrDeadCount++;
                     }
                 }
+                deathcount = aliveOrDeadCount;
+
                 if (deathcount == 16) {
                     backgateUnlocked = true;
 
                     if (!wave2Started) {
                         wave2Started = true;
-                        deathcount = 0;              // so wie du es willst: löst aus und resettet
+                        deathcount = 0;
                         player.resetPlayerPosition();
-                        spawnEnemies(2);
+                        spawnEnemies(2); // ✅ Wave2 = Kind
                     }
                 }
 
-
-
-
                 player.update(dt);
 
+                // Enemies update
                 for (int i = 0; i < enemies.length; i++) {
                     for (int j = 0; j < enemies[0].length; j++) {
                         Enemy e = enemies[i][j];
@@ -368,6 +371,7 @@ public class Controller extends InteractiveGraphicalObject {
                     }
                 }
 
+                // Enemy -> Player Hits
                 for (int i = 0; i < enemies.length; i++) {
                     for (int j = 0; j < enemies[0].length; j++) {
                         Enemy e = enemies[i][j];
@@ -377,6 +381,7 @@ public class Controller extends InteractiveGraphicalObject {
                     }
                 }
 
+                // Player -> Enemy Hits
                 if (player.canDealHitNow()) {
                     Rectangle2D hitbox = player.getAttackHitbox();
                     boolean hitSomeone = false;
@@ -407,8 +412,8 @@ public class Controller extends InteractiveGraphicalObject {
                 }
 
                 handleMovement(dt);
-                handleHealingPotion();
 
+                // Coin drops für tote Enemies
                 for (int i = 0; i < enemies.length; i++) {
                     for (int j = 0; j < enemies[0].length; j++) {
                         Enemy e = enemies[i][j];
@@ -423,6 +428,11 @@ public class Controller extends InteractiveGraphicalObject {
                 }
 
                 handleCoinPickup();
+
+                // Story
+                if (collisions.rectangleCollisions(player, storytomole)) {
+                    // speak nur auf E
+                }
                 break;
         }
     }
@@ -433,7 +443,7 @@ public class Controller extends InteractiveGraphicalObject {
         if (e == null) return;
         if (!e.canDealHitNow()) return;
 
-        // ✅ Wenn du ResistancePotion (Invulnerable) nutzt:
+        // ✅ ResistancePotion Support (Version2)
         if (player.isInvulnerable()) {
             e.markHitDone();
             return;
@@ -442,20 +452,19 @@ public class Controller extends InteractiveGraphicalObject {
         Rectangle2D enemyHitbox = e.getAttackHitbox();
         if (enemyHitbox.intersects(player.getXpos(), player.getYpos(), player.getWidth(), player.getHeight())) {
             player.setHP(player.getHP() - e.getAttackDamage());
-            if (e instanceof Kind){
+
+            // ✅ aus V1: Kind rennt weg
+            if (e instanceof Kind) {
                 e.setRunAway(true);
             }
+
             double kx = player.getCenterX() - e.getCenterX();
             double ky = player.getCenterY() - e.getCenterY();
             double dist = Math.sqrt(kx * kx + ky * ky);
             if (dist != 0) { kx /= dist; ky /= dist; }
-            double knockback = 80;
 
-            if (e instanceof Bosslehrer){
-                knockback = 200;
-            }else {
-                knockback = 80;
-            }
+            // ✅ aus V1: Bosslehrer stärkerer Knockback
+            double knockback = (e instanceof Bosslehrer) ? 200 : 80;
 
             double newX = player.getXpos() + kx * knockback;
             double newY = player.getYpos() + ky * knockback;
@@ -495,7 +504,7 @@ public class Controller extends InteractiveGraphicalObject {
     private void handleMovement(double dt) {
         if (inventoryOpen) return;
 
-        // ✅ SpeedPotion / Upgrades wirken nur, wenn wir speed vom Player nehmen
+        // ✅ nutzt Player-Speed (V2)
         double moveSpeed = player.getMoveSpeed();
 
         double dx = 0, dy = 0;
@@ -510,7 +519,7 @@ public class Controller extends InteractiveGraphicalObject {
             double newX = oldX + dx;
             newX = Math.max(0, Math.min(newX, Config.WINDOW_WIDTH - player.getWidth()));
             player.setXpos(newX);
-            if (playerHitsAnyTree()) player.setXpos(oldX);
+            //if (playerHitsAnyTree()) player.setXpos(oldX);
         }
 
         if (dy != 0) {
@@ -518,43 +527,23 @@ public class Controller extends InteractiveGraphicalObject {
             double newY = oldY + dy;
             newY = Math.max(0, Math.min(newY, Config.WINDOW_HEIGHT - player.getHeight()));
             player.setYpos(newY);
-            if (playerHitsAnyTree()) player.setYpos(oldY);
+            //if (playerHitsAnyTree()) player.setYpos(oldY);
         }
     }
 
-    private void handleHealingPotion() {
-        // (deine alte Healing-Logik bleibt erstmal, falls du sie noch nutzt)
-        if (healingPotion == null) return;
-
-        if (healingPotion.getHealing()) {
-            if (healingPotion.getAmount() > 0) {
-                player.heal(20); // ✅ heilen nur bis max
-                healingPotion.setHealing(false);
-                healingPotion.setAmount(healingPotion.getAmount() - 1);
-            } else {
-                healingPotion.setHealing(false);
-            }
-        }
-    }
-
-    private boolean playerHitsAnyTree() {
-        switch (scene) {
-            case 1:
-
-                for (int x = 0; x < baum.length; x++) {
-                    for (int y = 0; y < baum[x].length; y++) {
-                        if (collisions.rectangleCollisions(player, baum[x][y])) return true;
-                    }
-                }
-                for (int x = 0; x < betonZaun.length; x++) {
-                    for (int y = 0; y < betonZaun[x].length; y++) {
-                        if (collisions.rectangleCollisions(player, betonZaun[x][y])) return true;
-                    }
-                }
-                break;
-        }
-        return false;
-    }
+//    private boolean playerHitsAnyTree() {
+//        for (int x = 0; x < baum.length; x++) {
+//            for (int y = 0; y < baum[x].length; y++) {
+//                if (collisions.rectangleCollisions(player, baum[x][y])) return true;
+//            }
+//        }
+//        for (int x = 0; x < betonZaun.length; x++) {
+//            for (int y = 0; y < betonZaun[x].length; y++) {
+//                if (collisions.rectangleCollisions(player, betonZaun[x][y])) return true;
+//            }
+//        }
+//        return false;
+//    }
 
     // =================== Coins ===================
 
@@ -580,39 +569,31 @@ public class Controller extends InteractiveGraphicalObject {
         int slotW = 220;
         int slotH = 70;
 
-        // Slot 1 (Waffe)
         drawTool.setCurrentColor(new Color(0, 0, 0, 160));
         drawTool.drawFilledRectangle(40, y, slotW, slotH);
         drawTool.setCurrentColor(Color.WHITE);
         drawTool.drawRectangle(40, y, slotW, slotH);
 
-        // Slot 2 (Potion)
         drawTool.setCurrentColor(new Color(0, 0, 0, 160));
         drawTool.drawFilledRectangle(280, y, slotW, slotH);
         drawTool.setCurrentColor(Color.WHITE);
         drawTool.drawRectangle(280, y, slotW, slotH);
 
-        // Texte
         drawTool.formatText("Arial", 0, 18);
         drawTool.drawText(55, y + 25, "Slot 1 (Waffe) [1]");
         drawTool.drawText(295, y + 25, "Slot 2 (Potion) [2]");
 
-        //Weapons w = inventory.getSelectedWeapon();
-        //Potions p = inventory.getSelectedPotion();
+        Weapons w = inventory.getSelectedWeapon();
+        Potions p = inventory.getSelectedPotion();
 
-        //drawTool.drawText(55, y + 50, ">> " + inventory.getDisplayName(w));
-        //drawTool.drawText(295, y + 50, ">> " + inventory.getDisplayName(p));
+        drawTool.drawText(55, y + 50, ">> " + inventory.getDisplayName(w));
+        drawTool.drawText(295, y + 50, ">> " + inventory.getDisplayName(p));
 
-        if (inventory.getActiveSlot() == 1) {
-            drawTool.setCurrentColor(Color.YELLOW);
-            drawTool.drawRectangle(40, y, slotW, slotH);
-        } else {
-            drawTool.setCurrentColor(Color.YELLOW);
-            drawTool.drawRectangle(280, y, slotW, slotH);
-        }
+        drawTool.setCurrentColor(Color.YELLOW);
+        if (inventory.getActiveSlot() == 1) drawTool.drawRectangle(40, y, slotW, slotH);
+        else drawTool.drawRectangle(280, y, slotW, slotH);
     }
 
-    // ===== Inventar Overlay zeichnen =====
     private void drawInventoryOverlay(DrawTool drawTool) {
         drawTool.setCurrentColor(new Color(0, 0, 0, 180));
         drawTool.drawFilledRectangle(40, 40, 600, 920);
@@ -654,7 +635,6 @@ public class Controller extends InteractiveGraphicalObject {
         drawTool.drawText(70, 930, "1/2 = Slot | C = scroll | X = benutzen | E im Inventar = Loadout Editor");
     }
 
-    // ===== Hover + E öffnet Swing Auswahl =====
     private void tryOpenSwingForHoveredField() {
         if (!inventoryOpen) return;
 
@@ -662,15 +642,15 @@ public class Controller extends InteractiveGraphicalObject {
         boolean overPotion = potionField.contains(mouseX, mouseY);
 
         if (overWeapon) {
-            List<Weapons> available = collectWeaponsFromInventory();
-            List<Weapons> current = inventory.getWeaponLoadoutCopy();
-            List<Weapons> edited = SwingUI.editWeaponsLoadout(available, current);
+            java.util.List<Weapons> available = collectWeaponsFromInventory();
+            java.util.List<Weapons> current = inventory.getWeaponLoadoutCopy();
+            java.util.List<Weapons> edited = SwingUI.editWeaponsLoadout(available, current);
             if (edited != null) inventory.setWeaponLoadout(edited);
 
         } else if (overPotion) {
-            List<Potions> available = collectPotionsFromInventory();
-            List<Potions> current = inventory.getPotionLoadoutCopy();
-            List<Potions> edited = SwingUI.editPotionsLoadout(available, current);
+            java.util.List<Potions> available = collectPotionsFromInventory();
+            java.util.List<Potions> current = inventory.getPotionLoadoutCopy();
+            java.util.List<Potions> edited = SwingUI.editPotionsLoadout(available, current);
             if (edited != null) inventory.setPotionLoadout(edited);
         }
     }
@@ -732,19 +712,7 @@ public class Controller extends InteractiveGraphicalObject {
         drawTool.drawText(x + 8, y + 18, (int) hp + " / " + (int) maxHp + " HP");
     }
 
-    // ===== Item benutzen (X) =====
-    private void useActiveSlotItem() {
-        if (inventory.getActiveSlot() == 1) {
-            player.startAttack();
-        } else {
-            Potions p = inventory.getSelectedPotion();
-            if (p == null) return;
-
-            if (p instanceof HealingPotion) {
-                healingPotion.setHealing(true);
-            }
-        }
-    }
+    // =================== INPUT ===================
 
     public static void switchScene(int newSzene) {
         scene = newSzene;
@@ -757,7 +725,6 @@ public class Controller extends InteractiveGraphicalObject {
         mouseY = e.getY();
     }
 
-    // ✅ DAS IST DER FIX: Hover funktioniert wieder
     @Override
     public void mouseMoved(MouseEvent e) {
         mouseX = e.getX();
@@ -783,11 +750,10 @@ public class Controller extends InteractiveGraphicalObject {
         if (key == KeyEvent.VK_C) inventory.scrollActiveSlot();
 
         if (key == KeyEvent.VK_X) {
-            //if (inventory.getActiveSlot() == 1) {
+            if (inventory.getActiveSlot() == 1) {
                 player.startAttack();
             } else {
-                Potions p = inventory.getSelectedPotion();
-                if (p instanceof HealingPotion) healingPotion.setHealing(true);
+                inventory.consumeSelectedPotion(player);
             }
         }
 
@@ -798,7 +764,6 @@ public class Controller extends InteractiveGraphicalObject {
             }
 
             if (collisions.rectangleCollisions(player, merchant)) {
-                // ✅ Shop mit Upgrades braucht Player
                 SwingUI.openShop(inventory, player);
                 return;
             }
