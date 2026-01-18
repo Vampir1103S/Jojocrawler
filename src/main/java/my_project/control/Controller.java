@@ -148,7 +148,7 @@ public class Controller extends InteractiveGraphicalObject {
 
     private Enemy createEnemyByType(int enemyType,int x ,int y) {
         if (enemyType == 1) {
-            // Dieb-Constructor wie bei dir:
+            // WICHTIG: Falls dein Dieb-Konstruktor anders ist, hier anpassen!
             return new Dieb(x, y, 20, 1, 5, 20, "Dieb", 30, 30);
         }
 
