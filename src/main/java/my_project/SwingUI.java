@@ -1,8 +1,23 @@
 package my_project;
 
+import my_project.model.Entities.Player;
 import my_project.model.Entities.StoryTeller;
+
+import my_project.model.items.Inventory;
+import my_project.model.items.Item;
+
+// Weapons
+import my_project.model.items.Sword;
+import my_project.model.items.Dagger;
+import my_project.model.items.Spear;
+import my_project.model.items.Axe;
 import my_project.model.items.Weapons;
+
+// Potions
 import my_project.model.items.Consumables.Potions;
+import my_project.model.items.Consumables.HealingPotion;
+import my_project.model.items.Consumables.SpeedPotion;
+import my_project.model.items.Consumables.ResistancePotion;
 
 import javax.swing.*;
 import java.awt.*;
@@ -16,15 +31,11 @@ public class SwingUI {
     public JTextField outputField;
     public JComponent mainPanel;
 
-    // ====== NPC / Story SwingUI (wie vorher) ======
+    // ====== NPC / Story SwingUI ======
     public SwingUI(StoryTeller storytomole) {
-        // Falls du kein IntelliJ .form benutzt: sicherstellen, dass outputField existiert
-        if (outputField == null) {
-            outputField = new JTextField();
-        }
+        if (outputField == null) outputField = new JTextField();
 
         outputField.setText("Du musst die Taste E drücken.");
-
         outputField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
@@ -37,203 +48,304 @@ public class SwingUI {
         });
     }
 
-    // ============================================================
-    // ====== LOADOUT EDITOR (V1): Zwei Listen + Buttons ===========
-    // ============================================================
-
-    // Waffen-Loadout bearbeiten: Inventar links, Slot-Reihenfolge rechts
+    // =========================================================
+    // ✅ LOADOUT EDITOR (Waffen)
+    // =========================================================
     public static List<Weapons> editWeaponsLoadout(List<Weapons> available, List<Weapons> current) {
-        DefaultListModel<Weapons> left = new DefaultListModel<>();
-        DefaultListModel<Weapons> right = new DefaultListModel<>();
-
-        if (available != null) for (Weapons w : available) left.addElement(w);
-        if (current != null) for (Weapons w : current) right.addElement(w);
-
-        JList<Weapons> invList = new JList<>(left);
-        JList<Weapons> slotList = new JList<>(right);
-
-        invList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        slotList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-
-        // schöner Renderer (falls toString nicht sauber ist)
-        invList.setCellRenderer(simpleRenderer());
-        slotList.setCellRenderer(simpleRenderer());
-
-        JButton add = new JButton(">> Add");
-        JButton remove = new JButton("<< Remove");
-        JButton up = new JButton("Up");
-        JButton down = new JButton("Down");
-
-        add.addActionListener(e -> {
-            Weapons w = invList.getSelectedValue();
-            if (w == null) return;
-            if (!modelContains(right, w)) right.addElement(w); // keine Duplikate bei Waffen
-        });
-
-        remove.addActionListener(e -> {
-            Weapons w = slotList.getSelectedValue();
-            if (w == null) return;
-            right.removeElement(w);
-        });
-
-        up.addActionListener(e -> {
-            int i = slotList.getSelectedIndex();
-            if (i <= 0) return;
-            Weapons w = right.getElementAt(i);
-            right.remove(i);
-            right.add(i - 1, w);
-            slotList.setSelectedIndex(i - 1);
-        });
-
-        down.addActionListener(e -> {
-            int i = slotList.getSelectedIndex();
-            if (i < 0 || i >= right.getSize() - 1) return;
-            Weapons w = right.getElementAt(i);
-            right.remove(i);
-            right.add(i + 1, w);
-            slotList.setSelectedIndex(i + 1);
-        });
-
-        JPanel buttonsMid = new JPanel(new GridLayout(4, 1, 6, 6));
-        buttonsMid.add(add);
-        buttonsMid.add(remove);
-        buttonsMid.add(up);
-        buttonsMid.add(down);
-
-        JPanel panel = new JPanel(new BorderLayout(10, 10));
-        panel.add(wrap("Inventar (Waffen)", invList), BorderLayout.WEST);
-        panel.add(buttonsMid, BorderLayout.CENTER);
-        panel.add(wrap("Slot 1 Loadout (C-scroll)", slotList), BorderLayout.EAST);
-
-        int result = JOptionPane.showConfirmDialog(
-                null,
-                panel,
-                "Waffen-Loadout bearbeiten",
-                JOptionPane.OK_CANCEL_OPTION,
-                JOptionPane.PLAIN_MESSAGE
-        );
-
-        if (result != JOptionPane.OK_OPTION) return null;
-
-        List<Weapons> out = new ArrayList<>();
-        for (int i = 0; i < right.getSize(); i++) out.add(right.getElementAt(i));
-        return out;
+        return editLoadoutGeneric("Waffen-Loadout bearbeiten", available, current);
     }
 
-    // Potions-Loadout bearbeiten: Duplikate sind erlaubt (z.B. 2 Heiltränke)
+    // =========================================================
+    // ✅ LOADOUT EDITOR (Potions)
+    // =========================================================
     public static List<Potions> editPotionsLoadout(List<Potions> available, List<Potions> current) {
-        DefaultListModel<Potions> left = new DefaultListModel<>();
-        DefaultListModel<Potions> right = new DefaultListModel<>();
-
-        if (available != null) for (Potions p : available) left.addElement(p);
-        if (current != null) for (Potions p : current) right.addElement(p);
-
-        JList<Potions> invList = new JList<>(left);
-        JList<Potions> slotList = new JList<>(right);
-
-        invList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        slotList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-
-        invList.setCellRenderer(simpleRenderer());
-        slotList.setCellRenderer(simpleRenderer());
-
-        JButton add = new JButton(">> Add");
-        JButton remove = new JButton("<< Remove");
-        JButton up = new JButton("Up");
-        JButton down = new JButton("Down");
-
-        add.addActionListener(e -> {
-            Potions p = invList.getSelectedValue();
-            if (p == null) return;
-            right.addElement(p); // Potions dürfen doppelt
-        });
-
-        remove.addActionListener(e -> {
-            Potions p = slotList.getSelectedValue();
-            if (p == null) return;
-            right.removeElement(p);
-        });
-
-        up.addActionListener(e -> {
-            int i = slotList.getSelectedIndex();
-            if (i <= 0) return;
-            Potions p = right.getElementAt(i);
-            right.remove(i);
-            right.add(i - 1, p);
-            slotList.setSelectedIndex(i - 1);
-        });
-
-        down.addActionListener(e -> {
-            int i = slotList.getSelectedIndex();
-            if (i < 0 || i >= right.getSize() - 1) return;
-            Potions p = right.getElementAt(i);
-            right.remove(i);
-            right.add(i + 1, p);
-            slotList.setSelectedIndex(i + 1);
-        });
-
-        JPanel buttonsMid = new JPanel(new GridLayout(4, 1, 6, 6));
-        buttonsMid.add(add);
-        buttonsMid.add(remove);
-        buttonsMid.add(up);
-        buttonsMid.add(down);
-
-        JPanel panel = new JPanel(new BorderLayout(10, 10));
-        panel.add(wrap("Inventar (Potions)", invList), BorderLayout.WEST);
-        panel.add(buttonsMid, BorderLayout.CENTER);
-        panel.add(wrap("Slot 2 Loadout (C-scroll)", slotList), BorderLayout.EAST);
-
-        int result = JOptionPane.showConfirmDialog(
-                null,
-                panel,
-                "Potion-Loadout bearbeiten",
-                JOptionPane.OK_CANCEL_OPTION,
-                JOptionPane.PLAIN_MESSAGE
-        );
-
-        if (result != JOptionPane.OK_OPTION) return null;
-
-        List<Potions> out = new ArrayList<>();
-        for (int i = 0; i < right.getSize(); i++) out.add(right.getElementAt(i));
-        return out;
+        return editLoadoutGeneric("Potions-Loadout bearbeiten", available, current);
     }
 
-    // ===== Helper =====
-    private static <T> boolean modelContains(DefaultListModel<T> model, T value) {
-        for (int i = 0; i < model.size(); i++) {
-            if (model.getElementAt(i) == value) return true;
+    // =========================================================
+    // ✅ Generic Editor (2 Listen + Add/Remove/Up/Down)
+    // ✅ FIX: echtes Verschieben statt Duplizieren
+    // =========================================================
+    private static <T> List<T> editLoadoutGeneric(String title, List<T> available, List<T> current) {
+        if (available == null) available = new ArrayList<>();
+        if (current == null) current = new ArrayList<>();
+
+        // Links = "verfügbar" (alles was NICHT im Loadout ist)
+        DefaultListModel<T> availableModel = new DefaultListModel<>();
+        for (T t : available) {
+            if (!containsRef(current, t)) {
+                availableModel.addElement(t);
+            }
         }
-        return false;
-    }
 
-    private static JComponent wrap(String title, JList<?> list) {
-        JScrollPane sp = new JScrollPane(list);
-        sp.setPreferredSize(new Dimension(320, 280));
-        JPanel p = new JPanel(new BorderLayout());
-        p.add(new JLabel(title), BorderLayout.NORTH);
-        p.add(sp, BorderLayout.CENTER);
-        return p;
+        // Rechts = Loadout (ohne Duplikate)
+        DefaultListModel<T> loadoutModel = new DefaultListModel<>();
+        for (T t : current) {
+            if (t != null && !modelContainsRef(loadoutModel, t)) {
+                loadoutModel.addElement(t);
+            }
+        }
+
+        JList<T> availableList = new JList<>(availableModel);
+        JList<T> loadoutList = new JList<>(loadoutModel);
+
+        availableList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        loadoutList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
+        availableList.setCellRenderer(simpleRenderer());
+        loadoutList.setCellRenderer(simpleRenderer());
+
+        JButton addBtn = new JButton("Add →");
+        JButton removeBtn = new JButton("← Remove");
+        JButton upBtn = new JButton("↑");
+        JButton downBtn = new JButton("↓");
+
+        // ✅ Move: links -> rechts
+        addBtn.addActionListener(e -> {
+            int idx = availableList.getSelectedIndex();
+            if (idx < 0) return;
+
+            T sel = availableModel.getElementAt(idx);
+            if (sel == null) return;
+
+            availableModel.remove(idx);
+
+            if (!modelContainsRef(loadoutModel, sel)) {
+                loadoutModel.addElement(sel);
+                loadoutList.setSelectedIndex(loadoutModel.getSize() - 1);
+            }
+        });
+
+        // ✅ Move: rechts -> links
+        removeBtn.addActionListener(e -> {
+            int idx = loadoutList.getSelectedIndex();
+            if (idx < 0) return;
+
+            T sel = loadoutModel.getElementAt(idx);
+            if (sel == null) return;
+
+            loadoutModel.remove(idx);
+
+            if (!modelContainsRef(availableModel, sel)) {
+                availableModel.addElement(sel);
+                availableList.setSelectedIndex(availableModel.getSize() - 1);
+            }
+        });
+
+        upBtn.addActionListener(e -> {
+            int idx = loadoutList.getSelectedIndex();
+            if (idx > 0) {
+                T val = loadoutModel.get(idx);
+                loadoutModel.remove(idx);
+                loadoutModel.add(idx - 1, val);
+                loadoutList.setSelectedIndex(idx - 1);
+            }
+        });
+
+        downBtn.addActionListener(e -> {
+            int idx = loadoutList.getSelectedIndex();
+            if (idx >= 0 && idx < loadoutModel.getSize() - 1) {
+                T val = loadoutModel.get(idx);
+                loadoutModel.remove(idx);
+                loadoutModel.add(idx + 1, val);
+                loadoutList.setSelectedIndex(idx + 1);
+            }
+        });
+
+        JPanel center = new JPanel(new GridLayout(1, 3, 10, 10));
+        center.add(new JScrollPane(availableList));
+
+        JPanel midButtons = new JPanel(new GridLayout(4, 1, 5, 5));
+        midButtons.add(addBtn);
+        midButtons.add(removeBtn);
+        midButtons.add(upBtn);
+        midButtons.add(downBtn);
+        center.add(midButtons);
+
+        center.add(new JScrollPane(loadoutList));
+
+        JPanel root = new JPanel(new BorderLayout(10, 10));
+        root.add(new JLabel("Links: Verfügbar | Rechts: Loadout (Verschieben, nicht kopieren)"), BorderLayout.NORTH);
+        root.add(center, BorderLayout.CENTER);
+
+        int res = JOptionPane.showConfirmDialog(null, root, title,
+                JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+
+        if (res != JOptionPane.OK_OPTION) return null;
+
+        List<T> result = new ArrayList<>();
+        for (int i = 0; i < loadoutModel.getSize(); i++) {
+            result.add(loadoutModel.get(i));
+        }
+        return result;
     }
 
     private static DefaultListCellRenderer simpleRenderer() {
         return new DefaultListCellRenderer() {
             @Override
             public Component getListCellRendererComponent(
-                    JList<?> jList, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-
-                super.getListCellRendererComponent(jList, value, index, isSelected, cellHasFocus);
-
-                if (value == null) {
-                    setText("null");
-                } else {
-                    String txt = value.toString();
-                    if (txt == null || txt.trim().isEmpty() || txt.contains("@")) {
-                        txt = value.getClass().getSimpleName();
-                    }
-                    setText(txt);
-                }
+                    JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                setText(value == null ? "null" : value.getClass().getSimpleName());
                 return this;
             }
         };
+    }
+
+    // ===== Helpers: Referenz-basierte Checks =====
+    private static <T> boolean containsRef(List<T> list, T target) {
+        if (list == null) return false;
+        for (T t : list) {
+            if (t == target) return true;
+        }
+        return false;
+    }
+
+    private static <T> boolean modelContainsRef(DefaultListModel<T> model, T target) {
+        for (int i = 0; i < model.getSize(); i++) {
+            if (model.get(i) == target) return true;
+        }
+        return false;
+    }
+
+    // =========================================================
+    // ✅ SHOP UI: Waffen + Potions + Stat-Upgrades
+    // =========================================================
+
+    private enum Category { WEAPONS, POTIONS, UPGRADES }
+
+    private static class ShopEntry {
+        final Category category;
+        final String name;
+        final int price;
+        final Runnable buyAction;
+
+        ShopEntry(Category category, String name, int price, Runnable buyAction) {
+            this.category = category;
+            this.name = name;
+            this.price = price;
+            this.buyAction = buyAction;
+        }
+
+        @Override
+        public String toString() {
+            String cat =
+                    category == Category.WEAPONS ? "Waffe" :
+                            category == Category.POTIONS ? "Potion" : "Upgrade";
+            return "[" + cat + "] " + name + " (" + price + " Coins)";
+        }
+    }
+
+    // ✅ Shop: jetzt mit teuren / besseren Waffen
+    public static void openShop(Inventory inventory, Player player) {
+        if (inventory == null) return;
+
+        boolean upgradesEnabled = (player != null);
+
+        List<ShopEntry> offer = new ArrayList<>();
+
+        // =======================
+        // ===== Waffen (teuer) ===
+        // =======================
+        // Fists NICHT kaufen (Startwaffe) -> nicht anbieten
+
+        // Preise: bessere Waffe = teurer
+        offer.add(new ShopEntry(Category.WEAPONS, "Dagger (schnell, wenig dmg)", 35,
+                () -> inventory.addItem(new Dagger())));
+
+        offer.add(new ShopEntry(Category.WEAPONS, "Sword (balanced)", 55,
+                () -> inventory.addItem(new Sword())));
+
+        offer.add(new ShopEntry(Category.WEAPONS, "Spear (viel Reichweite)", 80,
+                () -> inventory.addItem(new Spear())));
+
+        offer.add(new ShopEntry(Category.WEAPONS, "Axe (sehr viel dmg, langsam)", 110,
+                () -> inventory.addItem(new Axe())));
+
+        // =======================
+        // ===== Potions =========
+        // =======================
+        offer.add(new ShopEntry(Category.POTIONS, "HealingPotion (+20 HP)", 25,
+                () -> inventory.addItem(new HealingPotion())));
+
+        offer.add(new ShopEntry(Category.POTIONS, "SpeedPotion (temporär schneller)", 45,
+                () -> inventory.addItem(new SpeedPotion())));
+
+        offer.add(new ShopEntry(Category.POTIONS, "ResistancePotion (kurz kein Schaden)", 65,
+                () -> inventory.addItem(new ResistancePotion())));
+
+        // =======================
+        // ===== Upgrades ========
+        // =======================
+        if (upgradesEnabled) {
+            offer.add(new ShopEntry(Category.UPGRADES, "Speed Boost +10% (permanent)", 120,
+                    () -> player.addMoveSpeedMultiplier(0.10)));
+
+            offer.add(new ShopEntry(Category.UPGRADES, "Max HP +20 (permanent)", 140,
+                    () -> player.increaseMaxHP(20)));
+
+            // Optional: noch ein Upgrade, damit es sich lohnt
+            offer.add(new ShopEntry(Category.UPGRADES, "Max HP +50 (permanent)", 300,
+                    () -> player.increaseMaxHP(50)));
+        }
+
+        DefaultListModel<ShopEntry> shopModel = new DefaultListModel<>();
+        for (ShopEntry e : offer) shopModel.addElement(e);
+
+        DefaultListModel<String> invModel = new DefaultListModel<>();
+        for (Item it : inventory.getItemsAsJavaList()) {
+            invModel.addElement(it.getClass().getSimpleName());
+        }
+
+        JList<ShopEntry> shopList = new JList<>(shopModel);
+        shopList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
+        JList<String> invList = new JList<>(invModel);
+
+        JLabel coinLabel = new JLabel("Coins: " + inventory.getCoins());
+        JLabel hintLabel = new JLabel(upgradesEnabled
+                ? "Upgrades wirken sofort auf den Spieler."
+                : "Upgrades deaktiviert (Player=null).");
+
+        JButton buyBtn = new JButton("Kaufen →");
+        buyBtn.addActionListener(ev -> {
+            int idx = shopList.getSelectedIndex();
+            if (idx < 0) return;
+
+            ShopEntry entry = shopModel.get(idx);
+
+            if (!inventory.spendCoins(entry.price)) {
+                JOptionPane.showMessageDialog(null,
+                        "Nicht genug Coins!\nPreis: " + entry.price,
+                        "Shop",
+                        JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            entry.buyAction.run();
+
+            // rechts aktualisieren
+            invModel.clear();
+            for (Item it : inventory.getItemsAsJavaList()) {
+                invModel.addElement(it.getClass().getSimpleName());
+            }
+
+            coinLabel.setText("Coins: " + inventory.getCoins());
+        });
+
+        JPanel center = new JPanel(new GridLayout(1, 3, 10, 10));
+        center.add(new JScrollPane(shopList));
+        center.add(buyBtn);
+        center.add(new JScrollPane(invList));
+
+        JPanel top = new JPanel(new GridLayout(2, 1));
+        top.add(coinLabel);
+        top.add(hintLabel);
+
+        JPanel root = new JPanel(new BorderLayout(10, 10));
+        root.add(top, BorderLayout.NORTH);
+        root.add(center, BorderLayout.CENTER);
+
+        JOptionPane.showMessageDialog(null, root, "Händler-Shop", JOptionPane.PLAIN_MESSAGE);
     }
 }
