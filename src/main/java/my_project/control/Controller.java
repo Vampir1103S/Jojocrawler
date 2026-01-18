@@ -115,6 +115,9 @@ public class Controller extends InteractiveGraphicalObject {
 
         // NPCs
         storytomole = new StoryTeller(500, 500, 10, 5, 10, 100, "Tomole", 30, 20);
+        // ===== NPCs =====
+        storytomole = new StoryTeller(0, 220, 10, 5, 10, 100, "Tomole", 80, 20);
+        // V1 Story (mehr Lines) + kompatibel zu V2
         storytomole.addDialogLine("Hallo!");
         storytomole.addDialogLine("Ich bin Tomole.");
         storytomole.addDialogLine("Begib dich zum Bahnhof um weiteres zu finden!");
@@ -134,6 +137,7 @@ public class Controller extends InteractiveGraphicalObject {
 
         Enemy.setController(this);
 
+        // optional Story Swing-Fenster
         SwingUtilities.invokeLater(() -> {
             JFrame frame = new JFrame("SwingUI");
             SwingUI ui = new SwingUI(storytomole);
@@ -663,6 +667,61 @@ public class Controller extends InteractiveGraphicalObject {
     }
 
     // ================== INPUT ==================
+    private void openStoryWindow() {
+        SwingUtilities.invokeLater(() -> {
+            JFrame frame = new JFrame("Dialog mit Tomole");
+            // Hier übergeben wir den NPC 'storytomole', damit sein Text angezeigt wird
+            SwingUI ui = new SwingUI(storytomole);
+
+            frame.setContentPane(ui.outputField);
+            frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); // Fenster schließt sich, Spiel läuft weiter
+            frame.setPreferredSize(new Dimension(600, 120));
+            frame.pack();
+
+            // Optional: Fenster in der Bildschirmmitte platzieren
+            frame.setLocationRelativeTo(null);
+
+            frame.setVisible(true);
+        });
+    }
+
+    // =================== HP BAR ===================
+
+    private void drawHPBar(DrawTool drawTool) {
+        if (player == null) return;
+
+        int barWidth = 300;
+        int barHeight = 25;
+        int margin = 30;
+
+        int x = Config.WINDOW_WIDTH - barWidth - margin;
+        int y = margin;
+
+        double hp = player.getHP();
+        double maxHp = player.getMaxHP();
+        if (maxHp <= 0) maxHp = 1;
+
+        double ratio = Math.max(0, Math.min(1, hp / maxHp));
+        int currentWidth = (int) (barWidth * ratio);
+
+        drawTool.setCurrentColor(new Color(0, 0, 0, 180));
+        drawTool.drawFilledRectangle(x, y, barWidth, barHeight);
+
+        drawTool.setCurrentColor(new Color(0, 200, 0));
+        drawTool.drawFilledRectangle(x, y, currentWidth, barHeight);
+
+        drawTool.setCurrentColor(Color.BLACK);
+        drawTool.drawRectangle(x, y, barWidth, barHeight);
+
+        drawTool.formatText("Arial", 0, 14);
+        drawTool.setCurrentColor(Color.WHITE);
+        drawTool.drawText(x + 8, y + 18, (int) hp + " / " + (int) maxHp + " HP");
+    }
+
+
+
+    // =================== INPUT ===================
+
     public static void switchScene(int newSzene) {
         scene = newSzene;
     }
@@ -724,6 +783,24 @@ public class Controller extends InteractiveGraphicalObject {
             if (key == KeyEvent.VK_A) aDown = true;
             if (key == KeyEvent.VK_S) sDown = true;
             if (key == KeyEvent.VK_D) dDown = true;
+        }
+
+        if (key == KeyEvent.VK_E) {
+            if (inventoryOpen) {
+                tryOpenSwingForHoveredField();
+                return;
+            }
+
+            if (collisions.rectangleCollisions(player, merchant)) {
+                SwingUI.openShop(inventory, player);
+                return;
+            }
+
+            // HIER IST DIE ÄNDERUNG:
+            if (collisions.rectangleCollisions(player, storytomole)) {
+                storytomole.speak(); // Konsolen-Output (optional, kann bleiben)
+                openStoryWindow();   // <-- Öffnet jetzt das Swing-Fenster!
+            }
         }
     }
 
