@@ -34,7 +34,7 @@ public class Player extends Entity {
     private Inventory inventory;
 
     public Player() {
-        super(100, 100, 100, 30, 1, 1, "hehe", 60, 110);
+        super(100, 500, 100, 30, 1, 1, "hehe", 60, 110);
         spriteSheet2 = new SpriteSheet("Player-Sprite.png", 4, 4);
     }
 

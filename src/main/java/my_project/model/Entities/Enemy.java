@@ -22,6 +22,7 @@ public class Enemy extends Entity {
     protected double cooldownTimer = 0;
     protected double attackCooldown = 0.6;
     protected int attackDamage = 10;
+    protected int direction = 0;
 
     // Bewegung / KI
     protected double speed = 120;
@@ -49,6 +50,10 @@ public class Enemy extends Entity {
         if (controller == null) return;
         Player p = controller.getPlayer();
         if (p == null) return;
+
+        if (!attacking) {
+            lookAtPlayer(p); // 👈 HIER
+        }
 
         // Timer
         if (cooldownTimer > 0) cooldownTimer -= dt;
@@ -119,11 +124,19 @@ public class Enemy extends Entity {
         if (Math.abs(dx) > Math.abs(dy)) {
             if (dx > 0) { facingX = 1; facingY = 0; }
             else { facingX = -1; facingY = 0; }
-        } else {
-            if (dy > 0) { facingX = 0; facingY = 1; }
+          } else {
+             if (dy > 0) { facingX = 0; facingY = 1; }
             else { facingX = 0; facingY = -1; }
         }
+
+//        if (ypos > player.getYpos()) direction = 0;    //unten
+//        else if (xpos < getXpos()) direction = 1;    //rechts
+//        else if (xpos > getXpos()) direction = 2;    //links
+//        else if (ypos < getYpos()) direction = 3;    //oben
+
     }
+
+
 
     public void startAttack() {
         if (!attacking && cooldownTimer <= 0) {
@@ -178,4 +191,31 @@ public class Enemy extends Entity {
         xpos = Math.max(0, Math.min(xpos, Config.WINDOW_WIDTH - width));
         ypos = Math.max(0, Math.min(ypos, Config.WINDOW_HEIGHT - height));
     }
+
+    protected void lookAtPlayer(Player p) {
+        if (p == null) return;
+
+        double dx = p.getCenterX() - getCenterX();
+        double dy = p.getCenterY() - getCenterY();
+
+        // horizontale vs vertikale Dominanz
+        if (Math.abs(dx) > Math.abs(dy)) {
+            if (dx > 0) {
+                facingX = 1; facingY = 0;
+                direction = 1; // rechts
+            } else {
+                facingX = -1; facingY = 0;
+                direction = 2; // links
+            }
+        } else {
+            if (dy > 0) {
+                facingX = 0; facingY = 1;
+                direction = 0; // unten
+            } else {
+                facingX = 0; facingY = -1;
+                direction = 3; // oben
+            }
+        }
+    }
+
 }

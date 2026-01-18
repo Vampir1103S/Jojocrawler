@@ -98,7 +98,10 @@ public class Controller extends InteractiveGraphicalObject {
         storytomole = new StoryTeller(500, 500, 10, 5, 10, 100, "Tomole", 30, 20);
         storytomole.addDialogLine("Hallo!");
         storytomole.addDialogLine("Ich bin Tomole.");
-        storytomole.addDialogLine("Drücke E für den nächsten Satz.");
+        storytomole.addDialogLine("Eine komische Präsenz hat seine Klauen in unsere Stadt getrieben.");
+        storytomole.addDialogLine("Fast alle haben diese Stadt, die sonst so vor Leben blühte verlassen.");
+        storytomole.addDialogLine("begib dich zum Bahnhof um weiteres zu finden!");
+
         collisions = new Collisions();
 
         // ===== Level =====
