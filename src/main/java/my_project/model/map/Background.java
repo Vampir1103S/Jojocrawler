@@ -9,13 +9,15 @@ import java.io.IOException;
 
 public class Background {
 
-    private BufferedImage image;
+    private BufferedImage image1;
     private BufferedImage image2;
+    private BufferedImage image3;
 
     public Background(){
         try {
-            image = ImageIO.read(new File("src/main/resources/graphic/Inside-Train.png"));
-            image2 = ImageIO.read(new File("src/main/resources/graphic/map101.png"));
+            image1 = ImageIO.read(new File("src/main/resources/graphic/Bahnhof.png"));
+            image2 = ImageIO.read(new File("src/main/resources/graphic/Trainstation.png"));
+            image3 = ImageIO.read(new File("src/main/resources/graphic/Inside-Train.png"));
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -23,10 +25,12 @@ public class Background {
     }
 
     public void draw(DrawTool drawTool, int s) {
-        if (image != null && s == 1) {
-            drawTool.drawTransformedImage(image,0,0,0,10);
+        if (image1 != null && s == 1) {
+            drawTool.drawTransformedImage(image1,0,0,0,1.417);
         }else if(image2 != null && s == 2){
-            drawTool.drawTransformedImage(image2,0,0,0,10);
+            drawTool.drawTransformedImage(image2,0,0,0,1.417);
+        }else if(image3 != null && s == 2){
+            drawTool.drawTransformedImage(image3,0,0,0,10);
         }
     }
 
