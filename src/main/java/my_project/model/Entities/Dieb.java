@@ -13,6 +13,12 @@ public class Dieb extends Enemy {
     public Dieb(double xpos, double ypos, double hp, double speed, double stamina, int defense, String name, double width,double height) {
         super( xpos,  ypos,  hp, speed,  stamina,  defense, name,  width, height);
         spriteSheet1 = new SpriteSheet("Dieb-Sprite.png", 4, 4);
+
+        // Optional feinjustieren
+        this.attackDamage = 10;
+        this.attackCooldown = 0.6;
+        this.attackDuration = 0.12;
+        this.speed = 140;
     }
 
     @Override
@@ -23,7 +29,6 @@ public class Dieb extends Enemy {
 
         spriteSheet1.draw(drawTool, xpos, ypos, 5);
 
-        // 🔴 Attackbox NUR beim Angriff
         if (attacking) {
             Rectangle2D hb = getAttackHitbox();
             drawTool.setCurrentColor(new Color(255, 0, 0, 120));
@@ -31,10 +36,8 @@ public class Dieb extends Enemy {
             drawTool.setCurrentColor(Color.RED);
             drawTool.drawRectangle(hb.getX(), hb.getY(), hb.getWidth(), hb.getHeight());
         }
+
         drawDebugBoxes(drawTool);
-
-
-
     }
 
     @Override

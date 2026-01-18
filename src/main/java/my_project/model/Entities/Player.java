@@ -1,13 +1,16 @@
 package my_project.model.Entities;
 
 import KAGO_framework.view.DrawTool;
-import my_project.Config;
 import my_project.view.Graphics.SpriteSheet;
+import my_project.model.items.Inventory;
+import my_project.model.items.Weapons;
 
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
 
 public class Player extends Entity {
+
+    private static final boolean DEBUG_DRAW_NEAR_BOX = true;
 
     private boolean isDownW, isDownA, isDownS, isDownD;
     private double knockbackStrength = 200;
@@ -17,22 +20,26 @@ public class Player extends Entity {
     private int direction = 0;
     private double timer = 0;
 
-    // Facing
     private int facingX = 0;
     private int facingY = 1;
 
-    // Angriff
     private boolean attacking = false;
     private boolean hitDoneThisAttack = false;
     private double attackTimer = 0;
     private double attackDuration = 0.12;
     private double cooldownTimer = 0;
     private double attackCooldown = 0.35;
-    private int attackDamage = 10;
+
+    private int fallbackDamage = 10;
+    private Inventory inventory;
 
     public Player() {
         super(100, 500, 500, 30, 1, 1, "hehe", 60, 110);
         spriteSheet2 = new SpriteSheet("Player-Sprite.png", 4, 4);
+    }
+
+    public void setInventory(Inventory inventory) {
+        this.inventory = inventory;
     }
 
     @Override
@@ -44,14 +51,14 @@ public class Player extends Entity {
         spriteSheet2.setCurrent(direction, number);
         spriteSheet2.draw(drawTool, xpos - 12, ypos - 10, 5);
 
-//        // 🔵 AGGRO BOX (DEBUG)
-//        Rectangle2D aggro = getEnemyAggroBox();
-//        drawTool.setCurrentColor(new Color(0, 0, 255, 60));
-//        drawTool.drawFilledRectangle(aggro.getX(), aggro.getY(), aggro.getWidth(), aggro.getHeight());
-//        drawTool.setCurrentColor(Color.BLUE);
-//        drawTool.drawRectangle(aggro.getX(), aggro.getY(), aggro.getWidth(), aggro.getHeight());
+        if (DEBUG_DRAW_NEAR_BOX) {
+            Rectangle2D near = getEnemyAggroBox();
+            drawTool.setCurrentColor(new Color(0, 80, 255, 60));
+            drawTool.drawFilledRectangle(near.getX(), near.getY(), near.getWidth(), near.getHeight());
+            drawTool.setCurrentColor(new Color(0, 80, 255, 200));
+            drawTool.drawRectangle(near.getX(), near.getY(), near.getWidth(), near.getHeight());
+        }
 
-        // 🔴 Attackbox (nur wenn Spieler angreift)
         if (attacking) {
             Rectangle2D hb = getAttackHitbox();
             drawTool.setCurrentColor(new Color(255, 0, 0, 120));
@@ -90,10 +97,9 @@ public class Player extends Entity {
         }
     }
 
-    // ===== AGGRO BOX (Rechteck) =====
     public Rectangle2D getEnemyAggroBox() {
-        double rangeX = 10; // 🔧 kleiner = kleinere Aggro
-        double rangeY = 20;
+        double rangeX = 60;
+        double rangeY = 60;
 
         return new Rectangle2D.Double(
                 xpos - rangeX,
@@ -103,30 +109,38 @@ public class Player extends Entity {
         );
     }
 
-    // ===== Angriff =====
     public void startAttack() {
         if (!attacking && cooldownTimer <= 0) {
             attacking = true;
             hitDoneThisAttack = false;
             attackTimer = attackDuration;
-            cooldownTimer = attackCooldown;
+
+            double cd = attackCooldown;
+            Weapons w = (inventory != null) ? inventory.getSelectedWeapon() : null;
+            if (w != null) cd *= w.getCooldownMultiplier();
+            cooldownTimer = cd;
         }
     }
 
-    public boolean canDealHitNow() {
-        return attacking && !hitDoneThisAttack;
-    }
-
-    public void markHitDone() {
-        hitDoneThisAttack = true;
-    }
+    public boolean canDealHitNow() { return attacking && !hitDoneThisAttack; }
+    public void markHitDone() { hitDoneThisAttack = true; }
 
     public int getAttackDamage() {
-        return attackDamage;
+        Weapons w = (inventory != null) ? inventory.getSelectedWeapon() : null;
+        if (w != null) return w.getDamage();
+        return fallbackDamage;
     }
 
     public Rectangle2D getAttackHitbox() {
         double hitW = 60, hitH = 60, offset = 10;
+
+        Weapons w = (inventory != null) ? inventory.getSelectedWeapon() : null;
+        if (w != null) {
+            hitW = w.getHitW();
+            hitH = w.getHitH();
+            offset = w.getOffset();
+        }
+
         double x = xpos + width / 2 - hitW / 2;
         double y = ypos + height / 2 - hitH / 2;
 
@@ -138,14 +152,9 @@ public class Player extends Entity {
         return new Rectangle2D.Double(x, y, hitW, hitH);
     }
 
-    public void setFacing(int fx, int fy) {
-        facingX = fx;
-        facingY = fy;
-    }
+    public void setFacing(int fx, int fy) { facingX = fx; facingY = fy; }
+    public double getKnockbackStrength() { return knockbackStrength; }
 
-    public double getKnockbackStrength() {
-        return knockbackStrength;
-    }
     public void setIsDownWTrue() { isDownW = true; }
     public void setIsDownWFalse() { isDownW = false; }
     public void setIsDownATrue() { isDownA = true; }
@@ -154,5 +163,4 @@ public class Player extends Entity {
     public void setIsDownSFalse() { isDownS = false; }
     public void setIsDownDTrue() { isDownD = true; }
     public void setIsDownDFalse() { isDownD = false; }
-
 }
