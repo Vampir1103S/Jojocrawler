@@ -99,9 +99,7 @@ public class Player extends Entity {
         drawTool.setCurrentColor(Color.BLACK);
         drawTool.drawFilledRectangle(xpos, ypos, width, height);
         drawTool.drawRectangle(xpos, ypos, width, height);
-        drawTool.setCurrentColor(new Color(255, 0, 0, 255));
-        drawTool.drawRectangle(17, 17, 205, 35);
-        drawTool.drawFilledRectangle(20, 20, hp*2, 30);
+
 
         spriteSheet2.setCurrent(direction, number);
         spriteSheet2.draw(drawTool, xpos - 12, ypos - 10, 5);
@@ -119,10 +117,12 @@ public class Player extends Entity {
             drawTool.drawFilledRectangle(xpos, ypos, width, height);
         }
     }
-    public void resetPlayerPosition(int xpos,int ypos){
-        this.xpos = 100;
-        this.ypos = 500;
+    public void resetPlayerPosition(double xpos, double ypos) {
+        this.xpos = xpos;
+        this.ypos = ypos;
     }
+
+
 
     @Override
     public void update(double dt) {
@@ -157,10 +157,6 @@ public class Player extends Entity {
             timer = 0;
         }
     }
-    public void resetPlayerPosition(){
-        this.xpos = 100;
-        this.ypos = 500;
-    }
     private void animatePlayer(double dt) {
         timer += dt;
         if (timer >= 0.15) {
@@ -170,8 +166,8 @@ public class Player extends Entity {
     }
 
     public Rectangle2D getEnemyAggroBox() {
-        double rangeX = 60;
-        double rangeY = 60;
+        double rangeX = 10;
+        double rangeY = 10;
 
         return new Rectangle2D.Double(
                 xpos - rangeX,

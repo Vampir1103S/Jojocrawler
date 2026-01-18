@@ -29,7 +29,7 @@ public class Background {
             drawTool.drawTransformedImage(image1,0,0,0,1.417);
         }else if(image2 != null && s == 2){
             drawTool.drawTransformedImage(image2,0,0,0,1.417);
-        }else if(image3 != null && s == 2){
+        }else if(image3 != null && s == 3){
             drawTool.drawTransformedImage(image3,0,0,0,10);
         }
     }

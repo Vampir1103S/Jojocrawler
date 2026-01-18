@@ -4,8 +4,8 @@ public class Sword extends Weapons {
 
     public Sword() {
         damage = 15;
-        hitW = 70;
-        hitH = 50;
+        hitW = 50;
+        hitH = 80;
         offset = 12;
         cooldownMultiplier = 1.0;
     }

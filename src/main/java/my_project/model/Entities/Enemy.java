@@ -161,7 +161,7 @@ public class Enemy extends Entity {
 
     // AttackHitbox wie beim Player: abhängig von facing
     public Rectangle2D getAttackHitbox() {
-        double hitW = 0, hitH = 0, offset = 10;
+        double hitW = 80, hitH = 80, offset = 10;
 
         double x = xpos + width / 2 - hitW / 2;
         double y = ypos + height / 2 - hitH / 2;
