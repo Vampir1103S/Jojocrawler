@@ -6,7 +6,7 @@ package KAGO_framework;
  * Für individuelle Einstellungen am eigenen Projekt sollte die Config-Datei im Paket "my_project"
  * verwendet werden.
  */
-public class Config {
+public class     Config {
 
     // Frameworkversion
     public final static String VERSION = "KNB-AOS-GraphicalObject-Java-Framework - 4.5b - 14.01.2022";

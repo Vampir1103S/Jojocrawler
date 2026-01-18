@@ -16,6 +16,7 @@
         </constraints>
         <properties>
           <editable value="false"/>
+          <text value=""/>
         </properties>
       </component>
     </children>

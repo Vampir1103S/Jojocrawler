@@ -10,8 +10,8 @@ public class Dieb extends Enemy {
 
     private SpriteSheet spriteSheet1;
 
-    public Dieb() {
-        super(500, 200, 50, 1, 10, 20, "maron", 50, 100);
+    public Dieb(double xpos, double ypos, double hp, double speed, double stamina, int defense, String name, double width,double height) {
+        super( xpos,  ypos,  hp, speed,  stamina,  defense, name,  width, height);
         spriteSheet1 = new SpriteSheet("Dieb-Sprite.png", 4, 4);
     }
 

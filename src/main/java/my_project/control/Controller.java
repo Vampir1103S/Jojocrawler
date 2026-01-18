@@ -21,13 +21,16 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 public class Controller extends InteractiveGraphicalObject {
     private static int scene = 0;
 
     private UI ui;
     private Player player;
+
     private Deathscreen deathscreen;
     private Collisions collisions;
     private HealingPotion healingPotion;
@@ -36,7 +39,11 @@ public class Controller extends InteractiveGraphicalObject {
     private Baum[][] baum;
     private Grünfläche[][] grünfläche;
     private BetonZaun[][] betonZaun;
-    private Background background;
+
+    //Level
+
+    private Gate gate;
+    private LevelOne level1;
 
     private int hoehe = 10;
     private int breite = 10;
@@ -46,6 +53,7 @@ public class Controller extends InteractiveGraphicalObject {
     private int zbreite = 4;
 
     private Enemy dieb;
+    private Enemy enemies[][];
     private StoryTeller storytomole;
 
     // Movement (sliding)
@@ -68,13 +76,27 @@ public class Controller extends InteractiveGraphicalObject {
         ui = new UI();
         deathscreen = new Deathscreen();
         player = new Player();
-        dieb = new Dieb();
+
+
+
+
+
         storytomole = new StoryTeller(500, 500, 10, 5, 10, 100, "Tomole", 30, 20);
         storytomole.addDialogLine("Hallo!");
         storytomole.addDialogLine("Ich bin Tomole.");
         storytomole.addDialogLine("Drücke E für den nächsten Satz.");
         collisions = new Collisions();
-        background = new Background();
+
+        //Level
+        level1 = new LevelOne();
+        gate = new Gate(1800, 200, 200, 200);
+
+
+        //Enemy
+        enemies= new Enemy[4][4];
+        SpawnEnemies(1);
+        dieb = enemies[0][0];
+
         Enemy.setController(this);
 
         SwingUtilities.invokeLater(() -> {
@@ -122,6 +144,39 @@ public class Controller extends InteractiveGraphicalObject {
         return player;
     }
 
+    private Enemy createEnemyByType(int enemyType,int x ,int y) {
+        if (enemyType == 1) {
+            // Dieb-Constructor wie bei dir:
+            return new Dieb(x, y, 20, 1, 5, 20, "Dieb", 30, 30);
+        }
+
+        // if (enemyType == 2) return new Ninja(); oder andere Enemey Typen
+
+        return null;
+    }
+
+    private void SpawnEnemies(int enemyType) {
+
+        int rows = enemies.length;
+        int cols = enemies[0].length;
+
+        double startX = 400;
+        double startY = 200;
+
+        double swarmX = 120;
+        double swarmY = 120;
+
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+
+                double x = startX + j * swarmX;
+                double y = startY + i * swarmY;
+
+                enemies[i][j] = createEnemyByType(enemyType, (int) x,(int) y);
+            }
+        }
+    }
+
     public void draw(DrawTool drawTool) {
         switch (scene) {
             case 0:
@@ -129,8 +184,6 @@ public class Controller extends InteractiveGraphicalObject {
                 break;
 
             case 1:
-
-                background.draw(drawTool,1);
 
                 for (int x = 0; x < bürgersteig.length; x++) {
                     for (int y = 0; y < bürgersteig[x].length; y++) {
@@ -145,7 +198,6 @@ public class Controller extends InteractiveGraphicalObject {
                 }
 
                 if (player.getHP() > 0) player.draw(drawTool);
-                dieb.draw(drawTool);
                 storytomole.draw(drawTool);
 
                 for (int x = 0; x < betonZaun.length; x++) {
@@ -158,7 +210,7 @@ public class Controller extends InteractiveGraphicalObject {
                         baum[x][y].draw(drawTool);
                     }
                 }
-
+                gate.draw(drawTool);
                 // ===== Hotbar immer anzeigen =====
                 drawHotbar(drawTool);
 
@@ -167,18 +219,23 @@ public class Controller extends InteractiveGraphicalObject {
 
                 break;
 
-            case 2:
-                background.draw(drawTool,2);
-
-                if (player.getHP() > 0) player.draw(drawTool);
-                dieb.draw(drawTool);
-                storytomole.draw(drawTool);
-
-                break;
-
             case 3:
                 deathscreen.draw(drawTool);
+
+            case 4:
+                level1.draw(drawTool);
+
+                for (int i = 0; i < enemies.length; i++) {
+                    for (int j = 0; j < enemies[0].length; j++) {
+                        if (enemies[i][j] != null) enemies[i][j].draw(drawTool);
+                    }
+                }
+                player.draw(drawTool);
                 break;
+
+
+
+
         }
     }
 
@@ -190,53 +247,12 @@ public class Controller extends InteractiveGraphicalObject {
                 break;
 
             case 1:
-
-
-
-
                 // Player/Combat
                 player.update(dt);
 
-                // Enemy
-                dieb.update(dt);
 
-                // ===== Enemy → Player Hit =====
-                if (dieb.canDealHitNow()) {
-                    var enemyHitbox = dieb.getAttackHitbox();
 
-                    if (enemyHitbox.intersects(
-                            player.getXpos(), player.getYpos(),
-                            player.getWidth(), player.getHeight())) {
-
-                        // Schaden
-                        player.setHP(player.getHP() - dieb.getAttackDamage());
-
-                        // Knockback weg vom Enemy
-                        double kx = player.getCenterX() - dieb.getCenterX();
-                        double ky = player.getCenterY() - dieb.getCenterY();
-                        double dist = Math.sqrt(kx * kx + ky * ky);
-
-                        if (dist != 0) {
-                            kx /= dist;
-                            ky /= dist;
-                        }
-
-                        double knockback = 80; // 🔧 HIER stellst du die Stärke ein (z.B. 40..200)
-
-                        double newX = player.getXpos() + kx * knockback;
-                        double newY = player.getYpos() + ky * knockback;
-
-                        // Optional: im Screen halten
-                        newX = Math.max(0, Math.min(newX, Config.WINDOW_WIDTH - player.getWidth()));
-                        newY = Math.max(0, Math.min(newY, Config.WINDOW_HEIGHT - player.getHeight()));
-
-                        player.setXpos(newX);
-                        player.setYpos(newY);
-
-                        dieb.markHitDone();
-                    }
-                }
-
+            case 2:
 
                 // ===== Movement nur wenn Inventar NICHT offen =====
                 if (!inventoryOpen) {
@@ -276,7 +292,104 @@ public class Controller extends InteractiveGraphicalObject {
                     }
                 }
 
-                // ===== Player → Enemy Hit =====
+
+                // Dialog
+                if (collisions.rectangleCollisions(player, storytomole) && storytomole.getETrue()) {
+                    storytomole.speak();
+                }
+
+                if (collisions.rectangleCollisions(player, gate) ) {
+                    switchScene(4);
+                }
+                break;
+
+            case 3:
+                deathscreen.update(dt);
+
+            case 4:
+                player.update(dt);
+
+                for (int i = 0; i < enemies.length; i++) {
+                    for (int j = 0; j < enemies[0].length; j++) {
+                        if (enemies[i][j] != null) enemies[i][j].update(dt);
+                    }
+                }
+
+                if (player.canDealHitNow()) {
+                    Rectangle2D hitbox = player.getAttackHitbox();
+                    boolean hitSomeone = false;
+
+                    for (int i = 0; i < enemies.length; i++) {
+                        for (int j = 0; j < enemies[0].length; j++) {
+
+                            Enemy e = enemies[i][j];
+                            if (e == null) continue;
+
+                            if (hitbox.intersects(player.getXpos(), player.getYpos(), player.getWidth(), player.getHeight())) {
+                            }
+
+                            if (hitbox.intersects(e.getXpos(), e.getYpos(), e.getWidth(), e.getHeight())) {
+
+                                e.setHP(e.getHP() - player.getAttackDamage());
+
+                                // Knockback Enemy weg vom Player
+                                double kx = e.getCenterX() - player.getCenterX();
+                                double ky = e.getCenterY() - player.getCenterY();
+                                double dist = Math.sqrt(kx*kx + ky*ky);
+                                if (dist != 0) { kx /= dist; ky /= dist; }
+
+                                double kb = player.getKnockbackStrength();
+                                e.applyKnockback(kx * kb, ky * kb);
+
+                                hitSomeone = true;
+                            }
+                        }
+                    }
+
+                    if (hitSomeone) player.markHitDone();
+                }
+
+
+                // ===== Movement nur wenn Inventar NICHT offen =====
+                if (!inventoryOpen) {
+                    double dx = 0, dy = 0;
+
+                    if (wDown) { dy -= moveSpeed * dt; player.setFacing(0, -1); player.setIsDownWTrue(); } else player.setIsDownWFalse();
+                    if (sDown) { dy += moveSpeed * dt; player.setFacing(0,  1); player.setIsDownSTrue(); } else player.setIsDownSFalse();
+                    if (aDown) { dx -= moveSpeed * dt; player.setFacing(-1, 0); player.setIsDownATrue(); } else player.setIsDownAFalse();
+                    if (dDown) { dx += moveSpeed * dt; player.setFacing( 1, 0); player.setIsDownDTrue(); } else player.setIsDownDFalse();
+
+                    // X-Achse + Screen-Grenze + Sliding
+                    if (dx != 0) {
+                        double oldX = player.getXpos();
+                        double newX = oldX + dx;
+                        newX = Math.max(0, Math.min(newX, Config.WINDOW_WIDTH - player.getWidth()));
+                        player.setXpos(newX);
+                        if (playerHitsAnyTree()) player.setXpos(oldX);
+                    }
+
+                    // Y-Achse + Screen-Grenze + Sliding
+                    if (dy != 0) {
+                        double oldY = player.getYpos();
+                        double newY = oldY + dy;
+                        newY = Math.max(0, Math.min(newY, Config.WINDOW_HEIGHT - player.getHeight()));
+                        player.setYpos(newY);
+                        if (playerHitsAnyTree()) player.setYpos(oldY);
+                    }
+                }
+
+                // ===== Potion Effekt =====
+                if (healingPotion.getHealing()) {
+                    if (healingPotion.getAmount() > 0) {
+                        player.setHP(player.getHP() + 20);
+                        healingPotion.setHealing(false);
+                        healingPotion.setAmount(healingPotion.getAmount() - 1);
+                    } else {
+                        healingPotion.setHealing(false);
+                    }
+                }
+
+
                 if (player.canDealHitNow()) {
                     var hitbox = player.getAttackHitbox();
                     if (hitbox.intersects(dieb.getXpos(), dieb.getYpos(), dieb.getWidth(), dieb.getHeight())) {
@@ -294,15 +407,10 @@ public class Controller extends InteractiveGraphicalObject {
                     }
                 }
 
-                // Dialog
-                if (collisions.rectangleCollisions(player, storytomole) && storytomole.getETrue()) {
-                    storytomole.speak();
-                }
+
                 break;
 
-            case 3:
-                deathscreen.update(dt);
-                break;
+
         }
     }
 
