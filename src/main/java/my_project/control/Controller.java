@@ -89,7 +89,7 @@ public class Controller extends InteractiveGraphicalObject {
 
         //Level
         level1 = new LevelOne();
-        gate = new Gate(1800, 200, 200, 200);
+        gate = new Gate(800, 200, 200, 200);
 
 
         //Enemy
@@ -227,7 +227,9 @@ public class Controller extends InteractiveGraphicalObject {
 
                 for (int i = 0; i < enemies.length; i++) {
                     for (int j = 0; j < enemies[0].length; j++) {
-                        if (enemies[i][j] != null) enemies[i][j].draw(drawTool);
+                        if (enemies[i][j].getHP() > 0) {
+                            if (enemies[i][j] != null) enemies[i][j].draw(drawTool);
+                        }
                     }
                 }
                 player.draw(drawTool);
@@ -311,7 +313,9 @@ public class Controller extends InteractiveGraphicalObject {
 
                 for (int i = 0; i < enemies.length; i++) {
                     for (int j = 0; j < enemies[0].length; j++) {
-                        if (enemies[i][j] != null) enemies[i][j].update(dt);
+                        if (enemies[i][j].getHP() > 0) {
+                            if (enemies[i][j] != null) enemies[i][j].update(dt);
+                        }
                     }
                 }
 
@@ -542,7 +546,7 @@ public class Controller extends InteractiveGraphicalObject {
     }
 
     private boolean playerHitsAnyTree() {
-        for (int x = 0; x < baum.length; x++) {
+        /*for (int x = 0; x < baum.length; x++) {
             for (int y = 0; y < baum[x].length; y++) {
                 if (collisions.rectangleCollisions(player, baum[x][y])) return true;
             }
@@ -551,7 +555,7 @@ public class Controller extends InteractiveGraphicalObject {
             for (int y = 0; y < betonZaun[x].length; y++) {
                 if (collisions.rectangleCollisions(player, betonZaun[x][y])) return true;
             }
-        }
+        }*/
         return false;
     }
 
