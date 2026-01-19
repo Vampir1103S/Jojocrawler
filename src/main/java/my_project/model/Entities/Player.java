@@ -48,7 +48,7 @@ public class Player extends Entity {
     private double invulnerableTimer = 0;
 
     public Player() {
-        super(100, 500, 500, 30, 1, 1, "hehe", 60, 110);
+        super(100, 500, 100, 30, 1, 1, "hehe", 60, 110);
         spriteSheet2 = new SpriteSheet("Player-Sprite.png", 4, 4);
         maxHP = 100;
     }

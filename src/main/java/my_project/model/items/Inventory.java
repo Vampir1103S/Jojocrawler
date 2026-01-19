@@ -20,7 +20,7 @@ public class Inventory {
     private int weaponIndex = 0;
     private int potionIndex = 0;
 
-    private int coins = 10000;
+    private int coins = 0;
 
     // ===== Coins =====
     public void addCoins(int amount) {

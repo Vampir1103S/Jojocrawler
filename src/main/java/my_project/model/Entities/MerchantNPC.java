@@ -2,24 +2,32 @@ package my_project.model.Entities;
 
 import KAGO_framework.view.DrawTool;
 
+import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 
 public class MerchantNPC extends Entity {
 
+    private BufferedImage image;
+
     public MerchantNPC(double x, double y) {
-        super(999, x, y, 0, 0, 0, "Merchant", 40, 60);
+        super(x, y, 10, 0, 0, 0, "Merchant", 190, 100);
     }
 
     @Override
     public void draw(DrawTool drawTool) {
-        drawTool.setCurrentColor(new Color(160, 80, 20));
-        drawTool.drawFilledRectangle(xpos, ypos, width, height);
-        drawTool.setCurrentColor(Color.BLACK);
-        drawTool.drawRectangle(xpos, ypos, width, height);
 
-        drawTool.formatText("Arial", 0, 14);
-        drawTool.drawText((int)xpos - 5, (int)ypos - 8, "SHOP");
+        try {
+            image = ImageIO.read(new File("src/main/resources/graphic/Shop-fr.png"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        drawTool.drawTransformedImage(image,1500,500,0,3);
+        drawTool.setCurrentColor(Color.BLACK);
+
     }
 
     @Override

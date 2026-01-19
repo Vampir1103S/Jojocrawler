@@ -33,8 +33,7 @@ public class StoryTeller extends Entity {
     }
 
     public void draw(DrawTool drawTool){
-        drawTool.setCurrentColor(Color.YELLOW);
-        drawTool.drawFilledRectangle(xpos, ypos, 80, 60);
+       
 
         spriteSheet1.draw(drawTool,xpos,ypos,5);
         spriteSheet1.setCurrent(0,direction);
