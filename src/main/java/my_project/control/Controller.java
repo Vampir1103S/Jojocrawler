@@ -31,48 +31,42 @@ public class Controller extends InteractiveGraphicalObject {
 
     private Background background;
 
-    // Items / Inventory
+
     private Inventory inventory;
 
-    // Level / Gates
+
     private Gate StationGate1;
     private Gate StationGate2;
     private Gate TrainGate;
     private Gate Maingate;
 
-    // Scene 4 (dein alter Teil)
+
     private int deathcount = 0;
     private boolean backgateUnlocked = false;
     private boolean wave2Started = false;
 
-    // Enemies (Scene 4)
+
     private Enemy dieb;
     private Enemy[][] enemies;
     private Enemy[][] secenemies;
 
-    // NPCs (Scene 1)
+
     private StoryTeller storytomole;
     private MerchantNPC merchant;
 
-    // Movement
     private boolean wDown, aDown, sDown, dDown;
 
-    // Inventory Overlay
     private boolean inventoryOpen = false;
 
-    // Mouse hover
     private int mouseX = 0;
     private int mouseY = 0;
 
-    // Inventory buttons (Hover + E)
     private Rectangle2D weaponField = new Rectangle2D.Double(80, 750, 320, 70);
     private Rectangle2D potionField = new Rectangle2D.Double(80, 840, 320, 70);
 
-    // ===== COIN DROPS =====
     private final java.util.List<CoinDrop> coinDrops = new ArrayList<>();
-    private final Set<Object> alreadyDropped = new HashSet<>(); // verhindert Double-Drops (Scene4+Scene3)
+    private final Set<Object> alreadyDropped = new HashSet<>();
 
-    // =================== SCENE 2 WALLS ===================
     private final double[][] scene2Walls = new double[][]{
             {390, 0, 10, 550},
             {390, 750, 10, 550},
@@ -81,34 +75,27 @@ public class Controller extends InteractiveGraphicalObject {
             {1500, 550, 10, 800},
     };
 
-    // =================== SCENE 3 WALLS ===================
     private final double[][] scene3Walls = new double[][]{
             {0, 500, 2000, 10},
             {0, 850, 2000, 10},
     };
 
-    // =================== SCENE 3 (Arena + Scaling) ===================
     private final java.util.List<Enemy> scene3Enemies = new ArrayList<>();
 
-    // Wie oft Szene 3 betreten wurde (wichtig für "mehr Gegner" + "gemischt")
     private int scene3Run = 0;
 
-    // Spawn-Bereich zwischen den Wänden
     private final double scene3MinX = 200;
     private final double scene3MaxX = 1940;
     private final double scene3MinY = 510;
     private final double scene3MaxY = 840;
 
-    // Scaling
-    private final int scene3BaseEnemies = 6;   // erstes Mal
-    private final int scene3MorePerRun = 4;    // jedes weitere Mal +4
+    private final int scene3BaseEnemies = 6;
+    private final int scene3MorePerRun = 4;
 
-    // Mischchance Kind
-    private final double scene3KindBaseChance = 0.15;  // erstes Mal 15%
-    private final double scene3KindMorePerRun = 0.10;  // +10% pro Run
-    private final double scene3KindMaxChance = 0.60;   // max 60%
+    private final double scene3KindBaseChance = 0.15;
+    private final double scene3KindMorePerRun = 0.10;
+    private final double scene3KindMaxChance = 0.60;
 
-    // Portal/Gate in Szene 3 -> zurück nach Szene 2
     private final Gate scene3ExitGate = new Gate(1900, 430, 10, 2000);
     private boolean scene3Cleared = false;
 
@@ -124,7 +111,6 @@ public class Controller extends InteractiveGraphicalObject {
         inventory = new Inventory();
         player.setInventory(inventory);
 
-        // NPCs
         storytomole = new StoryTeller(0, 220, 10, 5, 10, 100, "Tomole", 200 , 100);
         storytomole.addDialogLine("Hallo!");
         storytomole.addDialogLine("Ich bin Tomole.");
@@ -140,7 +126,6 @@ public class Controller extends InteractiveGraphicalObject {
         TrainGate = new Gate(300, 590, 10, 100);
         StationGate2 = new Gate(200, 1080, 800, 10);
 
-        // Enemies (Scene 4)
         enemies = new Enemy[4][4];
         secenemies = new Enemy[4][4];
 
@@ -149,22 +134,13 @@ public class Controller extends InteractiveGraphicalObject {
 
         Enemy.setController(this);
 
-//        SwingUtilities.invokeLater(() -> {
-//            JFrame frame = new JFrame("SwingUI");
-//            SwingUI ui = new SwingUI(storytomole);
-//            frame.setContentPane(ui.outputField);
-//            frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-//            frame.setPreferredSize(new Dimension(600, 120));
-//            frame.pack();
-//            frame.setVisible(true);
-//        });
+
     }
 
     public Player getPlayer() {
         return player;
     }
 
-    // =================== ENEMY FACTORY ===================
 
     private Enemy createEnemyByType(int enemyType, int x, int y) {
         if (enemyType == 1) {
@@ -201,7 +177,6 @@ public class Controller extends InteractiveGraphicalObject {
         }
     }
 
-    // =================== DRAW ===================
 
     public void draw(DrawTool drawTool) {
         switch (scene) {
@@ -257,7 +232,6 @@ public class Controller extends InteractiveGraphicalObject {
         for (CoinDrop c : coinDrops) c.draw(drawTool);
     }
 
-    // =================== UPDATE ===================
 
     @Override
     public void update(double dt) {
@@ -289,8 +263,8 @@ public class Controller extends InteractiveGraphicalObject {
 
                 if (collisions.rectangleCollisions(player, TrainGate)) {
                     switchScene(3);
-                    startScene3();           // ✅ spawnt Gegner (mehr + gemischt je nach Run)
-                    teleportPlayer(200, 650); // ✅ Player rein in die Arena
+                    startScene3();
+                    teleportPlayer(200, 650);
                 }
 
                 handleCoinPickup();
@@ -302,16 +276,15 @@ public class Controller extends InteractiveGraphicalObject {
                 handleMovement(dt);
 
                 updateScene3Enemies(dt);
-                handleScene3EnemyHitsPlayer();    // ✅ Gegner schlagen
-                handleScene3PlayerHitsEnemies();  // ✅ Spieler trifft
+                handleScene3EnemyHitsPlayer();
+                handleScene3PlayerHitsEnemies();
 
-                handleScene3CoinDrops();          // ✅ Coins droppen (einmal pro Enemy)
-                handleCoinPickup();               // ✅ Coins einsammeln
-
+                handleScene3CoinDrops();
+                handleCoinPickup();
                 scene3Cleared = isScene3Cleared();
                 if (scene3Cleared && collisions.rectangleCollisions(player, scene3ExitGate)) {
-                    switchScene(2);              // ✅ zurück nach Szene 2
-                    teleportPlayer(350, 600);    // ✅ Spawnpunkt in Szene 2
+                    switchScene(2);
+                    teleportPlayer(350, 600);
                 }
                 if(player.getHP() <= 0) scene = 4;
 
@@ -322,24 +295,24 @@ public class Controller extends InteractiveGraphicalObject {
                 break;
         }
 
-        // Scene4 CoinDrops (falls du es weiterhin willst)
+
         if (scene == 3 || scene == 4) {
             handleScene4CoinDrops();
         }
     }
 
-    // =================== TELEPORT ===================
+
 
     private void teleportPlayer(double x, double y) {
         player.setXpos(x);
         player.setYpos(y);
 
-        // Wichtig: sonst rutscht/buggt Bewegung weil Keys noch "down" sind
+
         wDown = aDown = sDown = dDown = false;
         inventoryOpen = false;
     }
 
-    // =================== COMBAT ===================
+
 
     private void handleEnemyHitsPlayer(Enemy e) {
         if (e == null) return;
@@ -355,15 +328,15 @@ public class Controller extends InteractiveGraphicalObject {
 
             player.setHP(player.getHP() - e.getAttackDamage());
 
-            // ✅ Knockback NUR auf X-Achse
+
             double knockback = (e instanceof Bosslehrer) ? 200 : 80;
 
             double kx = player.getCenterX() - e.getCenterX();
             if (kx == 0) kx = 1;
-            else kx = kx / Math.abs(kx); // -1 oder +1
+            else kx = kx / Math.abs(kx);
 
             double newX = player.getXpos() + kx * knockback;
-            double newY = player.getYpos(); // Y bleibt gleich
+            double newY = player.getYpos();
 
             newX = Math.max(0, Math.min(newX, getSceneMaxX() - player.getWidth()));
             newY = Math.max(0, Math.min(newY, getSceneMaxY() - player.getHeight()));
@@ -375,7 +348,7 @@ public class Controller extends InteractiveGraphicalObject {
         }
     }
 
-    // =================== MOVEMENT + WALLS ===================
+
 
     private void handleMovement(double dt) {
         if (inventoryOpen) return;
@@ -431,7 +404,7 @@ public class Controller extends InteractiveGraphicalObject {
         if (walls == null) return false;
         for (double[] r : walls) {
             if (r == null || r.length < 4) continue;
-            // braucht deine neue Collisions-Funktion: rectangleCollisions(Entity, x,y,w,h)
+
             if (collisions.rectangleCollisions(player, r[0], r[1], r[2], r[3])) return true;
         }
         return false;
@@ -453,7 +426,7 @@ public class Controller extends InteractiveGraphicalObject {
         }
     }
 
-    // =================== COINS ===================
+
 
     private void spawnCoinDrop(double centerX, double centerY, int amount) {
         coinDrops.add(new CoinDrop(centerX - CoinDrop.SIZE / 2.0, centerY - CoinDrop.SIZE / 2.0, amount));
@@ -468,7 +441,7 @@ public class Controller extends InteractiveGraphicalObject {
         while (it.hasNext()) {
             CoinDrop c = it.next();
 
-            // robust: wenn CoinDrop getHitBox() hat:
+
             if (c.getHitBox().intersects(player.getHitBox())) {
                 inventory.addCoins(c.getValue());
                 it.remove();
@@ -476,7 +449,7 @@ public class Controller extends InteractiveGraphicalObject {
         }
     }
 
-    // Coins aus Scene3 Enemies (nur 1x pro Enemy)
+
     private void handleScene3CoinDrops() {
         for (Enemy e : scene3Enemies) {
             if (e == null) continue;
@@ -489,7 +462,7 @@ public class Controller extends InteractiveGraphicalObject {
         }
     }
 
-    // Coins aus Scene4 Enemies (nur 1x pro Enemy)
+
     private void handleScene4CoinDrops() {
         if (enemies == null) return;
 
@@ -506,7 +479,7 @@ public class Controller extends InteractiveGraphicalObject {
             }
         }
 
-        // optional: wave2 enemies
+
         if (secenemies != null) {
             for (int i = 0; i < secenemies.length; i++) {
                 for (int j = 0; j < secenemies[0].length; j++) {
@@ -523,7 +496,7 @@ public class Controller extends InteractiveGraphicalObject {
         }
     }
 
-    // =================== SCENE 3 LOGIC ===================
+
 
     /**
      * Wird GENAU 1x aufgerufen, wenn du von Szene 2 -> Szene 3 gehst.
@@ -535,8 +508,7 @@ public class Controller extends InteractiveGraphicalObject {
         scene3Enemies.clear();
         scene3Cleared = false;
 
-        // sehr wichtig: sonst droppen "neue" Gegner ggf. keine Coins, wenn alte Referenzen noch drin sind
-        // Wir löschen NUR Scene3-Referenzen aus alreadyDropped, indem wir es komplett leeren (safe).
+
         alreadyDropped.clear();
 
         int total = scene3BaseEnemies + (scene3Run - 1) * scene3MorePerRun;
@@ -613,7 +585,7 @@ public class Controller extends InteractiveGraphicalObject {
         return ThreadLocalRandom.current().nextDouble(Math.min(a, b), Math.max(a, b));
     }
 
-    // =================== UI (Hotbar/Inventory/HP) ===================
+
 
     private void drawHotbar(DrawTool drawTool) {
         int y = 980;
@@ -689,15 +661,15 @@ public class Controller extends InteractiveGraphicalObject {
     private void openStoryWindow() {
         SwingUtilities.invokeLater(() -> {
             JFrame frame = new JFrame("Dialog mit Tomole");
-            // Hier übergeben wir den NPC 'storytomole', damit sein Text angezeigt wird
+
             SwingUI ui = new SwingUI(storytomole);
 
             frame.setContentPane(ui.outputField);
-            frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); // Fenster schließt sich, Spiel läuft weiter
+            frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
             frame.setPreferredSize(new Dimension(600, 120));
             frame.pack();
 
-            // Optional: Fenster in der Bildschirmmitte platzieren
+
             frame.setLocationRelativeTo(null);
 
             frame.setVisible(true);
@@ -735,7 +707,6 @@ public class Controller extends InteractiveGraphicalObject {
         drawTool.drawText(x + 8, y + 18, (int) hp + " / " + (int) maxHp + " HP");
     }
 
-    // =================== INPUT ===================
 
     public static void switchScene(int newSzene) {
         scene = newSzene;
@@ -814,10 +785,10 @@ public class Controller extends InteractiveGraphicalObject {
                 return;
             }
 
-            // HIER IST DIE ÄNDERUNG:
+
             if (collisions.rectangleCollisions(player, storytomole)) {
-                storytomole.speak(); // Konsolen-Output (optional, kann bleiben)
-                openStoryWindow();   // <-- Öffnet jetzt das Swing-Fenster!
+                storytomole.speak();
+                openStoryWindow();
             }
         }
 
@@ -831,7 +802,7 @@ public class Controller extends InteractiveGraphicalObject {
         if (key == KeyEvent.VK_D) dDown = false;
     }
 
-    // =================== Swing Loadout Editor ===================
+
 
     private void tryOpenSwingForHoveredField() {
         if (!inventoryOpen) return;

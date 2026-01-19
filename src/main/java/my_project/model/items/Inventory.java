@@ -130,9 +130,6 @@ public class Inventory {
         return obj.getClass().getSimpleName();
     }
 
-    // =========================================================
-    // ✅ NEU: Potion benutzen -> Effekt + aus Inventar entfernen
-    // =========================================================
     public void consumeSelectedPotion(Player player) {
         Potions p = getSelectedPotion();
         if (p == null) return;
