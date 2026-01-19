@@ -96,9 +96,7 @@ public class Player extends Entity {
 
     @Override
     public void draw(DrawTool drawTool) {
-        drawTool.setCurrentColor(Color.BLACK);
-        drawTool.drawFilledRectangle(xpos, ypos, width, height);
-        drawTool.drawRectangle(xpos, ypos, width, height);
+
 
 
         spriteSheet2.setCurrent(direction, number);

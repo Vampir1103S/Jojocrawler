@@ -17,9 +17,9 @@ public class Kind extends Enemy {
 
     @Override
     public void draw(DrawTool drawTool) {
-        drawTool.setCurrentColor(Color.GREEN);
-        drawTool.drawFilledRectangle(xpos, ypos, width, height);
-        drawTool.drawRectangle(xpos, ypos, width, height);
+//        drawTool.setCurrentColor(Color.GREEN);
+//        drawTool.drawFilledRectangle(xpos, ypos, width, height);
+//        drawTool.drawRectangle(xpos, ypos, width, height);
 
         spriteSheet1.draw(drawTool, xpos, ypos, 5);
 

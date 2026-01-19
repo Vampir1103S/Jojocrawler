@@ -144,9 +144,9 @@ public class Controller extends InteractiveGraphicalObject {
 
     private Enemy createEnemyByType(int enemyType, int x, int y) {
         if (enemyType == 1) {
-            return new Dieb(x, y, 20, 1, 5, 20, "Dieb", 30, 30);
+            return new Dieb(x, y, 20, 1, 5, 20, "Dieb", 50, 100);
         } else if (enemyType == 2) {
-            return new Kind(x, y, 40, 1, 5, 20, "Kind", 30, 30);
+            return new Kind(x, y, 40, 1, 5, 20, "Kind", 50, 100);
         } else if (enemyType == 3) {
             return new Bosslehrer(x, y, 110, 1, 5, 20, "Bosslehrer", 40, 60);
         }
