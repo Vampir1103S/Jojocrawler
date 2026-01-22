@@ -6,7 +6,7 @@ public class Spear extends Weapons {
         damage = 14;              // mittel
         hitW = 100;                // schmal, aber
         hitH = 50;                // lang (Reichweite)
-        offset = 22;              // großer Abstand nach vorne (Reach)
+        offset = 15;              // großer Abstand nach vorne (Reach)
         cooldownMultiplier = 1.05; // leicht langsamer als Sword
     }
 

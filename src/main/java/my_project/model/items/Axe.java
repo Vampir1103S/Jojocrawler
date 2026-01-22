@@ -6,7 +6,7 @@ public class Axe extends Weapons {
         damage = 24;             // sehr hoher Schaden
         hitW = 90;               // große Hitbox
         hitH = 75;
-        offset = 8;              // eher nah am Spieler
+        offset = 12;              // eher nah am Spieler
         cooldownMultiplier = 1.55; // deutlich langsamer (Cooldown wird größer)
     }
 

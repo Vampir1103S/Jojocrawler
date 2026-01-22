@@ -4,9 +4,9 @@ public class Dagger extends Weapons {
 
     public Dagger() {
         damage = 9;              // eher wenig
-        hitW = 38;               // kleine Hitbox
+        hitW = 60;               // kleine Hitbox
         hitH = 38;
-        offset = 10;             // normaler Abstand
+        offset = 15;             // normaler Abstand
         cooldownMultiplier = 0.45; // sehr schnell (Cooldown wird stark reduziert)
     }
 

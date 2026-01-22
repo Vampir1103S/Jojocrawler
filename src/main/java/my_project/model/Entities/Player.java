@@ -34,14 +34,13 @@ public class Player extends Entity {
 
     private int facingX = 0;
     private int facingY = 1;
-
-
     private boolean attacking = false;
     private boolean hitDoneThisAttack = false;
     private double attackTimer = 0;
+    private double cooldownTimer = 0;
     private double attackDuration = 0.12;
 
-    private double cooldownTimer = 0;
+
 
 
     private final double baseAttackCooldown = 0.35;
@@ -54,18 +53,15 @@ public class Player extends Entity {
 
 
     private double maxHP = 100;
-
     private double baseMoveSpeed = 250;
     private double permanentSpeedMult = 1.0;
     private double tempSpeedMult = 1.0;
     private double tempSpeedTimer = 0;
-
     private double invulnerableTimer = 0;
 
     public Player() {
         super(100, 500, 100, 30, 1, 1, "hehe", 60, 110);
         spriteSheet2 = new SpriteSheet("Player-Sprite.png", 4, 4);
-        maxHP = 100;
     }
 
     /**
@@ -151,12 +147,10 @@ public class Player extends Entity {
     @Override
     public void update(double dt) {
         if (cooldownTimer > 0) cooldownTimer -= dt;
-
         if (attacking) {
             attackTimer -= dt;
             if (attackTimer <= 0) attacking = false;
         }
-
         if (tempSpeedTimer > 0) {
             tempSpeedTimer -= dt;
             if (tempSpeedTimer <= 0) {
@@ -164,12 +158,10 @@ public class Player extends Entity {
                 tempSpeedMult = 1.0;
             }
         }
-
         if (invulnerableTimer > 0) {
             invulnerableTimer -= dt;
             if (invulnerableTimer < 0) invulnerableTimer = 0;
         }
-
         if (isDownW || isDownA || isDownS || isDownD) {
             if (isDownW) direction = 3;
             else if (isDownA) direction = 2;
@@ -304,7 +296,7 @@ public class Player extends Entity {
      */
 
     public Rectangle2D getAttackHitbox() {
-        double hitW = 60, hitH = 60, offset = 10;
+        double hitW = 70, hitH = 20, offset = 0;
 
         my_project.model.items.Weapons w = getEquippedWeapon();
         if (w != null) {

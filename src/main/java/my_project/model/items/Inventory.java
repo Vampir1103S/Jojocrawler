@@ -33,7 +33,7 @@ public class Inventory {
     private int weaponIndex = 0;
     private int potionIndex = 0;
 
-    private int coins = 10;
+    private int coins = 99999;
 
     /**
      * Erhöht die Anzahl der Coins im Inventar.

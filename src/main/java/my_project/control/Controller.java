@@ -84,7 +84,7 @@ public class Controller extends InteractiveGraphicalObject {
 
     private int scene3Run = 0;
 
-    private final double scene3MinX = 200;
+    private final double scene3MinX = 500;
     private final double scene3MaxX = 1940;
     private final double scene3MinY = 510;
     private final double scene3MaxY = 840;
@@ -538,7 +538,8 @@ public class Controller extends InteractiveGraphicalObject {
      */
 
     private void spawnCoinDrop(double centerX, double centerY, int amount) {
-        coinDrops.add(new CoinDrop(centerX - CoinDrop.SIZE / 2.0, centerY - CoinDrop.SIZE / 2.0, amount));
+        coinDrops.add(new CoinDrop(centerX - CoinDrop.SIZE
+                / 2.0, centerY - CoinDrop.SIZE / 2.0, amount));
     }
 
     /**
@@ -569,7 +570,6 @@ public class Controller extends InteractiveGraphicalObject {
             }
         }
     }
-
     /**
      * Verarbeitet Coin-Drops für Gegner in Szene 3.
      * <p>
