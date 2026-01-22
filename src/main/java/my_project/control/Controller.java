@@ -2,6 +2,8 @@ package my_project.control;
 
 import KAGO_framework.model.InteractiveGraphicalObject;
 import KAGO_framework.view.DrawTool;
+import KAGO_framework.control.SoundController;
+import KAGO_framework.control.ViewController;
 import my_project.Config;
 import my_project.SwingUI;
 import my_project.model.Entities.*;
@@ -21,6 +23,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class Controller extends InteractiveGraphicalObject {
 
+    private ViewController viewController;
     private static int scene = 0;
 
     private UI ui;
@@ -61,6 +64,8 @@ public class Controller extends InteractiveGraphicalObject {
     private int mouseX = 0;
     private int mouseY = 0;
 
+    private int currentScene = 0;
+
     private Rectangle2D weaponField = new Rectangle2D.Double(80, 750, 320, 70);
     private Rectangle2D potionField = new Rectangle2D.Double(80, 840, 320, 70);
 
@@ -99,11 +104,19 @@ public class Controller extends InteractiveGraphicalObject {
     private final Gate scene3ExitGate = new Gate(1900, 430, 10, 2000);
     private boolean scene3Cleared = false;
 
-    public Controller() {
+    public Controller(ViewController viewController) {
+        this.viewController = viewController;
         ui = new UI();
         deathscreen = new Deathscreen();
         collisions = new Collisions();
 
+        viewController.getSoundController().loadSound("src/main/resources/sound/Evasion.wav","Evasion", true);
+        viewController.getSoundController().loadSound("src/main/resources/sound/Inspiration.wav","Inspiration", true);
+        viewController.getSoundController().loadSound("src/main/resources/sound/Timeline.mp3","Timeline", true);
+
+        viewController.getSoundController().loadSound("src/main/resources/sound/punch1.mp3","punch1", false);
+        viewController.getSoundController().loadSound("src/main/resources/sound/punch2.mp3","punch2", false);
+        viewController.getSoundController().loadSound("src/main/resources/sound/punch3.mp3","punch3", false);
         background = new Background();
 
         player = new Player();
@@ -133,8 +146,6 @@ public class Controller extends InteractiveGraphicalObject {
         dieb = enemies[0][0];
 
         Enemy.setController(this);
-
-
     }
 
     public Player getPlayer() {
@@ -262,6 +273,7 @@ public class Controller extends InteractiveGraphicalObject {
 
             case 4:
                 deathscreen.draw(drawTool);
+                SoundController.playSound("Homeward");
                 break;
         }
     }
@@ -286,36 +298,51 @@ public class Controller extends InteractiveGraphicalObject {
         switch (scene) {
             case 0:
                 ui.update(dt);
+                currentScene = 0;
                 break;
 
             case 1:
                 player.update(dt);
                 handleMovement(dt);
+                currentScene = 1;
 
                 if (collisions.rectangleCollisions(player, StationGate1)) {
                     switchScene(2);
                     teleportPlayer(875, 950);
+                    SoundController.stopSound("Evasion");
+                    SoundController.stopSound("Inspiration");
+                    System.out.println("2");
                 }
 
                 handleCoinPickup();
+                currentScene = 1;
                 break;
 
             case 2:
                 player.update(dt);
                 handleMovement(dt);
-
+                currentScene = 2;
                 if (collisions.rectangleCollisions(player, StationGate2)) {
                     switchScene(1);
                     teleportPlayer(520, 180);
+                    SoundController.playSound("Timeline");
+                    SoundController.stopSound("Evasion");
+                    SoundController.stopSound("Inspiration");
+                    System.out.println("1");
                 }
 
                 if (collisions.rectangleCollisions(player, TrainGate)) {
                     switchScene(3);
                     startScene3();
                     teleportPlayer(200, 650);
+                    SoundController.playSound("Evasion");
+                    SoundController.stopSound("Inspiration");
+                    SoundController.stopSound("Timeline");
+                    System.out.println("3");
                 }
 
                 handleCoinPickup();
+                currentScene = 2;
                 break;
 
             case 3:
@@ -332,14 +359,24 @@ public class Controller extends InteractiveGraphicalObject {
                 scene3Cleared = isScene3Cleared();
                 if (scene3Cleared && collisions.rectangleCollisions(player, scene3ExitGate)) {
                     switchScene(2);
+                    SoundController.playSound("Timeline");
+                    SoundController.stopSound("Evasion");
+                    SoundController.stopSound("Inspiration");
+                    System.out.println("2");
                     teleportPlayer(350, 600);
                 }
-                if(player.getHP() <= 0) scene = 4;
+                if(player.getHP() <= 0){
+                    scene = 4;
+                    SoundController.playSound("Inspiration");
+                    SoundController.stopSound("Timeline");
+                    SoundController.stopSound("Evasion");
+                }
 
                 break;
 
             case 4:
                 deathscreen.update(dt);
+                currentScene = 4;
                 break;
         }
 
@@ -883,7 +920,7 @@ public class Controller extends InteractiveGraphicalObject {
         int currentWidth = (int) (barWidth * ratio);
 
         drawTool.setCurrentColor(new Color(0, 0, 0, 180));
-        drawTool.drawFilledRectangle(x, y, barWidth, barHeight);
+        drawTool.drawRectangle(x, y, barWidth, barHeight);
 
         drawTool.setCurrentColor(new Color(0, 200, 0));
         drawTool.drawFilledRectangle(x, y, currentWidth, barHeight);
@@ -935,6 +972,14 @@ public class Controller extends InteractiveGraphicalObject {
         if (key == KeyEvent.VK_X) {
             if (inventory.getActiveSlot() == 1) {
                 player.startAttack();
+                int randomHit = (int) (Math.random() * 3);
+                if (randomHit == 0) {
+                    SoundController.playSound("punch1");
+                }else if (randomHit == 1) {
+                    SoundController.playSound("punch2");
+                }else if (randomHit == 2) {
+                    SoundController.playSound("punch3");
+                }
             } else {
                 inventory.consumeSelectedPotion(player);
             }
