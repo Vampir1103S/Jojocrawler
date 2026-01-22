@@ -6,14 +6,13 @@ import my_project.model.Entities.StoryTeller;
 import my_project.model.items.Inventory;
 import my_project.model.items.Item;
 
-// Weapons
+
 import my_project.model.items.Sword;
 import my_project.model.items.Dagger;
 import my_project.model.items.Spear;
 import my_project.model.items.Axe;
 import my_project.model.items.Weapons;
 
-// Potions
 import my_project.model.items.Consumables.Potions;
 import my_project.model.items.Consumables.HealingPotion;
 import my_project.model.items.Consumables.SpeedPotion;
@@ -26,12 +25,32 @@ import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Grafische Benutzeroberfläche (Swing) für Dialoge, Loadout-Verwaltung
+ * und den Händler-Shop.
+ * <p>
+ * Die Klasse {@code SwingUI} stellt mehrere Swing-basierte Dialoge bereit:
+ * <ul>
+ *   <li>NPC-Dialoge (z.B. StoryTeller)</li>
+ *   <li>Editoren zum Bearbeiten von Waffen- und Potion-Loadouts</li>
+ *   <li>Einen Shop zum Kaufen von Waffen, Tränken und Upgrades</li>
+ * </ul>
+ *
+ * Sie fungiert als Brücke zwischen der Ingame-Logik (Controller, Inventory,
+ * Player) und externen Swing-Fenstern. Die eigentliche Spiellogik bleibt dabei
+ * im Spielcode, während {@code SwingUI} ausschließlich für Darstellung und
+ * Benutzereingaben zuständig ist.
+ *
+ * Die Kommunikation erfolgt über klar definierte Methodenaufrufe
+ * (z.B. Rückgabe bearbeiteter Loadouts oder Ausführen von Kaufaktionen).
+ */
+
 public class SwingUI {
 
     public JTextField outputField;
     public JComponent mainPanel;
 
-    // ====== NPC / Story SwingUI ======
+
     public SwingUI(StoryTeller storytomole) {
         if (outputField == null) outputField = new JTextField();
 
@@ -48,29 +67,68 @@ public class SwingUI {
         });
     }
 
-    // =========================================================
-    // ✅ LOADOUT EDITOR (Waffen)
-    // =========================================================
+    /**
+     * Öffnet den Loadout-Editor für Waffen.
+     * <p>
+     * Delegiert an den generischen Editor {@link #editLoadoutGeneric(String, List, List)} und
+     * gibt die vom Nutzer bestätigte Reihenfolge (rechts) als neue Loadout-Liste zurück.
+     * <p>
+     * Falls der Dialog abgebrochen wird, wird {@code null} zurückgegeben.
+     *
+     * @param available alle im Inventar verfügbaren Waffen (Kandidaten-Liste)
+     * @param current   aktuell ausgerüstetes Waffen-Loadout (Reihenfolge relevant)
+     * @return neue Loadout-Liste bei OK, sonst {@code null}
+     */
     public static List<Weapons> editWeaponsLoadout(List<Weapons> available, List<Weapons> current) {
         return editLoadoutGeneric("Waffen-Loadout bearbeiten", available, current);
     }
 
-    // =========================================================
-    // ✅ LOADOUT EDITOR (Potions)
-    // =========================================================
+    /**
+     * Öffnet den Loadout-Editor für Potions.
+     * <p>
+     * Delegiert an den generischen Editor {@link #editLoadoutGeneric(String, List, List)} und
+     * gibt die vom Nutzer bestätigte Reihenfolge (rechts) als neue Loadout-Liste zurück.
+     * <p>
+     * Falls der Dialog abgebrochen wird, wird {@code null} zurückgegeben.
+     *
+     * @param available alle im Inventar verfügbaren Potions (Kandidaten-Liste)
+     * @param current   aktuell ausgerüstetes Potion-Loadout (Reihenfolge relevant)
+     * @return neue Loadout-Liste bei OK, sonst {@code null}
+     */
     public static List<Potions> editPotionsLoadout(List<Potions> available, List<Potions> current) {
         return editLoadoutGeneric("Potions-Loadout bearbeiten", available, current);
     }
 
-    // =========================================================
-    // ✅ Generic Editor (2 Listen + Add/Remove/Up/Down)
-    // ✅ FIX: echtes Verschieben statt Duplizieren
-    // =========================================================
+    /**
+     * Öffnet einen generischen Swing-Editor zum Bearbeiten eines Loadouts.
+     * <p>
+     * UI-Aufbau:
+     * <ul>
+     *   <li>Links: "Verfügbar" (alles, was nicht im aktuellen Loadout ist)</li>
+     *   <li>Rechts: Loadout (ohne Duplikate, Reihenfolge ist wichtig)</li>
+     * </ul>
+     * Bedienung:
+     * <ul>
+     *   <li>{@code Add →}: verschiebt selektiertes Element von links nach rechts</li>
+     *   <li>{@code ← Remove}: verschiebt selektiertes Element von rechts nach links</li>
+     *   <li>{@code ↑}/{@code ↓}: verschiebt die Reihenfolge innerhalb des Loadouts</li>
+     * </ul>
+     * <p>
+     * Duplikate werden über Referenzvergleich verhindert (nicht über {@code equals()}).
+     * Bei {@code OK} wird die rechte Liste als neue {@link java.util.ArrayList} zurückgegeben,
+     * bei Abbruch {@code null}.
+     *
+     * @param title     Fenstertitel des Dialogs
+     * @param available alle verfügbaren Elemente (kann {@code null} sein)
+     * @param current   aktuell ausgerüstetes Loadout (kann {@code null} sein)
+     * @param <T>       Elementtyp (z.B. Weapons oder Potions)
+     * @return neue Loadout-Liste bei OK, sonst {@code null}
+     */
     private static <T> List<T> editLoadoutGeneric(String title, List<T> available, List<T> current) {
         if (available == null) available = new ArrayList<>();
         if (current == null) current = new ArrayList<>();
 
-        // Links = "verfügbar" (alles was NICHT im Loadout ist)
+
         DefaultListModel<T> availableModel = new DefaultListModel<>();
         for (T t : available) {
             if (!containsRef(current, t)) {
@@ -78,7 +136,7 @@ public class SwingUI {
             }
         }
 
-        // Rechts = Loadout (ohne Duplikate)
+
         DefaultListModel<T> loadoutModel = new DefaultListModel<>();
         for (T t : current) {
             if (t != null && !modelContainsRef(loadoutModel, t)) {
@@ -100,7 +158,7 @@ public class SwingUI {
         JButton upBtn = new JButton("↑");
         JButton downBtn = new JButton("↓");
 
-        // ✅ Move: links -> rechts
+
         addBtn.addActionListener(e -> {
             int idx = availableList.getSelectedIndex();
             if (idx < 0) return;
@@ -116,7 +174,7 @@ public class SwingUI {
             }
         });
 
-        // ✅ Move: rechts -> links
+
         removeBtn.addActionListener(e -> {
             int idx = loadoutList.getSelectedIndex();
             if (idx < 0) return;
@@ -179,7 +237,14 @@ public class SwingUI {
         }
         return result;
     }
-
+    /**
+     * Erstellt einen einfachen {@link DefaultListCellRenderer} für {@link JList}-Einträge.
+     * <p>
+     * Der Renderer zeigt nicht {@code toString()}, sondern den Klassennamen
+     * des Objekts ({@code getClass().getSimpleName()}). Für {@code null} wird "null" angezeigt.
+     *
+     * @return ein {@link DefaultListCellRenderer} zur Anzeige der Elemente
+     */
     private static DefaultListCellRenderer simpleRenderer() {
         return new DefaultListCellRenderer() {
             @Override
@@ -192,7 +257,16 @@ public class SwingUI {
         };
     }
 
-    // ===== Helpers: Referenz-basierte Checks =====
+    /**
+     * Prüft, ob eine Liste ein Element per Referenzvergleich enthält.
+     * <p>
+     * Es wird {@code ==} verwendet (gleiche Objektinstanz), nicht {@code equals()}.
+     *
+     * @param list   Liste, in der gesucht wird (kann {@code null} sein)
+     * @param target gesuchtes Objekt (Referenz)
+     * @param <T>    Elementtyp
+     * @return {@code true}, wenn die exakte Objektinstanz enthalten ist, sonst {@code false}
+     */
     private static <T> boolean containsRef(List<T> list, T target) {
         if (list == null) return false;
         for (T t : list) {
@@ -200,7 +274,16 @@ public class SwingUI {
         }
         return false;
     }
-
+    /**
+     * Prüft, ob ein {@link DefaultListModel} ein Element per Referenzvergleich enthält.
+     * <p>
+     * Es wird {@code ==} verwendet (gleiche Objektinstanz), nicht {@code equals()}.
+     *
+     * @param model  Model, in dem gesucht wird
+     * @param target gesuchtes Objekt (Referenz)
+     * @param <T>    Elementtyp
+     * @return {@code true}, wenn die exakte Objektinstanz enthalten ist, sonst {@code false}
+     */
     private static <T> boolean modelContainsRef(DefaultListModel<T> model, T target) {
         for (int i = 0; i < model.getSize(); i++) {
             if (model.get(i) == target) return true;
@@ -208,9 +291,7 @@ public class SwingUI {
         return false;
     }
 
-    // =========================================================
-    // ✅ SHOP UI: Waffen + Potions + Stat-Upgrades
-    // =========================================================
+
 
     private enum Category { WEAPONS, POTIONS, UPGRADES }
 
@@ -236,7 +317,25 @@ public class SwingUI {
         }
     }
 
-    // ✅ Shop: jetzt mit teuren / besseren Waffen
+    /**
+     * Öffnet den Händler-Shop als Swing-Dialog.
+     * <p>
+     * Der Shop bietet kaufbare Einträge aus den Kategorien:
+     * <ul>
+     *   <li>Waffen</li>
+     *   <li>Potions</li>
+     *   <li>Upgrades (nur wenn {@code player != null})</li>
+     * </ul>
+     * Beim Kauf wird:
+     * <ol>
+     *   <li>geprüft, ob genug Coins vorhanden sind ({@link Inventory#spendCoins(int)})</li>
+     *   <li>die Kaufaktion ausgeführt (Item hinzufügen oder Player-Stat erhöhen)</li>
+     *   <li>die Inventar-Anzeige im UI aktualisiert</li>
+     * </ol>
+     *
+     * @param inventory Inventar, aus dem Coins abgezogen und in das Items gelegt werden
+     * @param player    Spieler für Upgrades; wenn {@code null}, werden Upgrades deaktiviert
+     */
     public static void openShop(Inventory inventory, Player player) {
         if (inventory == null) return;
 
@@ -244,12 +343,7 @@ public class SwingUI {
 
         List<ShopEntry> offer = new ArrayList<>();
 
-        // =======================
-        // ===== Waffen (teuer) ===
-        // =======================
-        // Fists NICHT kaufen (Startwaffe) -> nicht anbieten
 
-        // Preise: bessere Waffe = teurer
         offer.add(new ShopEntry(Category.WEAPONS, "Dagger (schnell, wenig dmg)", 35,
                 () -> inventory.addItem(new Dagger())));
 
@@ -262,9 +356,7 @@ public class SwingUI {
         offer.add(new ShopEntry(Category.WEAPONS, "Axe (sehr viel dmg, langsam)", 110,
                 () -> inventory.addItem(new Axe())));
 
-        // =======================
-        // ===== Potions =========
-        // =======================
+
         offer.add(new ShopEntry(Category.POTIONS, "HealingPotion (+20 HP)", 25,
                 () -> inventory.addItem(new HealingPotion())));
 
@@ -274,9 +366,7 @@ public class SwingUI {
         offer.add(new ShopEntry(Category.POTIONS, "ResistancePotion (kurz kein Schaden)", 65,
                 () -> inventory.addItem(new ResistancePotion())));
 
-        // =======================
-        // ===== Upgrades ========
-        // =======================
+
         if (upgradesEnabled) {
             offer.add(new ShopEntry(Category.UPGRADES, "Speed Boost +10% (permanent)", 120,
                     () -> player.addMoveSpeedMultiplier(0.10)));
@@ -284,7 +374,7 @@ public class SwingUI {
             offer.add(new ShopEntry(Category.UPGRADES, "Max HP +20 (permanent)", 140,
                     () -> player.increaseMaxHP(20)));
 
-            // Optional: noch ein Upgrade, damit es sich lohnt
+
             offer.add(new ShopEntry(Category.UPGRADES, "Max HP +50 (permanent)", 300,
                     () -> player.increaseMaxHP(50)));
         }
@@ -324,7 +414,7 @@ public class SwingUI {
 
             entry.buyAction.run();
 
-            // rechts aktualisieren
+
             invModel.clear();
             for (Item it : inventory.getItemsAsJavaList()) {
                 invModel.addElement(it.getClass().getSimpleName());
