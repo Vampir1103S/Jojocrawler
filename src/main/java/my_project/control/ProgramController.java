@@ -44,7 +44,7 @@ public class ProgramController {
     public void startProgram() {
         // Erstelle ein Objekt der Klasse House und initialisiere damit die Referenz house1
         //firstHouse = new House();
-        firstController = new Controller();
+        firstController = new Controller(viewController);
         // Teile dem ViewController-Objekt mit, dass das House-Objekt gezeichnet werden soll
         viewController.draw(firstHouse);
         viewController.register(firstController);

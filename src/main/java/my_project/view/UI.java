@@ -1,5 +1,6 @@
 package my_project.view;
 
+import KAGO_framework.control.SoundController;
 import KAGO_framework.model.InteractiveGraphicalObject;
 import KAGO_framework.view.DrawTool;
 import my_project.Config;
@@ -21,7 +22,11 @@ public class UI extends InteractiveGraphicalObject {
     private double xPos = Config.WINDOW_WIDTH / 2.0;
     private double yPos = Config.WINDOW_HEIGHT / 2.0;
 
-    public UI() { }
+    public UI() {
+        SoundController.playSound("Inspiration");
+        SoundController.stopSound("Timeline");
+        SoundController.stopSound("Evasion");
+    }
 
     @Override
     public void draw(DrawTool drawTool) {
@@ -84,6 +89,9 @@ public class UI extends InteractiveGraphicalObject {
 
         if (yPos < -400) {
             Controller.switchScene(1);
+            SoundController.stopSound("Inspiration");
+            SoundController.playSound("Timeline");
+            SoundController.stopSound("Evasion");
             alphaAnimation = 0;
         }
     }
