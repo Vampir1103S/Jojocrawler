@@ -16,6 +16,8 @@ import java.awt.geom.Rectangle2D;
 
 public class Kind extends Enemy {
 
+    private int number = 0;
+    private double timer = 0;
     private SpriteSheet spriteSheet1;
 
     public Kind(double xpos, double ypos, double hp, double speed, double stamina, int defense, String name, double width,double height) {
@@ -26,7 +28,7 @@ public class Kind extends Enemy {
     @Override
     public void draw(DrawTool drawTool) {
 
-
+        spriteSheet1.setCurrent(direction, number);
         spriteSheet1.draw(drawTool, xpos, ypos, 5);
 
 
@@ -46,5 +48,14 @@ public class Kind extends Enemy {
     @Override
     public void update(double dt) {
         super.update(dt);
+        animateDieb(dt);
+    }
+
+    private void animateDieb(double dt) {
+        timer += dt;
+        if (timer >= 0.15) {
+            number = (number + 1) % 4;
+            timer = 0;
+        }
     }
 }

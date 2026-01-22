@@ -54,7 +54,7 @@ public class Dieb extends Enemy {
     @Override
     public void update(double dt) {
         super.update(dt);
-            animateDieb(dt);
+        animateDieb(dt);
     }
 
     private void animateDieb(double dt) {
