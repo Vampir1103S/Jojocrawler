@@ -5,6 +5,21 @@ import my_project.view.Graphics.SpriteSheet;
 
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
+/**
+ * Repräsentiert den spielbaren Charakter (Spieler) im Dungeon-Crawler.
+ * <p>
+ * Der {@code Player} verwaltet zentrale Spielfunktionen wie:
+ * <ul>
+ *   <li>Darstellung und Animation über ein SpriteSheet</li>
+ *   <li>Bewegungszustände (W/A/S/D) und Blickrichtung (Facing)</li>
+ *   <li>Kampfsystem mit Angriff, Attack-Hitbox, Cooldown und Schaden</li>
+ *   <li>Inventaranbindung (Waffen beeinflussen Schaden/Hitbox/Cooldown, Potions geben Effekte)</li>
+ *   <li>Statuswerte wie maximale HP, Heilung, temporärer Speed-Boost und Unverwundbarkeit</li>
+ * </ul>
+ *
+ * Die eigentliche Eingabeverarbeitung und Kollisionen übernimmt der Controller;
+ * der Spieler stellt dafür Methoden und Zustände bereit (z.B. Hitboxen, Timer, Facing).
+ */
 
 public class Player extends Entity {
 

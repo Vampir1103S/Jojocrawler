@@ -4,6 +4,17 @@ import KAGO_framework.view.DrawTool;
 
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
+/**
+ * Repräsentiert einen fallengelassenen Coin im Spiel.
+ * <p>
+ * {@code CoinDrop} wird erzeugt, wenn ein Gegner besiegt wird
+ * oder eine Belohnung im Spiel erscheint.
+ * Das Objekt besitzt eine feste Größe, einen Wert und eine
+ * Hitbox, über die der Spieler den Coin aufsammeln kann.
+ *
+ * Die grafische Darstellung erfolgt als goldener Kreis mit
+ * aufgedrucktem Zahlenwert.
+ */
 
 public class CoinDrop {
 

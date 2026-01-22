@@ -8,6 +8,18 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+/**
+ * Repräsentiert einen Händler-NPC im Spiel.
+ * <p>
+ * Der {@code MerchantNPC} ist eine nicht-angreifende Spielfigur,
+ * die als Interaktionspunkt für den Shop dient.
+ * Er besitzt keine eigene Bewegungs- oder Kampflogik und wird
+ * statisch an einer festen Position dargestellt.
+ *
+ * Die Klasse erbt von {@link Entity} und stellt zusätzlich
+ * eine Hitbox für Interaktionen (z.B. Öffnen des Shops)
+ * sowie eine grafische Darstellung über ein Bild bereit.
+ */
 
 public class MerchantNPC extends Entity {
 

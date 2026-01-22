@@ -5,6 +5,14 @@ import my_project.view.Graphics.SpriteSheet;
 
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
+/**
+ * Konkreter Gegnertyp, der die allgemeine Gegner-Logik aus {@link Enemy} nutzt
+ * und über ein eigenes SpriteSheet dargestellt wird.
+ * <p>
+ * {@code Kind} übernimmt Bewegung, KI und Angriffssystem von {@link Enemy},
+ * enthält jedoch eine eigene grafische Darstellung. Während eines Angriffs
+ * kann zusätzlich die Attack-Hitbox (Debug/Visualisierung) angezeigt werden.
+ */
 
 public class Kind extends Enemy {
 

@@ -141,6 +141,27 @@ public class Controller extends InteractiveGraphicalObject {
         return player;
     }
 
+    /**
+     * Erzeugt einen neuen Gegner basierend auf einem übergebenen Typ.
+     * <p>
+     * Abhängig vom {@code enemyType} wird eine konkrete Unterklasse von
+     * {@link Enemy} instanziiert und mit vordefinierten Attributen
+     * (Lebenspunkte, Geschwindigkeit, Größe usw.) initialisiert.
+     * Diese Methode wird typischerweise beim Spawnen von Gegnern
+     * in Arenen oder Szenen verwendet.
+     *
+     * <ul>
+     *   <li>{@code enemyType == 1}: {@link Dieb}</li>
+     *   <li>{@code enemyType == 2}: {@link Kind}</li>
+     *   <li>{@code enemyType == 3}: {@link Bosslehrer}</li>
+     * </ul>
+     *
+     * @param enemyType der numerische Typ des Gegners
+     * @param x         Startposition des Gegners auf der X-Achse
+     * @param y         Startposition des Gegners auf der Y-Achse
+     * @return eine neue {@link Enemy}-Instanz des gewünschten Typs
+     *         oder {@code null}, falls der Typ unbekannt ist
+     */
 
     private Enemy createEnemyByType(int enemyType, int x, int y) {
         if (enemyType == 1) {
@@ -152,7 +173,24 @@ public class Controller extends InteractiveGraphicalObject {
         }
         return null;
     }
-
+    /**
+     * Spawnt Gegner eines bestimmten Typs in einer rasterförmigen Anordnung.
+     * <p>
+     * Die Methode durchläuft ein zweidimensionales Gegner-Array und erzeugt
+     * neue Gegnerinstanzen an fest definierten Positionen.
+     * Die Positionen ergeben sich aus einer Startposition sowie festen
+     * Abständen (Swarm-Abstand) zwischen den einzelnen Gegnern.
+     *
+     * Zunächst wird versucht, freie Plätze im primären Gegner-Array
+     * ({@code enemies}) zu belegen. Sind diese bereits gefüllt, werden
+     * Gegner im sekundären Array ({@code secenemies}) erzeugt.
+     *
+     * Diese Methode wird typischerweise verwendet, um Gegnerwellen
+     * oder Arenakämpfe zu initialisieren.
+     *
+     * @param enemyType der Typ des zu spawnenden Gegners
+     *                  (wird an {@link #createEnemyByType(int, int, int)} weitergegeben)
+     */
     private void spawnEnemies(int enemyType) {
         int rows = enemies.length;
         int cols = enemies[0].length;
@@ -227,6 +265,16 @@ public class Controller extends InteractiveGraphicalObject {
                 break;
         }
     }
+    /**
+     * Zeichnet alle aktuell vorhandenen Coin-Drops auf den Bildschirm.
+     * <p>
+     * Die Methode durchläuft die Sammlung aller fallengelassenen Coins
+     * und ruft für jeden {@link CoinDrop} dessen Zeichenmethode auf.
+     * Sie wird im Render-Zyklus des Spiels aufgerufen, um eingesammelte
+     * oder noch liegende Coins visuell darzustellen.
+     *
+     * @param drawTool das {@link DrawTool}, das zum Zeichnen der Coins verwendet wird
+     */
 
     private void drawCoinDrops(DrawTool drawTool) {
         for (CoinDrop c : coinDrops) c.draw(drawTool);
@@ -313,6 +361,27 @@ public class Controller extends InteractiveGraphicalObject {
     }
 
 
+    /**
+     * Behandelt Treffer eines Gegners auf den Spieler.
+     * <p>
+     * Die Methode prüft zunächst, ob der Gegner aktuell Schaden verursachen darf
+     * und ob der Spieler verwundbar ist. Trifft die Angriffs-Hitbox des Gegners
+     * den Spieler, wird dem Spieler Schaden zugefügt und ein Rückstoß (Knockback)
+     * angewendet.
+     *
+     * Besonderheiten:
+     * <ul>
+     *   <li>Ist der Spieler unverwundbar, wird der Angriff ignoriert.</li>
+     *   <li>Der Rückstoß erfolgt ausschließlich auf der X-Achse.</li>
+     *   <li>Boss-Gegner verursachen einen stärkeren Knockback.</li>
+     *   <li>Die Spielerposition wird nach dem Rückstoß auf die Szenengrenzen begrenzt.</li>
+     * </ul>
+     *
+     * Nach einem erfolgreichen Treffer wird der Angriff des Gegners als
+     * abgeschlossen markiert, sodass pro Angriff nur ein Treffer möglich ist.
+     *
+     * @param e der Gegner, dessen Angriff auf den Spieler geprüft wird
+     */
 
     private void handleEnemyHitsPlayer(Enemy e) {
         if (e == null) return;
@@ -349,6 +418,30 @@ public class Controller extends InteractiveGraphicalObject {
     }
 
 
+    /**
+     * Verarbeitet die Bewegung des Spielers basierend auf Tastatureingaben.
+     * <p>
+     * Die Methode liest den aktuellen Status der Bewegungs-Tasten (W, A, S, D)
+     * aus und berechnet daraus eine framerate-unabhängige Bewegung mithilfe
+     * der Delta Time ({@code dt}). Zusätzlich wird die Blickrichtung des
+     * Spielers sowie der Animationsstatus gesetzt.
+     *
+     * Besonderheiten:
+     * <ul>
+     *   <li>Ist das Inventar geöffnet, wird keine Bewegung verarbeitet.</li>
+     *   <li>Die Bewegung erfolgt getrennt auf der X- und Y-Achse.</li>
+     *   <li>Nach jeder Bewegung wird geprüft, ob der Spieler mit Wänden kollidiert.</li>
+     *   <li>Bei einer Kollision wird die Bewegung auf der entsprechenden Achse rückgängig gemacht.</li>
+     *   <li>Die Spielerposition wird auf die aktuellen Szenengrenzen begrenzt.</li>
+     * </ul>
+     *
+     * Diese Methode wird im {@code update}-Zyklus des Controllers aufgerufen
+     * und bildet die Grundlage für das Bewegungs- und Kollisionssystem
+     * des Spielers.
+     *
+     * @param dt Delta Time (Zeit seit dem letzten Frame), um eine
+     *           gleichmäßige Bewegung unabhängig von der Framerate zu gewährleisten
+     */
 
     private void handleMovement(double dt) {
         if (inventoryOpen) return;
@@ -427,15 +520,43 @@ public class Controller extends InteractiveGraphicalObject {
     }
 
 
+    /**
+     * Erzeugt einen neuen Coin-Drop an einer bestimmten Position.
+     * <p>
+     * Der Coin wird zentriert um die übergebene Position erzeugt,
+     * typischerweise an der Stelle, an der ein Gegner besiegt wurde.
+     * Die Größe des Coins wird berücksichtigt, sodass der Drop
+     * optisch mittig erscheint.
+     *
+     * Der neu erstellte {@link CoinDrop} wird der internen Sammlung
+     * der aktiven Coin-Drops hinzugefügt und kann anschließend
+     * vom Spieler eingesammelt werden.
+     *
+     * @param centerX die X-Koordinate des Zentrums, an dem der Coin erscheinen soll
+     * @param centerY die Y-Koordinate des Zentrums, an dem der Coin erscheinen soll
+     * @param amount  der Wert des Coin-Drops (Anzahl der Coins)
+     */
 
     private void spawnCoinDrop(double centerX, double centerY, int amount) {
         coinDrops.add(new CoinDrop(centerX - CoinDrop.SIZE / 2.0, centerY - CoinDrop.SIZE / 2.0, amount));
     }
 
     /**
-     * ✅ WICHTIG: wir nutzen NICHT getX()/getY() (hast du nicht),
-     * sondern CoinDrop.getHitBox() (hast du sehr wahrscheinlich, weil du früher so gepickt hast).
+     * Behandelt das Aufsammeln von Coin-Drops durch den Spieler.
+     * <p>
+     * Die Methode durchläuft alle aktuell vorhandenen {@link CoinDrop}-Objekte
+     * und prüft, ob deren Hitbox die Hitbox des Spielers schneidet.
+     * Bei einer Kollision wird:
+     * <ul>
+     *   <li>der Coin-Wert dem Inventar des Spielers hinzugefügt</li>
+     *   <li>der Coin aus der Liste der aktiven Drops entfernt</li>
+     * </ul>
+     *
+     * Die Iteration erfolgt über einen {@link Iterator}, um das sichere
+     * Entfernen von Coins während des Durchlaufens der Sammlung zu ermöglichen.
+     * Diese Methode wird regelmäßig im Update-Zyklus des Spiels aufgerufen.
      */
+
     private void handleCoinPickup() {
         Iterator<CoinDrop> it = coinDrops.iterator();
         while (it.hasNext()) {
@@ -449,6 +570,21 @@ public class Controller extends InteractiveGraphicalObject {
         }
     }
 
+    /**
+     * Verarbeitet Coin-Drops für Gegner in Szene 3.
+     * <p>
+     * Die Methode überprüft alle Gegner der dritten Szene und erzeugt
+     * einen Coin-Drop, sobald ein Gegner besiegt wurde.
+     * Um zu verhindern, dass ein Gegner mehrfach Coins fallen lässt,
+     * wird eine separate Sammlung ({@code alreadyDropped}) verwendet,
+     * in der bereits abgehandelte Gegner gespeichert werden.
+     *
+     * Für jeden neu besiegten Gegner wird eine zufällige Anzahl
+     * an Coins erzeugt und an der Position des Gegners gespawnt.
+     *
+     * Diese Methode wird typischerweise im Update-Zyklus der Szene 3
+     * aufgerufen und ist Teil des Belohnungssystems des Spiels.
+     */
 
     private void handleScene3CoinDrops() {
         for (Enemy e : scene3Enemies) {
@@ -462,6 +598,24 @@ public class Controller extends InteractiveGraphicalObject {
         }
     }
 
+    /**
+     * Verarbeitet Coin-Drops für Gegner in Szene 4.
+     * <p>
+     * Die Methode überprüft alle Gegner aus den primären und sekundären
+     * Gegner-Arrays der vierten Szene. Sobald ein Gegner besiegt wurde,
+     * wird ein Coin-Drop an dessen Position erzeugt.
+     *
+     * Um Mehrfach-Drops desselben Gegners zu verhindern, wird die
+     * {@code alreadyDropped}-Sammlung verwendet, in der bereits
+     * berücksichtigte Gegner gespeichert werden.
+     *
+     * Für jeden neu besiegten Gegner wird eine zufällige Anzahl an Coins
+     * generiert und in der Szene gespawnt.
+     *
+     * Die Methode ist robust gegenüber {@code null}-Referenzen und kann
+     * auch dann sicher ausgeführt werden, wenn nur eines der Gegner-Arrays
+     * initialisiert ist.
+     */
 
     private void handleScene4CoinDrops() {
         if (enemies == null) return;
@@ -498,10 +652,7 @@ public class Controller extends InteractiveGraphicalObject {
 
 
 
-    /**
-     * Wird GENAU 1x aufgerufen, wenn du von Szene 2 -> Szene 3 gehst.
-     * Erhöht Run, spawnt mehr + gemischt.
-     */
+
     private void startScene3() {
         scene3Run++;
 
@@ -514,6 +665,27 @@ public class Controller extends InteractiveGraphicalObject {
         int total = scene3BaseEnemies + (scene3Run - 1) * scene3MorePerRun;
         spawnScene3EnemiesMixed(total);
     }
+
+    /**
+     * Spawnt eine gemischte Gegnergruppe für Szene 3.
+     * <p>
+     * Die Methode erzeugt eine bestimmte Anzahl von Gegnern und platziert sie
+     * an zufälligen Positionen innerhalb der erlaubten Koordinaten der Szene.
+     * Dabei wird zwischen verschiedenen Gegnertypen unterschieden:
+     * <ul>
+     *   <li>{@link Kind}: wird mit einer steigenden Wahrscheinlichkeit gespawnt</li>
+     *   <li>{@link Dieb}: dient als Standardgegner</li>
+     * </ul>
+     *
+     * Die Wahrscheinlichkeit für {@code Kind}-Gegner erhöht sich mit jeder
+     * weiteren Runde (Run) der Szene, ist jedoch durch einen Maximalwert
+     * begrenzt. Dadurch steigt der Schwierigkeitsgrad progressiv.
+     *
+     * Vor dem Spawnen wird die bestehende Gegnerliste der Szene 3 vollständig
+     * geleert.
+     *
+     * @param count die Anzahl der Gegner, die in Szene 3 gespawnt werden sollen
+     */
 
     private void spawnScene3EnemiesMixed(int count) {
         scene3Enemies.clear();
@@ -580,6 +752,23 @@ public class Controller extends InteractiveGraphicalObject {
 
         if (hitSomeone) player.markHitDone();
     }
+
+
+    /**
+     * Erzeugt einen zufälligen {@code double}-Wert innerhalb eines gegebenen Bereichs.
+     * <p>
+     * Die Methode liefert einen Zufallswert zwischen den beiden übergebenen
+     * Grenzen {@code a} und {@code b}. Dabei ist die Reihenfolge der Parameter
+     * unerheblich, da automatisch die kleinere und größere Grenze bestimmt wird.
+     *
+     * Diese Methode wird typischerweise verwendet, um zufällige Positionen
+     * oder Werte innerhalb eines definierten Bereichs zu berechnen,
+     * z.B. beim Spawnen von Gegnern.
+     *
+     * @param a eine Grenze des Wertebereichs
+     * @param b die andere Grenze des Wertebereichs
+     * @return ein zufälliger Wert im Bereich {@code [min(a, b), max(a, b))}
+     */
 
     private double randomRange(double a, double b) {
         return ThreadLocalRandom.current().nextDouble(Math.min(a, b), Math.max(a, b));
@@ -803,6 +992,28 @@ public class Controller extends InteractiveGraphicalObject {
     }
 
 
+    /**
+     * Öffnet bei aktivem Inventar die passende Swing-Oberfläche
+     * für das aktuell mit der Maus überhoverte Inventarfeld.
+     * <p>
+     * Die Methode prüft zunächst, ob das Inventar geöffnet ist.
+     * Anschließend wird anhand der Mausposition ermittelt, ob sich
+     * der Mauszeiger über dem Waffen- oder dem Potion-Feld befindet.
+     *
+     * Je nach Feld wird:
+     * <ul>
+     *   <li>die aktuell verfügbaren Items aus dem Inventar gesammelt</li>
+     *   <li>das derzeitige Loadout geladen</li>
+     *   <li>eine Swing-UI zum Bearbeiten des jeweiligen Loadouts geöffnet</li>
+     * </ul>
+     *
+     * Gibt die Swing-UI ein bearbeitetes Loadout zurück, wird dieses
+     * im Inventar übernommen. Wird {@code null} zurückgegeben,
+     * bleibt das Loadout unverändert.
+     *
+     * Die Methode dient als Brücke zwischen der Ingame-UI
+     * und den externen Swing-Dialogen zur Loadout-Verwaltung.
+     */
 
     private void tryOpenSwingForHoveredField() {
         if (!inventoryOpen) return;
@@ -823,6 +1034,21 @@ public class Controller extends InteractiveGraphicalObject {
             if (edited != null) inventory.setPotionLoadout(edited);
         }
     }
+    /**
+     * Sammelt alle Waffen aus dem Inventar des Spielers.
+     * <p>
+     * Die Methode durchläuft die interne KAGO-Datenstruktur des Inventars
+     * und filtert alle enthaltenen Items nach dem Typ {@link Weapons}.
+     * Gefundene Waffen werden in eine neue {@link java.util.ArrayList}
+     * übernommen.
+     *
+     * Diese Methode wird typischerweise verwendet, um eine Übersicht
+     * aller verfügbaren Waffen für Loadout-Auswahl oder Swing-Dialoge
+     * bereitzustellen.
+     *
+     * @return eine {@link java.util.List} mit allen Waffen,
+     *         die sich aktuell im Inventar befinden
+     */
 
     private java.util.List<Weapons> collectWeaponsFromInventory() {
         java.util.List<Weapons> out = new ArrayList<>();
@@ -835,6 +1061,21 @@ public class Controller extends InteractiveGraphicalObject {
         }
         return out;
     }
+    /**
+     * Sammelt alle Tränke aus dem Inventar des Spielers.
+     * <p>
+     * Die Methode durchläuft die interne KAGO-Datenstruktur des Inventars
+     * und filtert alle enthaltenen Items nach dem Typ {@link Potions}.
+     * Jeder gefundene Trank wird in eine neue {@link java.util.ArrayList}
+     * übernommen.
+     *
+     * Diese Methode wird typischerweise verwendet, um eine Übersicht
+     * aller verfügbaren Tränke bereitzustellen, z.B. für Loadout-Auswahl
+     * oder Swing-basierte Inventar-Dialoge.
+     *
+     * @return eine {@link java.util.List} mit allen Tränken,
+     *         die sich aktuell im Inventar befinden
+     */
 
     private java.util.List<Potions> collectPotionsFromInventory() {
         java.util.List<Potions> out = new ArrayList<>();

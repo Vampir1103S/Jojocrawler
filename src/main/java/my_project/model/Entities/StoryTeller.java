@@ -6,6 +6,19 @@ import my_project.view.Graphics.SpriteSheet;
 import java.awt.*;
 import java.util.Queue;
 import java.util.ArrayDeque;
+/**
+ * Repräsentiert einen Story- und Dialog-NPC im Spiel.
+ * <p>
+ * Der {@code StoryTeller} dient zur Vermittlung von Handlung,
+ * Hintergrundinformationen und Hinweisen an den Spieler.
+ * Er verwaltet eine Warteschlange von Dialogzeilen, die
+ * nacheinander ausgegeben werden können, und besitzt eine
+ * eigene grafische Darstellung über ein SpriteSheet.
+ *
+ * Die Klasse erbt von {@link Entity} und enthält keine
+ * Bewegungs- oder Kampflogik, sondern ist auf Interaktion
+ * und Story-Fortschritt ausgelegt.
+ */
 
 public class StoryTeller extends Entity {
 

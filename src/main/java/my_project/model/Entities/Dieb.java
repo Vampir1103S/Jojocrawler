@@ -5,6 +5,16 @@ import my_project.view.Graphics.SpriteSheet;
 
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
+/**
+ * Konkreter Gegnertyp mit schnellen Bewegungen und geringem Schaden.
+ * <p>
+ * Der {@code Dieb} erbt die allgemeine Gegner-Logik aus der
+ * {@link Enemy}-Klasse und ergänzt diese um eine eigene Animation
+ * mittels SpriteSheet sowie angepasste Kampf- und Bewegungswerte.
+ *
+ * Er stellt einen typischen Standardgegner dar, der den Spieler
+ * aktiv verfolgt und mit kurzen, schnellen Angriffen angreift.
+ */
 
 public class Dieb extends Enemy {
 

@@ -8,7 +8,20 @@ import my_project.model.items.Consumables.SpeedPotion;
 import my_project.model.items.Consumables.ResistancePotion;
 
 import java.util.ArrayList;
-
+/**
+ * Repräsentiert das Inventar des Spielers.
+ * <p>
+ * Das Inventar verwaltet:
+ * <ul>
+ *   <li>gesammelte Items</li>
+ *   <li>Waffen- und Potion-Loadouts</li>
+ *   <li>Coins und Kaufvorgänge</li>
+ * </ul>
+ *
+ * Intern wird eine KAGO-eigene Datenstruktur verwendet.
+ * Für Benutzeroberflächen werden Adapter-Methoden
+ * zu {@code java.util.List} bereitgestellt.
+ */
 public class Inventory {
 
     private final List<Item> items = new List<>();

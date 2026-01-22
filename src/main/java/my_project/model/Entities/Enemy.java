@@ -4,6 +4,20 @@ import KAGO_framework.view.DrawTool;
 import my_project.Config;
 
 import java.awt.geom.Rectangle2D;
+/**
+ * Basisklasse für alle Gegner im Spiel.
+ * <p>
+ * Die Klasse implementiert:
+ * <ul>
+ *   <li>Bewegungs- und KI-Logik</li>
+ *   <li>Angriffssystem mit Cooldown und Hitbox</li>
+ *   <li>Ausrichtung zum Spieler</li>
+ *   <li>Grundlegende Kampfmechaniken</li>
+ * </ul>
+ *
+ * Spezifische Gegnertypen wie {@code Dieb} oder {@code Kind}
+ * erben von dieser Klasse und passen Werte oder Darstellung an.
+ */
 
 public class Enemy extends Entity {
 

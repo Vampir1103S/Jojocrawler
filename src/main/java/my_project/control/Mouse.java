@@ -4,7 +4,19 @@ import KAGO_framework.model.InteractiveGraphicalObject;
 import com.sun.javafx.geom.Vec2d;
 
 import java.awt.event.MouseEvent;
-
+/**
+ * Verwaltet Mausposition und Mausbutton-Zustände im Spiel.
+ * <p>
+ * Die Klasse dient als zentrale Schnittstelle für Mauseingaben
+ * und speichert:
+ * <ul>
+ *   <li>die aktuelle Mausposition</li>
+ *   <li>den Zustand der Mausbuttons (gedrückt / nicht gedrückt)</li>
+ * </ul>
+ *
+ * Die Informationen können von anderen Klassen abgefragt werden,
+ * um z.B. Klicks, Hover-Effekte oder UI-Interaktionen umzusetzen.
+ */
 public class Mouse extends InteractiveGraphicalObject {
     private static Vec2d position;
     private static boolean[] button;

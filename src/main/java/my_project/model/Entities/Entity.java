@@ -1,6 +1,20 @@
 package my_project.model.Entities;
 
 import KAGO_framework.model.GraphicalObject;
+/**
+ * Abstrakte Basisklasse für alle spielbaren und nicht-spielbaren Objekte mit Position und Statuswerten.
+ * <p>
+ * {@code Entity} speichert grundlegende Eigenschaften, die im Spiel für viele Objekte gleich sind:
+ * <ul>
+ *   <li>Position ({@code xpos}, {@code ypos}) und Größe ({@code width}, {@code height})</li>
+ *   <li>Lebenspunkte ({@code hp})</li>
+ *   <li>Bewegungs-/Statuswerte wie Geschwindigkeit, Ausdauer und Verteidigung</li>
+ * </ul>
+ *
+ * Die Klasse stellt Getter/Setter bereit und bietet zusätzlich Hilfsmethoden wie
+ * {@link #getCenterX()} und {@link #getCenterY()} für die Berechnung der Objektmitte
+ * (z.B. für Distanzberechnungen, Knockback oder Ausrichtung).
+ */
 
 public abstract class  Entity extends GraphicalObject {
 

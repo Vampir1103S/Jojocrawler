@@ -5,6 +5,19 @@ import my_project.view.Graphics.SpriteSheet;
 
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
+/**
+ * Repräsentiert einen speziellen Boss-Gegner im Spiel.
+ * <p>
+ * Der {@code Bosslehrer} ist ein stärkerer Gegnertyp, der von
+ * {@link Enemy} erbt und angepasste Kampfwerte wie höheren Schaden,
+ * längeren Cooldown und spezielle Animationen besitzt.
+ * Er verwendet ein eigenes SpriteSheet und eine angepasste
+ * Richtungslogik, um seine Animationen korrekt darzustellen.
+ *
+ * Diese Klasse kombiniert Boss-typische Eigenschaften
+ * (hoher Schaden, besondere Präsenz) mit der allgemeinen
+ * Gegner-KI aus der Basisklasse.
+ */
 
 public class Bosslehrer extends Enemy {
 
