@@ -44,8 +44,7 @@ public class Baum extends Environment {
             drawTool.drawImage(image, this.x, y);
             drawTool.drawRectangle(getHitboxX(), getHitboxY(), getHitboxWidth(), getHitboxHeight());
 
-            // Debug-Hitbox (optional)
-            // drawTool.drawRectangle(getHitboxX(), getHitboxY(), getHitboxWidth(), getHitboxHeight());
+
         }
     }
 
@@ -56,7 +55,7 @@ public class Baum extends Environment {
 
 
 
-    // ✅ Bildgröße direkt aus BufferedImage
+
     public int getFullImageWidth() {
         return (image != null) ? image.getWidth() : 0;
     }
@@ -65,7 +64,7 @@ public class Baum extends Environment {
         return (image != null) ? image.getHeight() : 0;
     }
 
-    // ✅ Hitbox (aus Bildgröße berechnet)
+
     public double getHitboxXb() {
         return x + getImageWidth();
     }
@@ -107,7 +106,7 @@ public class Baum extends Environment {
     public double getHitboxHeight() {
         return getImageHeight() * hitboxHeightFactor;
     }
-    // Falls du Position brauchst
+
     public double getX() { return x; }
     public double getY() { return y; }
 }

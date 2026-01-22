@@ -14,7 +14,7 @@ public class BetonZaun extends Environment {
 
     private BufferedImage image;
 
-    // Hitbox-Faktoren (nur Stamm ist solid)
+
     private final double hitboxXOffsetFactor = 0.35;
     private final double hitboxYOffsetFactor = 0.55;
     private final double hitboxWidthFactor   = 0.30;
@@ -41,17 +41,16 @@ public class BetonZaun extends Environment {
             drawTool.drawImage(image, x, y);
             drawTool.drawRectangle(getHitboxX(), getHitboxY(), getHitboxWidth(), getHitboxHeight());
 
-            // Debug-Hitbox (optional)
-            // drawTool.drawRectangle(getHitboxX(), getHitboxY(), getHitboxWidth(), getHitboxHeight());
+
         }
     }
 
     @Override
     public void update(double dt) {
-        // nichts
+
     }
 
-    // ✅ Bildgröße direkt aus BufferedImage
+
     public int getImageWidth() {
         return (image != null) ? image.getWidth() : 0;
     }
@@ -60,7 +59,7 @@ public class BetonZaun extends Environment {
         return (image != null) ? image.getHeight() : 0;
     }
 
-    // ✅ Hitbox (aus Bildgröße berechnet)
+
     public double getHitboxX() {
         return x + getImageWidth() * hitboxXOffsetFactor;
     }
@@ -77,7 +76,7 @@ public class BetonZaun extends Environment {
         return getImageHeight() * hitboxHeightFactor;
     }
 
-    // Falls du Position brauchst
+
     public double getX() { return x; }
     public double getY() { return y; }
 }

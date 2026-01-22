@@ -17,13 +17,11 @@ public class Kind extends Enemy {
 
     @Override
     public void draw(DrawTool drawTool) {
-//        drawTool.setCurrentColor(Color.GREEN);
-//        drawTool.drawFilledRectangle(xpos, ypos, width, height);
-//        drawTool.drawRectangle(xpos, ypos, width, height);
+
 
         spriteSheet1.draw(drawTool, xpos, ypos, 5);
 
-        // 🔴 Attackbox NUR beim Angriff
+
         if (attacking) {
             Rectangle2D hb = getAttackHitbox();
             drawTool.setCurrentColor(new Color(255, 0, 0, 120));
@@ -31,7 +29,7 @@ public class Kind extends Enemy {
             drawTool.setCurrentColor(Color.RED);
             drawTool.drawRectangle(hb.getX(), hb.getY(), hb.getWidth(), hb.getHeight());
         }
-        drawDebugBoxes(drawTool);
+
 
 
 

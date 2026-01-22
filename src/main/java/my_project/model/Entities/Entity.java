@@ -12,7 +12,7 @@ public abstract class  Entity extends GraphicalObject {
     protected int defense;
     protected String name;
 
-    // FIX: width/height wirklich speichern
+
     protected double width;
     protected double height;
 

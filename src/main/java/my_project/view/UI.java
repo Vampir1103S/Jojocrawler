@@ -11,11 +11,11 @@ public class UI extends InteractiveGraphicalObject {
 
     private boolean startscreen = true;
 
-    // Blink-Text Alpha
+
     private double alpha = 255;
     private double alphaTimer = 0;
 
-    // Startscreen Fade/Slide Alpha
+
     private double alphaAnimation = 255;
 
     private double xPos = Config.WINDOW_WIDTH / 2.0;
@@ -29,7 +29,7 @@ public class UI extends InteractiveGraphicalObject {
     }
 
     private void drawStartScreen(DrawTool drawTool) {
-        // ✅ CLAMP, damit nie wieder IllegalArgumentException passiert
+
         int bgA = clampAlpha(alphaAnimation);
 
         drawTool.setCurrentColor(0, 0, 0, bgA);
@@ -53,7 +53,7 @@ public class UI extends InteractiveGraphicalObject {
     public void update(double dt) {
         alphaTimer += dt;
 
-        // Blink-Logik (kann leicht out of range gehen -> clampen wir beim Zeichnen)
+
         if (alphaTimer < 2) {
             alpha -= 95 * dt;
         }
@@ -81,7 +81,7 @@ public class UI extends InteractiveGraphicalObject {
         yPos -= 850 * dt;
         alphaAnimation -= 220 * dt;
 
-        // ✅ wenn fertig: Szene wechseln, aber Alpha sauber setzen
+
         if (yPos < -400) {
             Controller.switchScene(1);
             alphaAnimation = 0;
@@ -92,7 +92,16 @@ public class UI extends InteractiveGraphicalObject {
         return startscreen;
     }
 
-    // ===== Helper =====
+    /**
+     * Begrenzt einen Alpha-Wert auf den gültigen Bereich für Transparenz.
+     * <p>
+     * Der Wert wird auf den Bereich von 0 bis 255 eingeschränkt,
+     * wie er bei Farb- und Transparenzwerten verwendet wird.
+     *
+     * @param a der zu prüfende Alpha-Wert
+     * @return ein ganzzahliger Alpha-Wert im Bereich von 0 bis 255
+     */
+
     private static int clampAlpha(double a) {
         if (a < 0) return 0;
         if (a > 255) return 255;

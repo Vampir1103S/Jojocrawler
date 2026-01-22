@@ -37,6 +37,17 @@ public class SpriteSheet extends Texture {
         super.update(dt);
 
         setImageToCurrent();
+
+        /**
+         * Setzt das aktuell anzuzeigende Bild basierend auf den aktuellen
+         * Animationsindizes.
+         * <p>
+         * Die Indizes werden mithilfe des Modulo-Operators auf die gültigen
+         * Grenzen des Sprite-Sheets begrenzt, um Zugriffe außerhalb des
+         * Bildarrays zu vermeiden.
+         * Anschließend wird das entsprechende Teilbild als aktuelles
+         * Anzeigebild gesetzt.
+         */
     }
     protected void setImageToCurrent(){
         currentX %= subImages.length;
@@ -44,7 +55,18 @@ public class SpriteSheet extends Texture {
         setImage(getSubImage(currentX, currentY));
     }
 
-    //Getter and Setter
+    /**
+     * Setzt die aktuellen Indizes des Sprite-Sheets und aktualisiert das Bild.
+     * <p>
+     * Die übergebenen Werte bestimmen, welches Teilbild aus dem
+     * Sprite-Sheet angezeigt wird.
+     * Nach dem Setzen der Indizes wird automatisch das
+     * entsprechende Bild aktiviert.
+     *
+     * @param x der Spaltenindex des Teilbildes
+     * @param y der Zeilenindex des Teilbildes
+     */
+
     public void setCurrent(int x, int y) {
         currentX = x;
         currentY = y;
@@ -58,6 +80,17 @@ public class SpriteSheet extends Texture {
         this.currentY = currentY;
         setImageToCurrent();
     }
+    /**
+     * Gibt ein einzelnes Teilbild (Sprite) aus dem Sprite-Sheet zurück.
+     * <p>
+     * Das Teilbild wird anhand der übergebenen Spalten- und Zeilenindizes
+     * aus dem internen Sprite-Array ausgewählt.
+     *
+     * @param x der Spaltenindex des gewünschten Teilbildes
+     * @param y der Zeilenindex des gewünschten Teilbildes
+     * @return das ausgewählte {@link BufferedImage} aus dem Sprite-Sheet
+     */
+
     public BufferedImage getSubImage(int x, int y) {
         return subImages[x][y];
     }

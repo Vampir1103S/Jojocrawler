@@ -16,11 +16,11 @@ public class Player extends Entity {
     private int direction = 0;
     private double timer = 0;
 
-    // Facing
+
     private int facingX = 0;
     private int facingY = 1;
 
-    // Angriff
+
     private boolean attacking = false;
     private boolean hitDoneThisAttack = false;
     private double attackTimer = 0;
@@ -28,16 +28,16 @@ public class Player extends Entity {
 
     private double cooldownTimer = 0;
 
-    // Baseline
+
     private final double baseAttackCooldown = 0.35;
     private double attackCooldown = baseAttackCooldown;
 
     private int attackDamage = 10;
 
-    // Inventory
+
     private my_project.model.items.Inventory inventory;
 
-    // ===== Stats / Upgrades / Buffs =====
+
     private double maxHP = 100;
 
     private double baseMoveSpeed = 250;
@@ -52,6 +52,17 @@ public class Player extends Entity {
         spriteSheet2 = new SpriteSheet("Player-Sprite.png", 4, 4);
         maxHP = 100;
     }
+
+    /**
+     * Setzt das Inventar des Spielers.
+     * <p>
+     * Über diese Methode wird dem Spieler ein {@link my_project.model.items.Inventory}
+     * zugewiesen, das für Items, Waffen, Potions und Coins verwendet wird.
+     * Der Aufruf erfolgt typischerweise beim Initialisieren des Spiels
+     * oder beim Erstellen des Spielers im Controller.
+     *
+     * @param inv das Inventar, das dem Spieler zugewiesen werden soll
+     */
 
     public void setInventory(my_project.model.items.Inventory inv) {
         this.inventory = inv;
@@ -155,6 +166,19 @@ public class Player extends Entity {
             timer = 0;
         }
     }
+
+    /**
+     * Aktualisiert die Animationsphase des Spielers.
+     * <p>
+     * In festen Zeitabständen wird der Animationsindex erhöht,
+     * um zwischen den einzelnen Frames der Lauf- bzw. Bewegungsanimation
+     * zu wechseln.
+     * Die Animation ist zeitbasiert und somit unabhängig von der
+     * aktuellen Framerate.
+     *
+     * @param dt Delta Time (Zeit seit dem letzten Frame)
+     */
+
     private void animatePlayer(double dt) {
         timer += dt;
         if (timer >= 0.15) {
@@ -162,6 +186,18 @@ public class Player extends Entity {
             timer = 0;
         }
     }
+
+    /**
+     * Erzeugt und liefert die Aggro-Box für Gegner.
+     * <p>
+     * Die Aggro-Box ist ein vergrößerter Bereich um den Spieler,
+     * der verwendet wird, um zu prüfen, ob sich ein Gegner
+     * in Angriffs- bzw. Aktivierungsreichweite befindet.
+     * Sie basiert auf der aktuellen Position und Größe des Spielers
+     * und erweitert diese in alle Richtungen.
+     *
+     * @return ein {@link Rectangle2D}, das den Aggro-Bereich um den Spieler beschreibt
+     */
 
     public Rectangle2D getEnemyAggroBox() {
         double rangeX = 10;
@@ -174,6 +210,23 @@ public class Player extends Entity {
                 height + rangeY * 2
         );
     }
+
+    /**
+     * Startet einen Angriff des Spielers.
+     * <p>
+     * Ein Angriff kann nur ausgelöst werden, wenn aktuell kein Angriff läuft
+     * und kein Cooldown aktiv ist.
+     * Vor Beginn des Angriffs werden die Angriffsparameter anhand der
+     * aktuell ausgerüsteten Waffe bestimmt:
+     * <ul>
+     *   <li>Schadenswert wird aus der Waffe übernommen</li>
+     *   <li>Cooldown wird durch den Waffen-Multiplikator angepasst</li>
+     * </ul>
+     * Falls keine Waffe ausgerüstet ist, werden Standardwerte verwendet.
+     *
+     * Anschließend wird der Angriff aktiviert, der Trefferstatus
+     * zurückgesetzt und die entsprechenden Timer gestartet.
+     */
 
     public void startAttack() {
         if (!attacking && cooldownTimer <= 0) {
@@ -193,6 +246,22 @@ public class Player extends Entity {
         }
     }
 
+    /**
+     * Prüft, ob der Spieler in diesem Moment Schaden verursachen darf.
+     * <p>
+     * Ein Treffer ist nur möglich, wenn:
+     * <ul>
+     *   <li>der Spieler sich aktuell in einem Angriff befindet</li>
+     *   <li>für diesen Angriff noch kein Treffer registriert wurde</li>
+     * </ul>
+     *
+     * Dadurch wird verhindert, dass ein einzelner Angriff mehrfach
+     * Schaden innerhalb desselben Angriffszyklus verursacht.
+     *
+     * @return {@code true}, wenn der Spieler jetzt Schaden verursachen darf,
+     *         sonst {@code false}
+     */
+
     public boolean canDealHitNow() {
         return attacking && !hitDoneThisAttack;
     }
@@ -205,9 +274,22 @@ public class Player extends Entity {
         return attackDamage;
     }
 
-    // ✅ FIX: "Rotiert" Hitbox bei Up/Down (W/H tauschen)
+    /**
+     * Erzeugt und liefert die Attack-Hitbox des Spielers.
+     * <p>
+     * Die Größe und der Abstand der Hitbox werden standardmäßig über
+     * Fallback-Werte definiert, können jedoch durch die aktuell
+     * ausgerüstete Waffe überschrieben werden.
+     * Abhängig von der Blickrichtung des Spielers wird die Hitbox
+     * vor der Spielfigur platziert.
+     * Bei vertikalen Angriffen wird die Hitbox gedreht, indem
+     * Breite und Höhe vertauscht werden.
+     *
+     * @return ein {@link Rectangle2D}, das den Angriffsbereich des Spielers beschreibt
+     */
+
     public Rectangle2D getAttackHitbox() {
-        double hitW = 60, hitH = 60, offset = 10; // Fallback
+        double hitW = 60, hitH = 60, offset = 10;
 
         my_project.model.items.Weapons w = getEquippedWeapon();
         if (w != null) {
@@ -216,7 +298,7 @@ public class Player extends Entity {
             offset = w.getOffset();
         }
 
-        // ✅ Wenn vertikal (oben/unten): Hitbox drehen => Breite/Höhe tauschen
+
         boolean vertical = (facingY != 0);
         if (vertical) {
             double tmp = hitW;

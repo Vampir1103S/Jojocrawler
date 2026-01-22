@@ -56,15 +56,26 @@ public class Deathscreen extends InteractiveGraphicalObject {
         alphaAnimation -= 220 * dt;
 
         if (yPos < -400) {
-            // ✅ RESTART: zurück ins Gameplay
+
             Controller.switchScene(1);
 
-            // Reset, falls Deathscreen später erneut genutzt wird
+
             alphaAnimation = 255;
             yPos = Config.WINDOW_HEIGHT / 2.0;
             deathscreen = true;
         }
     }
+
+    /**
+     * Begrenzt einen Alpha-Wert auf den gültigen Bereich.
+     * <p>
+     * Der übergebene Wert wird auf den Bereich von 0 bis 255
+     * beschränkt, wie er für Transparenzwerte in der
+     * Farbdarstellung verwendet wird.
+     *
+     * @param a der zu begrenzende Alpha-Wert
+     * @return der begrenzte Alpha-Wert im Bereich von 0 bis 255
+     */
 
     private static int clampAlpha(double a) {
         if (a < 0) return 0;

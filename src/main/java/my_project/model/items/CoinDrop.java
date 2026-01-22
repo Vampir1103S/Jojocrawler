@@ -23,7 +23,7 @@ public class CoinDrop {
         return value;
     }
 
-    // ✅ damit dein Controller NICHT mehr getX/getY Fehler hat
+
     public double getX() { return x; }
     public double getY() { return y; }
 

@@ -7,14 +7,13 @@ import java.awt.geom.Rectangle2D;
 
 public class Enemy extends Entity {
 
-    // Controller-Referenz (du setzt sie in Controller: Enemy.setController(this);)
     protected static my_project.control.Controller controller;
 
-    // Facing (für AttackHitbox Richtung)
+
     protected int facingX = 0;
     protected int facingY = 1;
 
-    // Attack
+
     protected boolean attacking = false;
     protected boolean hitDoneThisAttack = false;
     protected double attackTimer = 0;
@@ -24,7 +23,7 @@ public class Enemy extends Entity {
     protected int attackDamage = 10;
     protected int direction = 0;
 
-    // Bewegung / KI
+
     protected double speed = 120;
     protected boolean runAway = false;
 
@@ -52,10 +51,10 @@ public class Enemy extends Entity {
         if (p == null) return;
 
         if (!attacking) {
-            lookAtPlayer(p); // 👈 HIER
+            lookAtPlayer(p);
         }
 
-        // Timer
+
         if (cooldownTimer > 0) cooldownTimer -= dt;
 
         if (attacking) {
@@ -63,18 +62,17 @@ public class Enemy extends Entity {
             if (attackTimer <= 0) attacking = false;
         }
 
-        // ✅ "Nah genug zum Angreifen?" (Box um den Spieler)
+
         Rectangle2D nearBox = p.getEnemyAggroBox();
         boolean inRange = nearBox.intersects(xpos, ypos, width, height);
 
         if (inRange) {
-            // Nicht weiter laufen, nur ausrichten + attacken
             faceTowardsPlayer(p);
             startAttack();
             return;
         }
 
-        // ✅ Wenn nicht in Range: zum Spieler laufen
+
         moveTowardsPlayer(p, dt);
     }
 
@@ -82,6 +80,26 @@ public class Enemy extends Entity {
         return runAway;
     }
 
+    /**
+     * Bewegt den Gegner relativ zum Spieler – entweder auf ihn zu oder kurzzeitig von ihm weg.
+     * <p>
+     * Ablauf der Methode:
+     * <ol>
+     *   <li>Berechnet den Richtungsvektor vom Gegner zum Spieler (dx, dy)</li>
+     *   <li>Normiert den Vektor, sodass die Bewegung unabhängig von der Entfernung ist</li>
+     *   <li>Setzt die Blickrichtung (Facing) des Gegners passend zur Bewegungsrichtung</li>
+     *   <li>Bewegt den Gegner mit seiner Geschwindigkeit framerate-unabhängig</li>
+     *   <li>Optional: Gegner kann für kurze Zeit vom Spieler weglaufen (Run-Away-Logik)</li>
+     *   <li>Begrenzt die Position auf den sichtbaren Spielbereich</li>
+     * </ol>
+     *
+     * Die Methode wird im {@link #update(double)}-Zyklus aufgerufen,
+     * solange sich der Spieler nicht in Angriffsreichweite befindet.
+     *
+     * @param p  der Spieler, auf den sich der Gegner zubewegt
+     * @param dt Delta Time (Zeit seit dem letzten Frame),
+     *           um gleichmäßige Bewegung unabhängig von der Framerate zu ermöglichen
+     */
     protected void moveTowardsPlayer(Player p, double dt) {
         double dx = p.getCenterX() - getCenterX();
         double dy = p.getCenterY() - getCenterY();
@@ -92,7 +110,6 @@ public class Enemy extends Entity {
         dx /= dist;
         dy /= dist;
 
-        // Facing setzen (damit Enemy beim Laufen in die Richtung schaut)
         setFacingFromVector(dx, dy);
 
         if (runAway){
@@ -109,16 +126,46 @@ public class Enemy extends Entity {
             ypos += dy * speed * dt;
         }
 
-
-        // ✅ FIX: Clamp nach Movement, sonst kann Enemy offscreen verschwinden
         clampToScreen();
     }
 
+    /**
+     * Richtet den Gegner so aus, dass er den Spieler anschaut.
+     * <p>
+     * Es wird ein Richtungsvektor vom Gegner zum Spieler berechnet.
+     * Dieser Vektor wird anschließend genutzt, um die Blickrichtung
+     * (Facing) des Gegners zu setzen.
+     *
+     * Die Methode verändert **nur die Ausrichtung**, nicht die Position.
+     * Sie wird z.B. verwendet, wenn der Gegner in Angriffsreichweite ist
+     * und nicht mehr auf den Spieler zuläuft.
+     *
+     * @param p der Spieler, auf den sich der Gegner ausrichten soll
+     */
     protected void faceTowardsPlayer(Player p) {
         double dx = p.getCenterX() - getCenterX();
         double dy = p.getCenterY() - getCenterY();
         setFacingFromVector(dx, dy);
     }
+
+
+    /**
+     * Setzt die Blickrichtung (Facing) des Gegners anhand eines Richtungsvektors.
+     * <p>
+     * Der Vektor {@code (dx, dy)} beschreibt die Richtung zu einem Ziel
+     * (z.B. zum Spieler). Die Methode entscheidet, ob die horizontale oder
+     * vertikale Komponente dominiert, und richtet den Gegner entsprechend aus:
+     * <ul>
+     *   <li>Horizontale Dominanz → links oder rechts</li>
+     *   <li>Vertikale Dominanz → oben oder unten</li>
+     * </ul>
+     *
+     * Dadurch wird sichergestellt, dass der Gegner immer eindeutig
+     * in eine der vier Hauptrichtungen blickt.
+     *
+     * @param dx Richtungsanteil auf der X-Achse
+     * @param dy Richtungsanteil auf der Y-Achse
+     */
 
     protected void setFacingFromVector(double dx, double dy) {
         if (Math.abs(dx) > Math.abs(dy)) {
@@ -129,15 +176,26 @@ public class Enemy extends Entity {
             else { facingX = 0; facingY = -1; }
         }
 
-//        if (ypos > player.getYpos()) direction = 0;    //unten
-//        else if (xpos < getXpos()) direction = 1;    //rechts
-//        else if (xpos > getXpos()) direction = 2;    //links
-//        else if (ypos < getYpos()) direction = 3;    //oben
 
     }
 
 
-
+    /**
+     * Startet einen Angriff des Gegners.
+     * <p>
+     * Ein Angriff kann nur gestartet werden, wenn der Gegner aktuell
+     * nicht angreift und kein Cooldown aktiv ist.
+     * Beim Start des Angriffs werden:
+     * <ul>
+     *   <li>der Angriffsstatus aktiviert</li>
+     *   <li>der Trefferstatus zurückgesetzt</li>
+     *   <li>die Angriffsdauer gesetzt</li>
+     *   <li>der Cooldown-Timer gestartet</li>
+     * </ul>
+     *
+     * Die eigentliche Trefferprüfung erfolgt anschließend über
+     * {@link #canDealHitNow()} und die Attack-Hitbox.
+     */
     public void startAttack() {
         if (!attacking && cooldownTimer <= 0) {
             attacking = true;
@@ -147,19 +205,78 @@ public class Enemy extends Entity {
         }
     }
 
+    /**
+     * Prüft, ob der Gegner in diesem Moment Schaden verursachen darf.
+     * <p>
+     * Ein Treffer ist nur möglich, wenn:
+     * <ul>
+     *   <li>der Gegner sich aktuell in einem Angriff befindet</li>
+     *   <li>für diesen Angriff noch kein Treffer registriert wurde</li>
+     * </ul>
+     *
+     * Dadurch wird verhindert, dass ein einzelner Angriff
+     * mehrfach Schaden im selben Angriffszyklus verursacht.
+     *
+     * @return {@code true}, wenn der Gegner jetzt Schaden verursachen darf,
+     *         sonst {@code false}
+     */
+
+
+    /**
+     * Prüft, ob der Gegner in diesem Moment Schaden verursachen darf.
+     * <p>
+     * Ein Treffer ist nur möglich, wenn:
+     * <ul>
+     *   <li>der Gegner sich aktuell in einem Angriff befindet</li>
+     *   <li>für diesen Angriff noch kein Treffer registriert wurde</li>
+     * </ul>
+     *
+     * Dadurch wird verhindert, dass ein einzelner Angriff
+     * mehrfach Schaden im selben Angriffszyklus verursacht.
+     *
+     * @return {@code true}, wenn der Gegner jetzt Schaden verursachen darf,
+     *         sonst {@code false}
+     */
+
     public boolean canDealHitNow() {
         return attacking && !hitDoneThisAttack;
     }
+
+    /**
+     * Markiert den aktuellen Angriff als bereits getroffen.
+     * <p>
+     * Nach dem Aufruf dieser Methode kann der Gegner im laufenden
+     * Angriffszyklus keinen weiteren Schaden mehr verursachen.
+     * Dies verhindert Mehrfachtreffer innerhalb eines einzelnen Angriffs.
+     */
 
     public void markHitDone() {
         hitDoneThisAttack = true;
     }
 
+
     public int getAttackDamage() {
         return attackDamage;
     }
 
-    // AttackHitbox wie beim Player: abhängig von facing
+    /**
+     * Erzeugt und liefert die Attack-Hitbox des Gegners.
+     * <p>
+     * Die Attack-Hitbox ist ein rechteckiger Bereich vor dem Gegner,
+     * in dem ein Angriff Schaden verursachen kann.
+     * Ihre Position hängt von der aktuellen Blickrichtung
+     * ({@code facingX}, {@code facingY}) ab.
+     * <ul>
+     *   <li>rechts / links: Hitbox wird seitlich neben dem Gegner platziert</li>
+     *   <li>oben / unten: Hitbox wird ober- bzw. unterhalb des Gegners platziert</li>
+     * </ul>
+     *
+     * Die Größe der Hitbox ist fest definiert und unabhängig von der
+     * Größe des Gegners.
+     *
+     * @return ein {@link Rectangle2D}, das den Angriffsbereich des Gegners beschreibt
+     */
+
     public Rectangle2D getAttackHitbox() {
         double hitW = 80, hitH = 80, offset = 10;
 
@@ -174,23 +291,54 @@ public class Enemy extends Entity {
         return new Rectangle2D.Double(x, y, hitW, hitH);
     }
 
-    // Debug Boxes (falls du das in Dieb.drawDebugBoxes(drawTool) nutzt)
-    protected void drawDebugBoxes(DrawTool drawTool) {
-        // Optional: hier später Enemy-eigene Debugboxen zeichnen
-    }
 
-    // ===== Knockback anwenden (vom Player-Hit) =====
+    /**
+     * Wendet einen Rückstoß (Knockback) auf den Gegner an.
+     * <p>
+     * Die übergebenen Verschiebungswerte werden direkt zur aktuellen
+     * Position addiert, um den Gegner durch einen Treffer
+     * zurückzustoßen.
+     * Anschließend wird die Position auf den sichtbaren
+     * Spielbereich begrenzt.
+     *
+     * @param dx Verschiebung auf der X-Achse
+     * @param dy Verschiebung auf der Y-Achse
+     */
+
     public void applyKnockback(double dx, double dy) {
         xpos += dx;
         ypos += dy;
-        clampToScreen(); // ✅ clamp auch hier
+        clampToScreen();
     }
 
-    // ✅ zentrale Methode: Enemy bleibt im Bildschirm
+    /**
+     * Begrenzt die Position des Gegners auf den sichtbaren Spielbereich.
+     * <p>
+     * Die Methode stellt sicher, dass sich der Gegner nicht
+     * außerhalb des Fensters bewegen kann.
+     * Dabei werden die aktuellen Koordinaten so angepasst,
+     * dass der Gegner vollständig innerhalb der Fenstergrenzen bleibt.
+     */
+
     protected void clampToScreen() {
         xpos = Math.max(0, Math.min(xpos, Config.WINDOW_WIDTH - width));
         ypos = Math.max(0, Math.min(ypos, Config.WINDOW_HEIGHT - height));
     }
+
+
+    /**
+     * Richtet den Gegner visuell und logisch auf den Spieler aus.
+     * <p>
+     * Anhand der relativen Position des Spielers wird bestimmt,
+     * ob der Gegner horizontal oder vertikal auf den Spieler blickt.
+     * Zusätzlich zur Blickrichtung werden auch die Animations-
+     * bzw. Richtungswerte gesetzt.
+     *
+     * Die Methode verändert nur die Ausrichtung des Gegners
+     * und keine Position oder Bewegung.
+     *
+     * @param p der Spieler, auf den sich der Gegner ausrichten soll
+     */
 
     protected void lookAtPlayer(Player p) {
         if (p == null) return;

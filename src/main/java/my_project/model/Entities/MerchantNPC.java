@@ -33,6 +33,16 @@ public class MerchantNPC extends Entity {
     @Override
     public void update(double dt) { }
 
+    /**
+     * Gibt die Körper-Hitbox der Entity zurück.
+     * <p>
+     * Die Hitbox entspricht der aktuellen Position und Größe
+     * der Entity und wird für Kollisionen, Trefferabfragen
+     * und Reichweitenprüfungen verwendet.
+     *
+     * @return ein {@link Rectangle2D}, das die Hitbox der Entity beschreibt
+     */
+
     public Rectangle2D getHitBox() {
         return new Rectangle2D.Double(xpos, ypos, width, height);
     }

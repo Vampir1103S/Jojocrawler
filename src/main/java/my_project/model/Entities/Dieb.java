@@ -16,7 +16,7 @@ public class Dieb extends Enemy {
         super( xpos,  ypos,  hp, speed,  stamina,  defense, name,  width, height);
         spriteSheet1 = new SpriteSheet("Dieb-Sprite.png", 4, 4);
 
-        // Optional feinjustieren
+
         this.attackDamage = 10;
         this.attackCooldown = 0.6;
         this.attackDuration = 0.12;
@@ -25,9 +25,7 @@ public class Dieb extends Enemy {
 
     @Override
     public void draw(DrawTool drawTool) {
-//        drawTool.setCurrentColor(Color.GREEN);
-//        drawTool.drawFilledRectangle(xpos, ypos, width, height);
-//        drawTool.drawRectangle(xpos, ypos, width, height);
+
 
         spriteSheet1.setCurrent(direction, number);
         spriteSheet1.draw(drawTool, xpos, ypos, 5);
@@ -40,7 +38,7 @@ public class Dieb extends Enemy {
             drawTool.drawRectangle(hb.getX(), hb.getY(), hb.getWidth(), hb.getHeight());
         }
 
-        drawDebugBoxes(drawTool);
+
     }
 
     @Override

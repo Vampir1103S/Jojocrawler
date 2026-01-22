@@ -17,7 +17,7 @@ public class Bosslehrer extends Enemy {
         super( xpos,  ypos,  hp, speed,  stamina,  defense, name,  width, height);
         spriteSheet1 = new SpriteSheet("Dieb-Sprite.png", 4, 4);
 
-        // Optional feinjustieren
+
         this.attackDamage = 30;
         this.attackCooldown = 0.8;
         this.attackDuration = 0.12;
@@ -41,7 +41,7 @@ public class Bosslehrer extends Enemy {
             drawTool.drawRectangle(hb.getX(), hb.getY(), hb.getWidth(), hb.getHeight());
         }
 
-        drawDebugBoxes(drawTool);
+
     }
 
     @Override
@@ -49,10 +49,10 @@ public class Bosslehrer extends Enemy {
         super.update(dt);
 
 
-        if (facingX == 1 && facingY == 0) direction = 3;    //oben
-        else if (facingX == -1 && facingY == 0) direction = 2;    //links
-        else if (facingX == 0 && facingY == -1) direction = 0;    //unten
-        else if (facingX == 0 && facingY == 1) direction = 1;    //rechts
+        if (facingX == 1 && facingY == 0) direction = 3;
+        else if (facingX == -1 && facingY == 0) direction = 2;
+        else if (facingX == 0 && facingY == -1) direction = 0;
+        else if (facingX == 0 && facingY == 1) direction = 1;
         animateDieb(dt);
 
     }

@@ -27,6 +27,15 @@ public class StoryTeller extends Entity {
         spriteSheet1 = new SpriteSheet("Storyteller-Sprite.png", 2, 1);
     }
 
+    /**
+     * Fügt eine neue Dialogzeile zur Dialog-Warteschlange hinzu.
+     * <p>
+     * Die Dialogzeilen werden in der Reihenfolge ihres Hinzufügens
+     * gespeichert und später nacheinander ausgegeben,
+     * z.B. beim Sprechen mit einem NPC.
+     *
+     * @param dialog die Dialogzeile, die hinzugefügt werden soll
+     */
 
     public void addDialogLine(String dialog) {
         dialogQueue.add(dialog);
@@ -38,6 +47,19 @@ public class StoryTeller extends Entity {
         spriteSheet1.draw(drawTool,xpos,ypos,5);
         spriteSheet1.setCurrent(0,direction);
     }
+    /**
+     * Gibt die nächste Dialogzeile des NPCs zurück.
+     * <p>
+     * Die Methode entnimmt die nächste verfügbare Dialogzeile
+     * aus der Dialog-Warteschlange und gibt sie zurück.
+     * Ist keine Dialogzeile mehr vorhanden, wird ein
+     * entsprechender Hinweistext geliefert.
+     * Zusätzlich wird die Blickrichtung des NPCs gesetzt,
+     * um eine passende Ausrichtung beim Sprechen zu ermöglichen.
+     *
+     * @return die nächste Dialogzeile oder ein Hinweistext,
+     *         falls keine weiteren Dialoge vorhanden sind
+     */
 
     public String speak(){
         if (dialogQueue.isEmpty()) {
