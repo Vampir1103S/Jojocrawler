@@ -7,7 +7,7 @@ public class Axe extends Weapons {
         hitW = 90;               // große Hitbox
         hitH = 75;
         offset = 8;              // eher nah am Spieler
-        cooldownMultiplier = 2.5; // deutlich langsamer (Cooldown wird größer)
+        cooldownMultiplier = 1.55; // deutlich langsamer (Cooldown wird größer)
     }
 
     @Override
