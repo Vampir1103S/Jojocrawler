@@ -140,9 +140,9 @@ public class Controller extends InteractiveGraphicalObject {
         StationGate2 = new Gate(200, 1080, 800, 10);
 
         enemies = new Enemy[4][4];
-        secenemies = new Enemy[4][4];
+        secenemies = new Enemy[2][8];
+        spawnEnemies(2);
 
-        spawnEnemies(3);
         dieb = enemies[0][0];
 
         Enemy.setController(this);
@@ -724,7 +724,7 @@ public class Controller extends InteractiveGraphicalObject {
      * @param count die Anzahl der Gegner, die in Szene 3 gespawnt werden sollen
      */
 
-    private void spawnScene3EnemiesMixed(int count) {
+    private void spawnSceneEnemiesMixed(int count) {
         scene3Enemies.clear();
 
         double kindChance = Math.min(scene3KindBaseChance + scene3KindMorePerRun * (scene3Run - 1), scene3KindMaxChance);
