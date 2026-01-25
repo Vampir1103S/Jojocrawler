@@ -2,88 +2,56 @@ package my_project.model.Entities;
 
 import KAGO_framework.view.DrawTool;
 import my_project.view.Graphics.SpriteSheet;
+import KAGO_framework.model.abitur.datenstrukturen.Queue;
 
-import java.awt.*;
-import java.util.Queue;
-import java.util.ArrayDeque;
 /**
- * Repräsentiert einen Story- und Dialog-NPC im Spiel.
- * <p>
- * Der {@code StoryTeller} dient zur Vermittlung von Handlung,
- * Hintergrundinformationen und Hinweisen an den Spieler.
- * Er verwaltet eine Warteschlange von Dialogzeilen, die
- * nacheinander ausgegeben werden können, und besitzt eine
- * eigene grafische Darstellung über ein SpriteSheet.
- *
- * Die Klasse erbt von {@link Entity} und enthält keine
- * Bewegungs- oder Kampflogik, sondern ist auf Interaktion
- * und Story-Fortschritt ausgelegt.
+ * Story- und Dialog-NPC mit einer klassischen FIFO-Queue.
  */
-
 public class StoryTeller extends Entity {
 
     private boolean ETrue;
     private SpriteSheet spriteSheet1;
-
     private int direction = 0;
-    private double timer = 0;
 
     private Queue<String> dialogQueue;
 
-    public StoryTeller(int x, int y, double hp, int speed, double stamina, int defense,
-                       String name, int width, int height) {
+    public StoryTeller(int x, int y, double hp, int speed, double stamina,
+                       int defense, String name, int width, int height) {
 
         super(x, y, hp, speed, stamina, defense, name, width, height);
 
-
-        dialogQueue = new ArrayDeque<>();
+        dialogQueue = new Queue<>();
         spriteSheet1 = new SpriteSheet("Storyteller-Sprite.png", 2, 1);
     }
 
     /**
-     * Fügt eine neue Dialogzeile zur Dialog-Warteschlange hinzu.
-     * <p>
-     * Die Dialogzeilen werden in der Reihenfolge ihres Hinzufügens
-     * gespeichert und später nacheinander ausgegeben,
-     * z.B. beim Sprechen mit einem NPC.
-     *
-     * @param dialog die Dialogzeile, die hinzugefügt werden soll
+     * enqueue – Dialog hinten anstellen
      */
-
     public void addDialogLine(String dialog) {
-        dialogQueue.add(dialog);
+        dialogQueue.enqueue(dialog);
     }
 
-    public void draw(DrawTool drawTool){
-       
-
-        spriteSheet1.draw(drawTool,xpos,ypos,5);
-        spriteSheet1.setCurrent(0,direction);
-    }
     /**
-     * Gibt die nächste Dialogzeile des NPCs zurück.
-     * <p>
-     * Die Methode entnimmt die nächste verfügbare Dialogzeile
-     * aus der Dialog-Warteschlange und gibt sie zurück.
-     * Ist keine Dialogzeile mehr vorhanden, wird ein
-     * entsprechender Hinweistext geliefert.
-     * Zusätzlich wird die Blickrichtung des NPCs gesetzt,
-     * um eine passende Ausrichtung beim Sprechen zu ermöglichen.
-     *
-     * @return die nächste Dialogzeile oder ein Hinweistext,
-     *         falls keine weiteren Dialoge vorhanden sind
+     * dequeue – nächsten Dialog vorne entnehmen
      */
-
-    public String speak(){
+    public String speak() {
         if (dialogQueue.isEmpty()) {
             return "(NPC hat nichts mehr zu sagen)";
         }
+
         direction = 1;
-        return dialogQueue.poll();
+
+        String nextLine = dialogQueue.front();
+        dialogQueue.dequeue();
+        return nextLine;
     }
 
-    public void update(double dt) {
+    public void draw(DrawTool drawTool) {
+        spriteSheet1.draw(drawTool, xpos, ypos, 5);
+        spriteSheet1.setCurrent(0, direction);
     }
+
+    public void update(double dt) {}
 
     public boolean getETrue() {
         return ETrue;

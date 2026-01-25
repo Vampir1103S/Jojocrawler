@@ -732,9 +732,7 @@ public class Controller extends InteractiveGraphicalObject {
         for (int i = 0; i < count; i++) {
             double x = randomRange(scene3MinX, scene3MaxX - 60);
             double y = randomRange(scene3MinY, scene3MaxY - 110);
-
-            int enemyType = (ThreadLocalRandom.current().nextDouble() < kindChance) ? 2 : 1;
-
+            int enemyType = (  (Math.random() < kindChance) ? 2 : 1);
             Enemy e = createEnemyByType(enemyType, (int) x, (int) y);
             if (e != null) scene3Enemies.add(e);
         }
