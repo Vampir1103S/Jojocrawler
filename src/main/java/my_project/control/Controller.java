@@ -724,7 +724,7 @@ public class Controller extends InteractiveGraphicalObject {
      * @param count die Anzahl der Gegner, die in Szene 3 gespawnt werden sollen
      */
 
-    private void spawnSceneEnemiesMixed(int count) {
+    private void spawnScene3EnemiesMixed(int count) {
         scene3Enemies.clear();
 
         double kindChance = Math.min(scene3KindBaseChance + scene3KindMorePerRun * (scene3Run - 1), scene3KindMaxChance);
